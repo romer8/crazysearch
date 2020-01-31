@@ -1,0 +1,41 @@
+{% extends "crazysearch/base.html" %}
+{% load tethys_gizmos %}
+
+
+
+{% block app_content %}
+<div id="map" class="map"></div>
+ <div>
+   <!-- Popup -->
+   <div id="popup"></div>
+ </div>
+{% endblock %}
+
+{# Use the after_app_content block for modals #}
+
+{% block app_content_wrapper_override %}
+
+{{ block.super }}
+{% include "crazysearch/modals/manageServers.html" %}
+{% include "crazysearch/modals/manageCentral.html" %}
+{% include "crazysearch/modals/addCentral.html" %}
+{% include "crazysearch/modals/delCentral.html" %}
+{% include "crazysearch/modals/addHydroserver.html" %}
+{% include "crazysearch/modals/delServer.html" %}
+
+
+
+
+
+{% endblock %}
+
+
+{% block after_app_content %}
+  <!-- Example Modal -->
+
+{% endblock %}
+
+{% block app_actions %}
+<div id="zoomlevel"></div>
+
+{% endblock %}
