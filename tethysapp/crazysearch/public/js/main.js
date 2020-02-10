@@ -74,7 +74,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
         shpSource,
         shpLayer,
         wmsLayer,
-        wmsSource
+        wmsSource,
+        cata
+      cata=[{
+        title:"hola",
+        description:" this is just a mere description for the hola example"
+      }];
     /************************************************************************
      *                    PRIVATE FUNCTION DECLARATIONS
      *************************************************************************/
@@ -102,6 +107,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $modalAddSOAP,
         set_color,
         $SoapVariable,
+        $modalAddGroupHydro,
         $modalHIS,
         $modalClimate,
         $modalDelete,
@@ -115,7 +121,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
         prepare_files,
         update_catalog,
         upload_file,
-        createExportCanvas
+        createExportCanvas,
+        createDropdownMenu,
+        createDescriptions,
+        create_group_hydroservers,
+        load_group_hydroservers,
+        addExpandableMenu,
+        load_individual_hydroservers_group,
+        actual_group,
+        add_hydroserver;
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -130,6 +144,45 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+    createDropdownMenu = function(catalogCreated){
+      console.log(catalogCreated);
+      let dropdown_classArray=document.getElementsByClassName("selectpicker");
+      let element_dropdown=document.getElementById("content_description");
+      Array.from(dropdown_classArray).forEach(function(dropdown){
+        catalogCreated.forEach(function(element){
+          let option = document.createElement("option");
+          option.text=element.title;
+          dropdown.add(option);
+        });
+        // Add a function to add a the title description as well
+        dropdown.addEventListener("change", function(e){
+            console.log("hola nene");
+          if(e.target.value !== "Select a group of Hydroservers" ){
+            let title_option = e.target.value;
+            let description_option= catalogCreated.find(x => x.title === title_option).description;
+            createDescriptions("description",title_option, description_option);
+          }
+          else {
+            element_dropdown.style.display="none";
+
+          }
+            //add a function to do the change this function probably needs some change in the DOM
+        })
+      });
+      element_dropdown.style.visibility="visible";
+
+    };
+    createDescriptions = function(id,option_title, option_description){
+      let elementId=document.getElementById(id);
+      console.log(elementId);
+      let titles= elementId.querySelector("h2");
+      console.log(titles);
+      titles.innerHTML=option_title;
+
+      let descriptions= elementId.querySelector("p");
+      descriptions.innerHTML=option_description;
+    };
+
     // List of colors for generating the styling of the points on the map
     set_color = function() {
         var color = colors[Math.floor(Math.random() * colors.length)]
@@ -333,6 +386,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         // init_events()
     }
     init_jquery_var = function(){
+      $modalAddGroupHydro= $("#modalAddGroupServer");
       // $modalAddHS = $("#modalAddHS");
       $modalAddSOAP = $("#modalAddSoap");
       // $SoapVariable = $("#soap_variable");
@@ -368,6 +422,547 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $listItem.attr("data-context-menu", contextMenuId)
     }
 
+//************ THIS FUNCTION CREATES A GROUP OF HYDRSOERVERS AND ADDS IT TO THE MENU *******/////
+    create_group_hydroservers = function(){
+      //CHECKS IF THE INPUT IS EMPTY ///
+      if($("#addGroup-title").val() == ""){
+        $modalAddGroupHydro.find(".warning").html(  "<b>Please enter a title. This field cannot be blank.</b>")
+        return false
+      }
+      else {
+        $modalAddGroupHydro.find(".warning").html("")
+      }
+
+      //CHECKS IF THERE IS AN INPUT THAT IS NOT ALLOWED//
+      if ($("#addGroup-title").val() != "") {
+        var regex = new RegExp("^(?![0-9]*$)[a-zA-Z0-9_]+$")
+        var title = $("#addGroup-title").val()
+        if (!regex.test(title)) {
+            $modalAddGroupHydro
+                .find(".warning")
+                .html("<b>Please note that only numbers and other characters besides the underscore ( _ ) are not allowed</b>");
+            return false
+        }
+      }
+      else {
+          $modalAddGroupHydro.find(".warning").html("");
+      }
+
+      //CHECKS IF THERE IS AN EMPTY DESCRIPTION //
+      if($("#addGroup-description").val() == ""){
+        $modalAddGroupHydro.find(".warning").html(  "<b>Please enter a description for this group. This field cannot be blank.</b>")
+        return false
+      }
+      else {
+        $modalAddGroupHydro.find(".warning").html("")
+      }
+      //MAKE THE AJAX REQUEST///
+      let elementForm= $("#modalAddGroupServerForm");
+      let datastring= elementForm.serialize();
+      console.log(typeof(datastring));
+      console.log(datastring);
+      $("#soapAddLoading").removeClass("hidden");
+      // $("#btn-add-addHydro").hide();
+
+      $.ajax({
+          type: "POST",
+          url: `${apiServer}/create-group/`,
+          dataType: "HTML",
+          data: datastring,
+          success: function(result) {
+              //Returning the geoserver layer metadata from the controller
+              var json_response = JSON.parse(result)
+
+              let group=json_response
+              if(group.message !== "There was an error while adding th group.") {
+                let title=group.title;
+                let description=group.description;
+                let newHtml = `<li class="ui-state-default" layer-name="${title}">
+                <input class="chkbx-layer" type="checkbox"><span class="group-name">${title}</span>
+                <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                </li>
+                <ul class="hydroserver-list" style = "display: none">
+
+                </ul>`
+
+                $(newHtml).appendTo("#current-Groupservers")
+                addContextMenuToListItem(
+                    $("#current-Groupservers").find("li:last-child")
+                )
+                $(".ui-state-default").click(function(){
+                  console.log("hola");
+                });
+                    $("#soapAddLoading").addClass("hidden")
+                    $("#soapAddLoading").addClass("hidden")
+                    $("#btn-add-addHydro").show()
+
+                    $("#modalAddGroupServer").modal("hide")
+                    $("#modalAddGroupServerForm").each(function() {
+                        this.reset()
+                    })
+
+                    // map.getView().fit(vectorSource.getExtent(), map.getSize());
+
+                    $.notify(
+                        {
+                            message: `Successfully Created Group of HydroServers to the database`
+                        },
+                        {
+                            type: "success",
+                            allow_dismiss: true,
+                            z_index: 20000,
+                            delay: 5000
+                        }
+                    )
+
+              } else {
+                  $("#soapAddLoading").addClass("hidden")
+                  $("#btn-add-addHydro").show()
+                  $.notify(
+                      {
+                          message: `Failed to add to the group. Please check and try again.`
+                      },
+                      {
+                          type: "danger",
+                          allow_dismiss: true,
+                          z_index: 20000,
+                          delay: 5000
+                      }
+                  )
+              }
+          },
+          error: function(error) {
+              $("#soapAddLoading").addClass("hidden")
+              $("#btn-add-addHydro").show()
+              console.log(error)
+              $.notify(
+                  {
+                      message: `There was an error while adding a group of hydroserver`
+                  },
+                  {
+                      type: "danger",
+                      allow_dismiss: true,
+                      z_index: 20000,
+                      delay: 5000
+                  }
+              )
+          }
+
+      })
+
+    };
+
+    $("#btn-add-addHydro").on("click", create_group_hydroservers);
+
+    addExpandableMenu = function(clName){
+      let element= document.getElementsByClassName(className);
+
+    }
+   load_individual_hydroservers_group = function(group_name){
+     let group_name_obj={
+       group: group_name
+     };
+     console.log(group_name_obj);
+     $.ajax({
+         type: "GET",
+         url: `${apiServer}/catalog-group/`,
+         dataType: "JSON",
+         data: group_name_obj,
+         success: result => {
+             console.log(result);
+             let servers = result["hydroserver"]
+             console.log("this are the servers");
+             console.log(servers);
+             $("#current-servers").empty() //Resetting the catalog
+             let extent = ol.extent.createEmpty()
+             console.log(servers);
+             servers.forEach(server => {
+                 let {
+                     title,
+                     url,
+                     geoserver_url,
+                     layer_name,
+                     extents,
+                     siteInfo
+                 } = server
+                 let newHtml = `<li class="ui-state-default" layer-name="${title}">
+                 <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
+                 <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                 </li>`
+                 let sites = JSON.parse(siteInfo)
+                 console.log(extents);
+                 console.log(sites);
+                 sites = sites.map(site => {
+                     return {
+                         type: "Feature",
+                         geometry: {
+                             type: "Point",
+                             coordinates: ol.proj.transform(
+                                 [
+                                     parseFloat(site.longitude),
+                                     parseFloat(site.latitude)
+                                 ],
+                                 "EPSG:4326",
+                                 "EPSG:3857"
+                             )
+                         },
+                         properties: {
+                             name: site.sitename,
+                             code: site.sitecode,
+                             network: site.network,
+                             hs_url: url,
+                             hs_name: title
+                         }
+                     }
+                 })
+
+                 let sitesGeoJSON = {
+                     type: "FeatureCollection",
+                     crs: {
+                         type: "name",
+                         properties: {
+                             name: "EPSG:3857"
+                         }
+                     },
+                     features: sites
+                 }
+
+                 const vectorSource = new ol.source.Vector({
+                     features: new ol.format.GeoJSON().readFeatures(
+                         sitesGeoJSON
+                     )
+                 })
+
+                 const vectorLayer = new ol.layer.Vector({
+                     source: vectorSource,
+                     style: featureStyle()
+                 })
+
+                 map.addLayer(vectorLayer)
+                 ol.extent.extend(extent, vectorSource.getExtent())
+
+                 vectorLayer.set("selectable", true)
+
+                 $(newHtml).appendTo("#current-servers")
+                 addContextMenuToListItem(
+                     $("#current-servers").find("li:last-child")
+                 )
+
+                 layersDict[title] = vectorLayer
+             })
+
+             if (servers.length) {
+                 map.getView().fit(extent, map.getSize())
+                 map.updateSize()
+             }
+         },
+         error: function(error) {
+             console.log(error)
+             $.notify(
+                 {
+                     message: `Something went wrong loading the catalog. Please see the console for details.`
+                 },
+                 {
+                     type: "danger",
+                     allow_dismiss: true,
+                     z_index: 20000,
+                     delay: 5000
+                 }
+             )
+         }
+     })
+
+   };
+
+///******************  THIS FUNCTION IS TO LOAD THE GROUPS OF THE HYDROSERVERS*********//////////////
+    load_group_hydroservers = function(){
+      console.log("hola");
+      $.ajax({
+          type: "GET",
+          url: `${apiServer}/load-groups/`,
+          dataType: "JSON",
+          success: result => {
+            console.log(result);
+              let groups =result["hydroservers"];
+              // console.log("this are the servers");
+              // console.log(groups);
+              $("#current-servers").empty() //Resetting the catalog
+              let extent = ol.extent.createEmpty()
+              // console.log(groups);
+              groups.forEach(group => {
+                  let {
+                      title,
+                      description
+                  } = group
+                  let newHtml = `<li class="ui-state-default" id="${title}">
+                  <input class="chkbx-layer" type="checkbox"><span class="group-name">${title}</span>
+
+                  <div>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-cog"></span> </button>
+                  </div>
+
+                  <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                  </li>
+                  <ul id=${title}list class="ul-list" style = "display: none">
+                  </ul>`
+                  $(newHtml).appendTo("#current-Groupservers");
+                  let $title="#"+title;
+                  let $title_list="#"+title+"list";
+
+                  $($title).click(function(){
+                    actual_group = `&actual-group=${title}`;
+                    console.log(actual_group);
+                    console.log($($title_list).is(":visible"));
+                    $(".ul-list").hide();
+                    $("#current-servers-list").html("");
+                    switch ($($title_list).is(":visible")) {
+                      case false:
+                        // console.log("making visible");
+                        $($title_list).show();
+                        $("#pop-up_description").show();
+                        load_individual_hydroservers_group(title);
+                        break;
+                      case true:
+                        $($title_list).hide();
+                        $("#pop-up_description").html("");
+                        $("#pop-up_description").hide();
+                        $("#accordion_servers").hide();
+
+                        break;
+                    }
+                    // console.log(description);
+                    let description_html=`<h3><u>${title}</u></h3>
+                    <h5>Description:</h5>
+                    <p>${description}</p>`;
+                    $("#pop-up_description").html(description_html);
+
+                  });
+
+                  addContextMenuToListItem(
+                      $("#current-Groupservers").find("li:last-child")
+                  )
+              })
+      },
+      error: function(error) {
+          $("#soapAddLoading").addClass("hidden")
+          $("#btn-add-addHydro").show()
+          console.log(error)
+          $.notify(
+              {
+                  message: `There was an error while adding a group of hydroserver`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+      }
+
+    })
+  }
+
+  add_hydroserver = function(){
+    if($("#extent").is(":checked")){
+      var zoom= map.getView().getZoom();
+      if(zoom < 8){
+          $modalAddSOAP.find(".warning").html("<b>The zoom level has to be 8 or greater. Please check and try again.</b>")
+          return false
+      }
+      else {
+        $modalAddSOAP.find(".warning").html("")
+      }
+      $('#chk_val').empty()
+      var level=map.getView().calculateExtent(map.getSize())
+      $(
+            '<input type="text" name="extent_val" id="extent_val" value=' +
+                '"' +
+                level +
+                '"' +
+                " hidden>"
+        ).appendTo($("#chk_val"))
+    }
+    if($("#soap-title").val() == ""){
+      $modalAddSOAP.find(".warning").html(  "<b>Please enter a title. This field cannot be blank.</b>")
+      return false
+    }
+    else {
+      $modalAddSOAP.find(".warning").html("")
+    }
+    if(
+      $("#soap-url").val() == "http://hydroportal.cuahsi.org/nwisdv/cuahsi_1_1.asmx?WSDL" ||
+      $("#soap-url").val() =="http://hydroportal.cuahsi.org/nwisuv/cuahsi_1_1.asmx?WSDL")
+      {
+        $modalAddSOAP
+              .find(".warning")
+              .html(
+                  "<b>Please zoom in further to be able to access the NWIS Values</b>"
+              )
+          return false
+      }
+      else {
+          $modalAddSOAP.find(".warning").html("")
+      }
+      if ($("#soap-title").val() != "") {
+        var regex = new RegExp("^[a-zA-Z ]+$")
+        var title = $("#soap-title").val()
+        if (!regex.test(title)) {
+            $modalAddSOAP
+                .find(".warning")
+                .html("<b>Please enter Letters only for the title.</b>");
+            return false
+        }
+      } else {
+          $modalAddSOAP.find(".warning").html("");
+      }
+      var datastring = $modalAddSOAP.serialize();
+      datastring += actual_group;
+
+      console.log("This is the serialize string of datastring");
+      console.log(datastring);
+      //Submitting the data to the controller
+      $("#soapAddLoading").removeClass("hidden");
+      $("#btn-add-soap").hide();
+      $.ajax({
+          type: "POST",
+          url: `${apiServer}/soap-group/`,
+          dataType: "HTML",
+          data: datastring,
+          success: function(result) {
+              //Returning the geoserver layer metadata from the controller
+              var json_response = JSON.parse(result)
+              console.log("This is the result from the controllers function call");
+              console.log(json_response);
+              if (json_response.status === "true") {
+                  let {title, siteInfo, url, group} = json_response
+
+                  let newHtml = `<li class="ui-state-default" layer-name="${title}">
+                  <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
+                  <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                  </li>`
+
+                  let sites = JSON.parse(siteInfo)
+                  console.log("These are the sites");
+                  console.log(sites);
+                  sites = sites.map(site => {
+                      return {
+                          type: "Feature",
+                          geometry: {
+                              type: "Point",
+                              coordinates: ol.proj.transform(
+                                  [
+                                      parseFloat(site.longitude),
+                                      parseFloat(site.latitude)
+                                  ],
+                                  "EPSG:4326",
+                                  "EPSG:3857"
+                              )
+                          },
+                          properties: {
+                              name: site.sitename,
+                              code: site.sitecode,
+                              network: site.network,
+                              hs_url: url,
+                              hs_name: title
+                          }
+                      }
+                  })
+
+                  let sitesGeoJSON = {
+                      type: "FeatureCollection",
+                      crs: {
+                          type: "name",
+                          properties: {
+                              name: "EPSG:3857"
+                          }
+                      },
+                      features: sites
+                  }
+
+                  const vectorSource = new ol.source.Vector({
+                      features: new ol.format.GeoJSON().readFeatures(
+                          sitesGeoJSON
+                      )
+                  })
+
+                  const vectorLayer = new ol.layer.Vector({
+                      source: vectorSource,
+                      style: featureStyle()
+                  })
+
+                  map.addLayer(vectorLayer)
+                  console.log("this is the vector layer baby");
+                  console.log(vectorLayer);
+                  console.log("this is the geojson layer baby");
+                  console.log(sitesGeoJSON);
+
+                  vectorLayer.set("selectable", true)
+
+                  $(newHtml).appendTo("#current-servers")
+                  addContextMenuToListItem(
+                      $("#current-servers").find("li:last-child")
+                  )
+
+                  layersDict[title] = vectorLayer
+                  $("#soapAddLoading").addClass("hidden")
+                  $("#btn-add-soap").show()
+
+                  $("#modalAddSoap").modal("hide")
+                  $("#modalAddSoap").each(function() {
+                      this.reset()
+                  })
+
+                  // map.getView().fit(vectorSource.getExtent(), map.getSize());
+
+                  $.notify(
+                      {
+                          message: `Successfully Added the HydroServer to the Map`
+                      },
+                      {
+                          type: "success",
+                          allow_dismiss: true,
+                          z_index: 20000,
+                          delay: 5000
+                      }
+                  )
+              } else {
+                  $("#soapAddLoading").addClass("hidden")
+                  $("#btn-add-soap").show()
+                  $.notify(
+                      {
+                          message: `Failed to add server. Please check Url and try again.`
+                      },
+                      {
+                          type: "danger",
+                          allow_dismiss: true,
+                          z_index: 20000,
+                          delay: 5000
+                      }
+                  )
+              }
+          },
+          error: function(error) {
+              $("#soapAddLoading").addClass("hidden")
+              $("#btn-add-soap").show()
+              console.log(error)
+              $.notify(
+                  {
+                      message: `Invalid Hydroserver SOAP Url. Please check and try again.`
+                  },
+                  {
+                      type: "danger",
+                      allow_dismiss: true,
+                      z_index: 20000,
+                      delay: 5000
+                  }
+              )
+          }
+      })
+
+  }
+
+  $("#btn-add-soap").on("click", add_hydroserver);
 
     add_soap=function(){
       if($("#extent").is(":checked")){
@@ -423,6 +1018,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             $modalAddSOAP.find(".warning").html("");
         }
         var datastring = $modalAddSOAP.serialize();
+
         console.log("This is the serialize string of datastring");
         console.log(datastring);
         //Submitting the data to the controller
@@ -565,7 +1161,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         })
     }
 
-    $("#btn-add-soap").on("click", add_soap);
+    // $("#btn-add-soap").on("click", add_soap);
 
     get_hs_list = function() {
       console.log("hola");
@@ -914,6 +1510,39 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
       return cookieValue
   }
+  //Initialize the context menu (The little hamburger in the Current HydroServers list item). It currently supports zoom to or delete layer. You can add more functionality here.
+  init_menu = function() {
+      ContextMenuBase = [
+          {
+              name: "Add a HydroServer",
+              title: "Add a HydroServer",
+              fun: function(e) {
+                  onClickZoomTo(e)
+              }
+          },
+          {
+              name: "Delete HydroServer",
+              title: "Delete hydroserver",
+              fun: function(e) {
+                  onClickDeleteLayer(e)
+              }
+          }
+      ]
+  }
+
+  /************************************************************************
+   *                  INITIALIZATION / CONSTRUCTOR
+   *************************************************************************/
+  $(function() {
+
+      init_jquery_var()
+      addDefaultBehaviorToAjax()
+      load_group_hydroservers()
+      init_menu()
+      init_map()
+      // load_catalog()
+      createDropdownMenu(cata);
+  })
 
     // init_jquery_var = function() {
     //     //$('#current-servers').empty();
@@ -1717,7 +2346,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     //     let $lyrListItem = $(clickedElement)
     //         .parent()
     //         .parent()
-    //     let layer_name = $lyrListItem.attr("layer-name")
+      //     let layer_name = $lyrListItem.attr("layer-name")
     //     let layer_extent = layersDict[layer_name].getSource().getExtent()
     //
     //     map.getView().fit(layer_extent, map.getSize())
@@ -2230,11 +2859,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
     /************************************************************************
      *                  INITIALIZATION / CONSTRUCTOR
      *************************************************************************/
-    $(function() {
-        init_jquery_var()
-        addDefaultBehaviorToAjax()
-        // init_menu()
-        init_map()
-        load_catalog()
-    })
+    // $(function() {
+    //
+    //     init_jquery_var()
+    //     addDefaultBehaviorToAjax()
+    //     load_groups()
+    //     // init_menu()
+    //     init_map()
+    //     // load_catalog()
+    //     createDropdownMenu(cata);
+    // })
 })() // End of package wrapper

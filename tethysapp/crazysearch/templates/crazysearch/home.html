@@ -1,7 +1,100 @@
 {% extends "crazysearch/base.html" %}
 {% load tethys_gizmos %}
 
+{% block app_navigation_items %}
+<!--The Hydroservers are added to this box-->
+<!-- <h3> Hydroservers Groups</h3> -->
+<li>
+  <div class="header-btns">
+    <p> Hydroservers Groups
+      <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span> </button>
+      <button class="btn btn-primary" data-toggle="modal" data-target="#modalDeleteGroupServer"> <span class="glyphicon glyphicon-minus"></span> </button>
+    </p>
 
+  </div>
+  <div id="current-Groupservers">
+
+      <ul id="current-Groupservers-list"></ul>
+
+  </div>
+</li>
+<hr>
+<div id="pop-up_description">
+
+</div>
+
+<li>
+  <div class="accordion" id="accordion_servers">
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-primary" data-toggle="collapse" data-target="#current-servers" aria-expanded="false" aria-controls="current-servers">
+            <b>Current HydroServers Added</b><i class="fas fa-angle-down rotate-icon"></i>
+          </button>
+        </h5>
+      </div>
+      <div class="card-body">
+        <div id="current-servers" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion_servers">    
+          <ul id="current-servers-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</li>
+
+
+
+
+
+
+<!-- <div id="accordion">
+
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          Collapsible Group Item #2
+        </button>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" id="headingThree">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Collapsible Group Item #3
+        </button>
+      </h5>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+
+
+
+<!-- <li>
+  <select class="selectpicker show-tick" data-style="btn-primary">
+    <option>Select Hydroserver Groups</option>
+
+  </select>
+  <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span> </button>
+
+</li> -->
+
+{% include "crazysearch/sideContent.html" %}
+
+{% endblock %}
 
 {% block app_content %}
 <div id="map" class="map"></div>
@@ -9,6 +102,7 @@
    <!-- Popup -->
    <div id="popup"></div>
  </div>
+
 {% endblock %}
 
 {# Use the after_app_content block for modals #}
@@ -22,6 +116,7 @@
 {% include "crazysearch/modals/delCentral.html" %}
 {% include "crazysearch/modals/addHydroserver.html" %}
 {% include "crazysearch/modals/delServer.html" %}
+{% include "crazysearch/modals/addGroupHydroserver.html" %}
 
 
 

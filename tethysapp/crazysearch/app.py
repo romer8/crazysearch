@@ -51,6 +51,23 @@ class Crazysearch(TethysAppBase):
             UrlMap(name='add-central',
                    url='crazysearch/add-central',
                    controller='crazysearch.controllers.add_central'),
+            # Add a central catalog, but it is still in progress.
+            UrlMap(name='create-group',
+                   url='crazysearch/create-group',
+                   controller='crazysearch.controllers.create_group'),
+            # Create a new group for the hydroservers ##
+            UrlMap(name='load-groups',
+                   url='crazysearch/load-groups',
+                   controller='crazysearch.controllers.get_groups_list'),
+            # Load groups for the hydroservers ##
+            UrlMap(name='add-hydrosever-groups',
+                   url='crazysearch/soap-group',
+                   controller='crazysearch.controllers.soap_group'),
+            # Load groups for the hydroservers ##
+            UrlMap(name='load-hydroserver-of-groups',
+                   url='crazysearch/catalog-group',
+                   controller='crazysearch.controllers.catalog_group'),
+            # Load the hydroservers from a specific group##
         )
 
         return url_maps
