@@ -32,8 +32,8 @@ class Crazysearch(TethysAppBase):
                 controller='crazysearch.controllers.home'
             ),
             UrlMap(name='his-server',
-                   url='hydroexplorer/his-server',
-                   controller='hydroexplorer.controllers.get_his_server'),
+                   url='crazysearch/his-server',
+                   controller='crazysearch.controllers.get_his_server'),
             # Returns the selected HIS server from the select HIS
             # server modal.
             UrlMap(name='soap',

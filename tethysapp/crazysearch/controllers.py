@@ -94,7 +94,7 @@ def his(request):
 
     context = {"hs_list": hs_list, "error_list": error_list}
 
-    return render(request, 'hydroexplorer/his.html', context)
+    return render(request, 'crazysearch/his.html', context)
 
 def soap(request):
     print("inside SOAP function")
