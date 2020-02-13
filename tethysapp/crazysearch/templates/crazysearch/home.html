@@ -4,24 +4,64 @@
 {% block app_navigation_items %}
 <!--The Hydroservers are added to this box-->
 <!-- <h3> Hydroservers Groups</h3> -->
-<li>
+<!-- <li>
   <div class="header-btns">
     <p> Hydroservers Groups
       <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span> </button>
-      <button class="btn btn-primary" data-toggle="modal" data-target="#modalDeleteGroupServer"> <span class="glyphicon glyphicon-minus"></span> </button>
+      <button class="btn btn-danger" id="btn-delete-hydroserver-group"> <span class="glyphicon glyphicon-minus"></span> </button>
     </p>
 
   </div>
+  <p>
+    Add or Delete Groups of Hydroservers
+  </p>
   <div id="current-Groupservers">
-
-      <ul id="current-Groupservers-list"></ul>
-
+        <ul id="current-Groupservers-list"></ul>
   </div>
 </li>
-<hr>
-<div id="pop-up_description">
-
+<hr> -->
+<div class="accordion" id="groups_hydroservers">
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h2 class="mb-0">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+          Hydro Groups Added
+        </button>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span> </button>
+        <button class="btn btn-danger" id="btn-delete-hydroserver-group"> <span class="glyphicon glyphicon-minus"></span> </button>
+      </h2>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+        <div id="current-Groupservers">
+              <ul id="current-Groupservers-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div class="accordion" id="accordion_description">
+  <div class="card">
+     <div class="card-header" id="headingThree">
+       <h2 class="mb-0">
+         <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+           Hydro Group Info
+         </button>
+       </h2>
+     </div>
+     <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+       <div class="card-body">
+         <div id="pop-up_description">
+
+         </div>
+       </div>
+     </div>
+   </div>
+</div>
+<!-- <div id="pop-up_description">
+
+</div> -->
 
 <li>
   <div class="accordion" id="accordion_servers">
@@ -29,12 +69,12 @@
       <div class="card-header" id="headingOne">
         <h5 class="mb-0">
           <button class="btn btn-primary" data-toggle="collapse" data-target="#current-servers" aria-expanded="false" aria-controls="current-servers">
-            <b>Current HydroServers Added</b><i class="fas fa-angle-down rotate-icon"></i>
+            <b>Current HydroServers Added..</b><span class="glyphicon glyphicon-chevron-down">
           </button>
         </h5>
       </div>
       <div class="card-body">
-        <div id="current-servers" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion_servers">    
+        <div id="current-servers" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion_servers">
           <ul id="current-servers-list"></ul>
         </div>
       </div>

@@ -46,6 +46,7 @@ def home(request):
     # readSoap(request)
     return render(request, 'crazysearch/home.html', context)
 
+
 def readSoap(request):
     "This function is for testing purposes in the Dominican Republic soap endpoint",
     soap_url="http://128.187.106.131/app/index.php/dr/services/cuahsi_1_1.asmx?WSDL"
@@ -346,7 +347,24 @@ def get_groups_list(request):
     # A json list object with the HydroServer metadata. This object will be
     # used to add layers to the catalog table on the homepage.
     list["hydroservers"] = hydroserver_groups_list
-    # print(list)
+    print("----------------------------------------------")
+    print("----------------------------------------------")
+    print("----------------------------------------------")
+    print(list)
+    print("----------------------------------------------")
+    print("----------------------------------------------")
+    print("----------------------------------------------")
+    list2={}
+    array_example=[]
+    for server in session.query(HydroServer_Individual).all():
+        layer_obj = {}
+        layer_obj["title"] = server.title
+        layer_obj["url"] = server.url
+        array_example.append(layer_obj)
+
+    list2["servers"] =array_example
+    print(list2)
+
     return JsonResponse(list)
 
 
@@ -468,9 +486,11 @@ def soap_group(request):
     return JsonResponse(return_obj)
 
 ######*****************************************************************************************################
-##############################LOAD THE HYDROSERVERS OF AN SPECIFIC GROUP###################################
+##############################LOAD THE HYDROSERVERS OF AN SPECIFIC GROUP#######################################
 ######*****************************************************************************************################
 def catalog_group(request):
+    print("Catalog_group function in controllers.py")
+    print("--------------------------------------------------------------------")
     specific_group=request.GET.get('group')
     print(specific_group)
     print(request.GET)
@@ -499,17 +519,103 @@ def catalog_group(request):
     print("printing the lsit of hydroservers of the group")
     print(list)
 
-
-    # hs_list = []
-    # for server in hydroservers:
-    #     layer_obj = {}
-    #     layer_obj["title"] = server.title
-    #     layer_obj["url"] = server.url.strip()
-    #     layer_obj["siteInfo"] = server.siteinfo
-    #
-    #     hs_list.append(layer_obj)
-    # # A json list object with the HydroServer metadata. This object will be
-    # # used to add layers to the catalog table on the homepage.
-    # list["hydroserver"] = hs_list
-
     return JsonResponse(list)
+
+######*****************************************************************************************################
+############################## DELETE THE HYDROSERVER OF AN SPECIFIC GROUP ####################################
+######*****************************************************************************************################
+def delete_group_hydroserver(request):
+    print("delete_group_hydroserver_function in controllers.py")
+    list = {}
+    print("--------------------------------------------")
+    SessionMaker = app.get_persistent_store_database(
+        Persistent_Store_Name, as_sessionmaker=True)
+    session = SessionMaker()
+
+    # Query DB for hydroservers
+    print(request.POST)
+    if request.is_ajax() and request.method == 'POST':
+        print(type(request.POST))
+        print(request.POST.getlist('server'))
+        titles=request.POST.getlist('server')
+        group = request.POST.get('actual-group')
+
+        print(type(titles))
+        # title = request.POST['server']
+        i=0;
+        hydroservers_group = session.query(Groups).filter(Groups.title == group)[0].hydroserver
+
+        # for title in titles:
+        #     hydroservers = session.query(Catalog).filter(Catalog.title == title).delete(
+        #         synchronize_session='evaluate')  # Deleting the record from the local catalog
+        #     session.commit()
+        #     session.close()
+        #
+        #     # Returning the deleted title. To let the user know that the particular
+        #     # title is deleted.
+        #     i_string=str(i);
+        #     # list["title"] = title
+        #     list[i_string] = title
+        #     i=i+1
+        for title in titles:
+            hydroservers_group = session.query(HydroServer_Individual).filter(HydroServer_Individual.title == title).delete(
+                synchronize_session='evaluate')  # Deleting the record from the local catalog
+            session.commit()
+            session.close()
+
+            # Returning the deleted title. To let the user know that the particular
+            # title is deleted.
+            i_string=str(i);
+            # list["title"] = title
+            list[i_string] = title
+            i=i+1
+    return JsonResponse(list)
+######*****************************************************************************************################
+############################## DELETE A GROUP OF HYDROSERVERS #############################
+######*****************************************************************************************################
+def delete_group(request):
+    print("delete_group function controllers.py")
+    print("--------------------------------------------")
+    list = {}
+    list_groups ={}
+    list_response = {}
+    SessionMaker = app.get_persistent_store_database(
+        Persistent_Store_Name, as_sessionmaker=True)
+    session = SessionMaker()
+    print(request.POST)
+    if request.is_ajax() and request.method == 'POST':
+        groups=request.POST.getlist('groups[]')
+        list_groups['groups']=groups
+        list_response['groups']=groups
+        print(groups)
+        i=0
+        arrayTitles = []
+        for group in session.query(Groups).all():
+            print(group.title)
+
+        for group in groups:
+            # print(session.query(Groups).filter(Groups.title == group).first())
+            hydroservers_group = session.query(Groups).filter(Groups.title == group)[0].hydroserver
+            print("printing hydroserver_groups")
+            print(hydroservers_group)
+            for server in hydroservers_group:
+                title=server.title
+                arrayTitles.append(title)
+                print(server.title)
+                i_string=str(i);
+                # list["title"] = title
+                list[i_string] = title
+                # session.delete(server)
+                # server.delete(synchronize_session='evaluate')
+                # session.commit()
+                # session.close()
+                i=i+1
+            print(session.query(Groups).filter(Groups.title == group).first().id)
+            hydroservers_group = session.query(Groups).filter(Groups.title == group).first()
+            session.delete(hydroservers_group)
+            session.commit()
+            session.close()
+        list_response['hydroservers']=arrayTitles
+
+
+    return JsonResponse(list_response)

@@ -68,6 +68,16 @@ class Crazysearch(TethysAppBase):
                    url='crazysearch/catalog-group',
                    controller='crazysearch.controllers.catalog_group'),
             # Load the hydroservers from a specific group##
+
+            UrlMap(name='delete-group-hydroserver',
+                   url='crazysearch/delete-group-hydroserver',
+                   controller='crazysearch.controllers.delete_group_hydroserver'),
+            ## Delete an speicific hydroserver or multiple from a specific group ##
+
+            UrlMap(name='delete-group',
+                   url='crazysearch/delete-group',
+                   controller='crazysearch.controllers.delete_group'),
+            ## Delete an speicific hydroserver or multiple from a specific group ##
         )
 
         return url_maps
