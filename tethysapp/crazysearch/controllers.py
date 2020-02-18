@@ -489,13 +489,13 @@ def soap_group(request):
 ##############################LOAD THE HYDROSERVERS OF AN SPECIFIC GROUP#######################################
 ######*****************************************************************************************################
 def catalog_group(request):
-    print("Catalog_group function in controllers.py")
-    print("--------------------------------------------------------------------")
+    # print("Catalog_group function in controllers.py")
+    # print("--------------------------------------------------------------------")
     specific_group=request.GET.get('group')
-    print(specific_group)
-    print(request.GET)
+    # print(specific_group)
+    # print(request.GET)
     list = {}
-    print("catalogs_groups controllers.py FUNCTION inside")
+    # print("catalogs_groups controllers.py FUNCTION inside")
 
     SessionMaker = app.get_persistent_store_database(Persistent_Store_Name, as_sessionmaker=True)
 
@@ -506,8 +506,8 @@ def catalog_group(request):
     hs_list = []
     for hydroservers in hydroservers_group:
         name = hydroservers.title
-        print(hydroservers.title)
-        print(hydroservers.url)
+        # print(hydroservers.title)
+        # print(hydroservers.url)
         layer_obj = {}
         layer_obj["title"] = hydroservers.title
         layer_obj["url"] = hydroservers.url.strip()
@@ -516,8 +516,8 @@ def catalog_group(request):
 
     list["hydroserver"] = hs_list
     print("------------------------------------------")
-    print("printing the lsit of hydroservers of the group")
-    print(list)
+    # print("printing the lsit of hydroservers of the group")
+    # print(list)
 
     return JsonResponse(list)
 
@@ -619,3 +619,69 @@ def delete_group(request):
 
 
     return JsonResponse(list_response)
+
+def keyWordsForGroup(request):
+    list={}
+    print("inside the keywordsgroup function")
+    specific_group=request.GET.get('group')
+    SessionMaker = app.get_persistent_store_database(Persistent_Store_Name, as_sessionmaker=True)
+
+    # print(SessionMaker)
+    session = SessionMaker()  # Initiate a session
+    hydroservers_group = session.query(Groups).filter(Groups.title == specific_group)[0].hydroserver
+    # h1=session.query(Groups).join("hydroserver")
+    hs_list = []
+    words_to_search={};
+
+    for hydroservers in hydroservers_group:
+        name = hydroservers.title
+        # print(hydroservers.title)
+        # print(hydroservers.url)
+        layer_obj = {}
+        layer_obj["title"] = hydroservers.title
+        layer_obj["url"] = hydroservers.url.strip()
+        layer_obj["siteInfo"] = hydroservers.siteinfo
+        client = Client(hydroservers.url.strip())
+        keywords = client.service.GetVariables('[:]')
+
+        keywords_dict = xmltodict.parse(keywords)
+        keywords_dict_object = json.dumps(keywords_dict)
+
+        keywords_json = json.loads(keywords_dict_object)
+        # Parsing the sites and creating a sites object. See utilities.py
+        print("-------------------------------------")
+        # print(sites_json)
+        print(type(keywords_json))
+        print(keywords_dict.keys())
+        # print(keywords_json['variablesResponse']['variables']['variable'])
+        array_variables=keywords_json['variablesResponse']['variables']['variable']
+        array_keywords_hydroserver=[]
+        print(type(array_variables))
+        # print(array_variables)
+        if isinstance(array_variables,type([])):
+            # print("inside the list iption")
+            for words in array_variables:
+                # print("priting words")
+                # print(type(words))
+                # print(words)
+                # print(words.get('variableName'))
+                # print(words['variableName'])
+                array_keywords_hydroserver.append(words['variableName'])
+            # words_to_search[name] = array_keywords_hydroserver
+        if isinstance(array_variables,dict):
+            array_keywords_hydroserver.append(array_variables['variableName'])
+
+        words_to_search[name] = array_keywords_hydroserver
+        print(words_to_search)
+        # print(type(keywords_json['variablesResponse']['variables']['variable']))
+        # layer_obj['keywords']=keywords_json
+        # print(keywords_json)
+
+        hs_list.append(layer_obj)
+
+    list["hydroserver"] = hs_list
+    list["keysSearch"] = words_to_search
+    print("------------------------------------------")
+    # print(len(hs_list))
+    # print(list)
+    return JsonResponse(list)
