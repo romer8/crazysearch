@@ -23,19 +23,20 @@
 
 <br>
 
+
 <div class="accordion" id="groups_hydroservers">
 
   <div class="card">
     <div class="card-header" id="headingTwo">
       <h2 class="mb-0">
-        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
           Hydro Groups Added
         </button>
         <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span> </button>
-        <button class="btn btn-danger" id="btn-delete-hydroserver-group"> <span class="glyphicon glyphicon-minus"></span> </button>
+        <button class="btn btn-danger" id="btn-delete-hydroserver-group"> <span class="glyphicon glyphicon-trash"></span> </button>
       </h2>
     </div>
-    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#groups_hydroservers">
+    <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#groups_hydroservers">
       <div class="card-body">
         <div id="current-Groupservers">
             <ul id="current-Groupservers-list"></ul>
@@ -44,22 +45,22 @@
     </div>
   </div>
 
-  <div class="card">
+  <!-- <div class="card">
      <div class="card-header" id="headingThree">
        <h2 class="mb-0">
-         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
            Hydro Group Info
          </button>
        </h2>
      </div>
-     <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#groups_hydroservers">
+     <div id="collapseThree" class="collapse show" aria-labelledby="headingThree" data-parent="#groups_hydroservers">
        <div class="card-body">
          <div id="pop-up_description">
          </div>
        </div>
      </div>
-   </div>
-   
+   </div> -->
+
    <button class="btn btn-success" data-toggle="modal" data-target="#modalKeyWordSearch" style="width:100%"> Group Keywords Search <span class="glyphicon glyphicon-eye-open" style="padding-left:0.5em"></span> </button>
 
    <div class="accordion" id="accordion_servers">
@@ -72,7 +73,7 @@
          </h5>
        </div>
        <div class="card-body">
-         <div id="current-servers" class="collapse" aria-labelledby="headingOne" data-parent="#groups_hydroservers">
+         <div id="current-servers" class="collapse show" aria-labelledby="headingOne" data-parent="#groups_hydroservers">
            <ul id="current-servers-list"></ul>
          </div>
        </div>
