@@ -84,6 +84,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
      *                    PRIVATE FUNCTION DECLARATIONS
      *************************************************************************/
     var addContextMenuToListItem,
+        filter_words,
         add_soap,
         addDefaultBehaviorToAjax,
         checkCsrfSafe,
@@ -134,7 +135,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
         get_hs_list_from_hydroserver,
         delete_group_of_hydroservers,
         get_keywords_from_group,
-        remove_individual_hydroservers_group;
+        remove_individual_hydroservers_group,
+        keyword_filter,
+        get_all_the_checked_keywords,
+        get_servers_with_keywords_from_group,
+        remove_list_and_layers_from_hydroservers,
+        reset_keywords,
+        get_active_hydroservers_groups,
+        lis_deleted = [],
+        layers_deleted = [],
+        lis_separators = [];
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -427,28 +437,332 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $listItem.attr("data-context-menu", contextMenuId)
     }
 
-    // PUT IT WHERE THE CLICK EVENT ITS SHOOT TO CALCULATE THE DIFFERET KEY WORDS.
+/*
+************ FUNCTION NAME : GET_KEYWORDS_FROM_GROUPS
+************ PURPOSE : THE FUNCTION LETS YOU FILTER THE HYDROSERVERS LIST FROM THE SELECTED GROUPS OF HYDROSERVERS
+
+*/
     get_keywords_from_group = function(){
-      let hydroserver_group = actual_group.split('=')[1]
-      let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
-      // console.log(datastring);
-      let key_words_to_search=[];
-      datastring.forEach(function(data){
-        // console.log(Array.from(data.children));
-        Array.from(data.children).forEach(function(column){
-          if(Array.from(column.children)[0].checked ==true){
-            // console.log();
-            key_words_to_search.push(Array.from(column.children)[0].nextSibling.nodeValue.trim())
-          }
+
+      // ONLY THE KEY WORDS //
+      let key_words_to_search= get_all_the_checked_keywords();
+
+      if(key_words_to_search.length > 0){
+
+        // LOOK FOR THE GROUPS TO SEARCH//
+        let input_check_array= get_active_hydroservers_groups();
+        console.log(input_check_array);
+
+        // GET THE LI ELEMENTS OF THE MENU OF THE HYDROSERVERS //
+        let lis = document.getElementById("current-servers").getElementsByTagName("li");
+        let li_arrays = Array.from(lis);
+        console.log(li_arrays);
+
+
+        // LOOP FOR ALL THE GROUPS THAT ARE CHECKED
+        input_check_array.forEach(function(hydroserver_group){
+          let servers_with_no_keyword=[]; // SERVERS WITH NO KEYWORD
+          let all_servers_titles=[]; // ALL THE TITLES OF THE SERVERS
+
+          let send_group={
+            group: hydroserver_group
+          };
+
+          $.ajax({
+            type:"GET",
+            url: `${apiServer}/keyword-group/`,
+            dataType: "JSON",
+            data: send_group,
+            success: function(result){
+              console.log(result);
+
+              //ALL THE SERVERS IN THE SELECTED GROUP //
+              let all_servers_in_group = result.hydroserver;
+              console.log(all_servers_in_group);
+
+              //LOOK FOR THE SERVERS THAT HAVE KEYWORDS //
+              let keywords_in_servers = get_servers_with_keywords_from_group(result, key_words_to_search);
+              // PRINT THE SERVERS WITH KEYWORDS
+              console.log(keywords_in_servers);
+
+
+              // GET ALL THE TITLES OF THE SERVERS ACTIVE OR NOT //
+              all_servers_in_group.forEach(server_in_group => {
+                      let title_add = server_in_group.title;
+                      all_servers_titles.push(title_add);
+              })
+
+                // SERVERS WITH NO KEYWORDS //
+                servers_with_no_keyword = all_servers_titles.filter(x => !keywords_in_servers.includes(x));
+
+                //COMPARISON OF ALL THE SERVERS AND THE ONES ONLY WITH KEYWORDS //
+                console.log(servers_with_no_keyword.length);
+                console.log(all_servers_titles.length);
+
+                // LI ELEMENTS THAT NEED TO BE DELETED
+                let lis_to_delete = li_arrays.filter(x => servers_with_no_keyword.includes(x.attributes['layer-name'].value));
+                console.log(lis_to_delete);
+
+
+                //PRINT THE ARRAYS THAT KNOW WHICH LAYERS AND MENUS HAS BEEN ERRASED//
+                console.log(lis_deleted);
+                console.log(layers_deleted);
+
+                console.log(lis_separators);
+                console.log(keywords_in_servers);
+
+                // ADDING THE LAYERS TO THE MAP AND MENUS THAT ARE LEFT //
+                keywords_in_servers.forEach(function(server_name){
+                  let checks = true;
+                  let index = lis_deleted.length -1 ;
+                  while (index >= 0) {
+                    let title = lis_deleted[index].attributes['layer-name'].value;
+                      if (title === server_name) {
+                        // let title = lis.attributes['layer-name'].value;
+                        console.log(title);
+                        lis_separators[index].appendChild(lis_deleted[index]);
+                        layersDict[title] = layers_deleted[index];
+                        map.addLayer(layers_deleted[index]);
+                        lis_separators.splice(index, 1);
+                        lis_deleted.splice(index, 1);
+                        layers_deleted.splice(index , 1);
+                      }
+                      index -= 1;
+                  }
+
+                })
+
+
+                // DELETE THE LAYERS ON THE MAP AND ALSO THE MENUS //
+                lis_to_delete.forEach(function(li_to_delete){
+                  let layer = li_to_delete.attributes['layer-name'].value;
+                  lis_deleted.push(li_to_delete);
+                  console.log(document.getElementById(`${hydroserver_group}_list_separator`));
+                  lis_separators.push(document.getElementById(`${hydroserver_group}_list_separator`));
+                  document.getElementById(`${hydroserver_group}_list_separator`).removeChild(li_to_delete);
+                  map.removeLayer(layersDict[layer]);
+                  layers_deleted.push(layersDict[layer]);
+                  delete layersDict[layer];
+                  map.updateSize();
+                })
+
+                $("#soapAddLoading").addClass("hidden")
+                $("#btn-key-search").show()
+            },
+
+            error: function(error) {
+              console.log(error);
+              $.notify(
+                  {
+                      message: `Something were wrong when applying the filter with the keywords`
+                  },
+                  {
+                      type: "danger",
+                      allow_dismiss: true,
+                      z_index: 20000,
+                      delay: 5000
+                  }
+              )
+
+            }
+          });
+
         })
+
+    }
+    else {
+
+      console.log("I am here with no keywords");
+      console.log(lis_deleted);
+      console.log(layers_deleted);
+      console.log(lis_separators);
+      let i = 0;
+      lis_deleted.forEach( function(lis){
+        let title = lis.attributes['layer-name'].value;
+        lis_separators[i].appendChild(lis);
+        layersDict[title] = layers_deleted[i];
+        map.addLayer(layers_deleted[i]);
+        i = i + 1;
+      })
+      lis_deleted = [];
+      layers_deleted = [];
+      lis_separators = [];
+
+      $.notify(
+          {
+              message: `You need to select at least one keyword`
+          },
+          {
+              type: "info",
+              allow_dismiss: true,
+              z_index: 20000,
+              delay: 5000
+          }
+      )
+
+    }
+  }
+
+  $("#btn-key-search").on("click", get_keywords_from_group);
+
+  /*
+  ************ FUNCTION NAME : RESET KEYWORDS
+  ************ PURPOSE : THE FUNCTION LETS YOU RESET ALL THE KEYWORDS
+  */
+  reset_keywords = function(){
+    // UNCHECK ALL THE BOXES AND CHECK IF THERE WAS SOME THAT WERE CHECKED BEFORE //
+    // let check = true;
+    console.log("IN THE FUNCTION FOR RESETING ");
+    let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
+    // console.log(datastring);
+    datastring.forEach(function(data){
+      // console.log(Array.from(data.children));
+      Array.from(data.children).forEach(function(column){
+        if(Array.from(column.children)[0].checked ==true){
+          // console.log();
+          // check = false;
+          Array.from(column.children)[0].checked = false;
+        }
+      })
+    });
+
+      console.log("I am here with no keywords");
+      console.log(lis_deleted);
+      console.log(layers_deleted);
+      console.log(lis_separators);
+      let index = 0;
+
+      lis_deleted.forEach( function(lis){
+        let title = lis.attributes['layer-name'].value;
+        lis_separators[index].appendChild(lis);
+        layersDict[title] = layers_deleted[index];
+        map.addLayer(layers_deleted[index]);
+        index = index + 1;
+      })
+
+      lis_deleted = [];
+      layers_deleted = [];
+      lis_separators = [];
+
+  }
+  $("#btn-r-reset").on("click", reset_keywords);
+
+  /*
+  ************ FUNCTION NAME : GET_ALL_THE_CHECKED_KEYWORDS
+  ************ PURPOSE : GET ALL THE CHECKED KEYWORDS FROM THE POP-UP MENU
+  */
+  get_all_the_checked_keywords = function(){
+    // ONLY THE KEY WORDS //
+    let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
+    // console.log(datastring);
+    let key_words_to_search=[];
+    datastring.forEach(function(data){
+      // console.log(Array.from(data.children));
+      Array.from(data.children).forEach(function(column){
+        if(Array.from(column.children)[0].checked ==true){
+          // console.log();
+          key_words_to_search.push(Array.from(column.children)[0].nextSibling.nodeValue.trim())
+        }
+      })
+    });
+    // filter_words = key_words_to_search;
+    console.log(key_words_to_search);
+    return key_words_to_search;
+  }
+  /*
+  ************ FUNCTION NAME : GET_ACTIVE_HYDROSERVERS_GROUPS
+  ************ PURPOSE : THIS GETS ALL THE ACTIVE HYDROSERVERS GROUPS
+  */
+
+  get_active_hydroservers_groups = function(){
+    let active_groups_hydroservers = document.getElementById("current-Groupservers").getElementsByTagName("LI");
+    let array_active_groups_hydroservers = Array.from(active_groups_hydroservers);
+    let input_check_array = [];
+    array_active_groups_hydroservers.forEach(function(group){
+      let input_type = Array.from(group.getElementsByTagName("INPUT"))[0];
+      if(input_type.checked){
+        input_check_array.push(group.innerText);
+      }
+    })
+    console.log(input_check_array);
+    return input_check_array
+  }
+  //////////////////*********************************************************************************************************/////////////////////
+  /*
+  ************ FUNCTION NAME : GET_SERVERS_WITH_KEYWORDS_FROM_GROUP
+  ************ PURPOSE : THIS WILL GET TEH SERVERS WITH KEYWORDS
+  */
+
+  get_servers_with_keywords_from_group = function(result, key_words_to_search){
+    //look which servers do not have a selected search keyword//
+    let keywords_in_servers=[];
+    for (let [key, value] of Object.entries(result.keysSearch)) {
+        value.forEach(function(v){
+            key_words_to_search.forEach(function(word_to_search){
+              if(v === word_to_search){
+                if(!keywords_in_servers.includes(key)){
+                  keywords_in_servers.push(key);
+                }
+              }
+            })
+        })
+        console.log(key, value);
+    }
+    console.log(keywords_in_servers);
+    return keywords_in_servers;
+  }
+
+  remove_list_and_layers_from_hydroservers= function(servers_with_no_keyword, all_servers_titles, keywords_in_servers, all_servers_in_group, group){
+
+    servers_with_no_keyword = all_servers_titles.filter(x => !keywords_in_servers.includes(x));
+    console.log(servers_with_no_keyword.length);
+    console.log(all_servers_titles.length);
+
+    let lis = document.getElementById("current-servers").getElementsByTagName("li");
+    let li_arrays = Array.from(lis);
+    console.log(li_arrays);
+
+    let lis_to_delete = li_arrays.filter(x => servers_with_no_keyword.includes(x.attributes['layer-name'].value));
+    console.log(lis_to_delete);
+    console.log(keywords_in_servers);
+    // so the deletion will be //
+
+
+    if(keywords_in_servers.length !== 0){
+      // change //
+      let ul_servers = document.getElementById("current-servers");
+      lis_to_delete.forEach(function(li_tag){
+        ul_servers.removeChild(li_tag);
       });
-      console.log(key_words_to_search);
+    }
+
+
+    // console.log(servers_with_no_keyword);
+    if(servers_with_no_keyword.length !== all_servers_titles.length){
+      console.log("removing layers");
+      servers_with_no_keyword.forEach(function(server_to_remove_from_map){
+          map.removeLayer(layersDict[server_to_remove_from_map]);
+          delete layersDict[server_to_remove_from_map];
+          map.updateSize();
+      });
+    }
+  }
+
+
+  keyword_filter = function(group){
+    // GET THE KEYWORDS //
+    let key_words_to_search = get_all_the_checked_keywords();
+
+    console.log(key_words_to_search);
+    if(key_words_to_search.length > 0){
+
+    // input_check_array.forEach(function(hydroserver_group){
+      let servers_with_no_keyword=[];
+      let all_servers_titles=[];
       let send_group={
-        group: hydroserver_group
+        group: group
       };
-      console.log(send_group);
-      $("#soapAddLoading").removeClass("hidden");
-      $("#btn-key-search").hide();
+
       $.ajax({
         type:"GET",
         url: `${apiServer}/keyword-group/`,
@@ -457,42 +771,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
         success: function(result){
           console.log(result);
 
-          // take out a server and do not display it // for this load all the servers again, and at the end erase the ones that do not have a
-          // search keyword//
-
           //look which servers do not have a selected search keyword//
-          let keywords_in_servers=[];
-          for (let [key, value] of Object.entries(result.keysSearch)) {
-              value.forEach(function(v){
-                  key_words_to_search.forEach(function(word_to_search){
-                    if(v === word_to_search){
-                      if(!keywords_in_servers.includes(key)){
-                        keywords_in_servers.push(key);
-                      }
-                    }
-                  })
-              })
-              console.log(key, value);
-          }
+          let keywords_in_servers = get_servers_with_keywords_from_group(result,key_words_to_search);
           console.log(keywords_in_servers);
-          // load only the specific hydroservers
-          // clean the list of hydroservers
-          $("#current-servers").empty() //Resetting the catalog
-          let extent = ol.extent.createEmpty();
-          let servers_with_no_keyword=[];
-          let all_servers_titles=[];
 
 
-          // THIS WILL REMOVE ANY LAYERS FROM A HYDROSERVER //
-          for (var key of Object.keys(layersDict)) {
-              map.removeLayer(layersDict[key])
-              delete layersDict[key]
-              map.updateSize()
-          };
-
-          let all_servers_in_group=result.hydroserver;
-          console.log(servers_with_no_keyword);
+          let all_servers_in_group = result.hydroserver;
           console.log(all_servers_in_group);
+
+
             all_servers_in_group.forEach(server_in_group => {
                       let {
                           title,
@@ -503,118 +790,20 @@ var CRAZYSEARCH_PACKAGE = (function() {
                           siteInfo
                       } = server_in_group
                       all_servers_titles.push(title);
-                      let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                      <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                      <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                      </li>`
-                      let sites = JSON.parse(siteInfo)
-                      // console.log(extents);
-                      console.log(sites);
-                      sites = sites.map(site => {
-                          return {
-                              type: "Feature",
-                              geometry: {
-                                  type: "Point",
-                                  coordinates: ol.proj.transform(
-                                      [
-                                          parseFloat(site.longitude),
-                                          parseFloat(site.latitude)
-                                      ],
-                                      "EPSG:4326",
-                                      "EPSG:3857"
-                                  )
-                              },
-                              properties: {
-                                  name: site.sitename,
-                                  code: site.sitecode,
-                                  network: site.network,
-                                  hs_url: url,
-                                  hs_name: title
-                              }
-                          }
-                      })
-
-                      let sitesGeoJSON = {
-                          type: "FeatureCollection",
-                          crs: {
-                              type: "name",
-                              properties: {
-                                  name: "EPSG:3857"
-                              }
-                          },
-                          features: sites
-                      }
-
-                      const vectorSource = new ol.source.Vector({
-                          features: new ol.format.GeoJSON().readFeatures(
-                              sitesGeoJSON
-                          )
-                      })
-
-                      const vectorLayer = new ol.layer.Vector({
-                          source: vectorSource,
-                          style: featureStyle()
-                      })
-
-                      map.addLayer(vectorLayer)
-                      ol.extent.extend(extent, vectorSource.getExtent())
-
-                      vectorLayer.set("selectable", true)
-
-                      $(newHtml).appendTo("#current-servers")
-                      addContextMenuToListItem(
-                          $("#current-servers").find("li:last-child")
-                      )
-
-                      layersDict[title] = vectorLayer;
-              // })
-
             })
-            // let li_tags =$("#current-servers").children();
-            // console.log(typeof(li_tags));
-            // let li_tags_array = Object.values(li_tags);
-
-            let lis = document.getElementById("current-servers").getElementsByTagName("li");
-            let li_arrays = Array.from(lis);
-            // console.log(li_arrays);
-            console.log(li_arrays[0].attributes['layer-name'].value);
-            // console.log(keywords_in_servers);
-            let lis_to_delete = li_arrays.filter(x => servers_with_no_keyword.includes(x.attributes['layer-name'].value));
-            // console.log(lis_to_delete);
-            // so the deletion will be //
 
 
-            if(keywords_in_servers.length !== 0){
-              let ul_servers = document.getElementById("current-servers");
-              lis_to_delete.forEach(function(li_tag){
-                ul_servers.removeChild(li_tag);
-              });
-            }
+            console.log(all_servers_in_group);
+            remove_list_and_layers_from_hydroservers(servers_with_no_keyword, all_servers_titles, keywords_in_servers, all_servers_in_group)
 
-            servers_with_no_keyword = all_servers_titles.filter(x => !keywords_in_servers.includes(x));
-
-            // console.log(servers_with_no_keyword);
-            if(servers_with_no_keyword.length != all_servers_titles.length){
-              servers_with_no_keyword.forEach(function(server_to_remove_from_map){
-                  map.removeLayer(layersDict[server_to_remove_from_map]);
-                  delete layersDict[server_to_remove_from_map];
-                  map.updateSize();
-              });
-            }
-            $("#soapAddLoading").addClass("hidden")
-            $("#btn-key-search").show()
-
-
-          // load all the hydroservers again for the group //
-
-          // delete the ones that are not in the keyword search this is done in the display and in the map layer
         },
         error: function(error) {
           console.log(error);
         }
       });
     }
-  $("#btn-key-search").on("click", get_keywords_from_group);
+
+  }
 
 
 
@@ -680,7 +869,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 // <ul class="hydroserver-list" style = "display: none">
                 // </ul>`
                 let newHtml = `<li class="ui-state-default" id="${title}">
-                <input class="chkbx-layer" type="checkbox"><span class="group-name">${title}</span>
+                <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
 
                 <div>
                   <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
@@ -690,43 +879,94 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 <ul id=${title}list class="ul-list" style = "display: none">
                 </ul>`
 
-                $(newHtml).appendTo("#current-Groupservers")
+
+                $(newHtml).appendTo("#current-Groupservers");
+
+                let li_object = document.getElementById(`${title}`);
+                console.log("hola");
+                // console.log(li_object.children[0]);
+                let input_check = li_object.children[0];
+                console.log(input_check);
+                if(input_check.checked){
+                  load_individual_hydroservers_group(title);
+                  // keyword_filter(title);
+                }
+
+                input_check.addEventListener("change", function(){
+                  console.log(this);
+                  if(this.checked){
+                    console.log(" it is checked");
+                    load_individual_hydroservers_group(title);
+                    // keyword_filter(title);
+
+                  }
+                  else{
+                    // delete the lsit of hydroservers being display // make a function to delete it
+                    console.log("it is not checked");
+                    remove_individual_hydroservers_group(title);
+                  }
+
+                });
+
                 let $title="#"+title;
                 let $title_list="#"+title+"list";
+                console.log($title_list);
+
 
                 $($title).click(function(){
-                  actual_group = `&actual-group=${title}`;
-                  console.log(actual_group);
-                  console.log($($title_list).is(":visible"));
-                  $(".ul-list").hide();
-                  $("#current-servers-list").html("");
-                  switch ($($title_list).is(":visible")) {
-                    case false:
-                      // console.log("making visible");
-                      $($title_list).show();
-                      $("#pop-up_description").show();
-                      // get_keywords_from_group(title);
-                      load_individual_hydroservers_group(title);
-                      break;
-                    case true:
-                      $($title_list).hide();
-                      $("#pop-up_description").html("");
-                      $("#pop-up_description").hide();
-                      $("#accordion_servers").hide();
+                  $("#pop-up_description2").html("");
 
-                      break;
-                  }
-                  // console.log(description);
-                  let description_html=`<h3><u>${title}</u></h3>
-                  <h5>Description:</h5>
+                  actual_group = `&actual-group=${title}`;
+
+                  let description_html=`<h1><u>${title}</u></h1>
                   <p>${description}</p>`;
-                  $("#pop-up_description").html(description_html);
+                  // $("#pop-up_description").html(description_html);
+                  $("#pop-up_description2").html(description_html);
 
                 });
 
                 addContextMenuToListItem(
                     $("#current-Groupservers").find("li:last-child")
                 )
+
+                // $(newHtml).appendTo("#current-Groupservers")
+                // let $title="#"+title;
+                // let $title_list="#"+title+"list";
+                //
+                //
+                // $($title).click(function(){
+                //   actual_group = `&actual-group=${title}`;
+                //   console.log(actual_group);
+                //   console.log($($title_list).is(":visible"));
+                //   $(".ul-list").hide();
+                //   $("#current-servers-list").html("");
+                //   switch ($($title_list).is(":visible")) {
+                //     case false:
+                //       // console.log("making visible");
+                //       $($title_list).show();
+                //       $("#pop-up_description").show();
+                //       // get_keywords_from_group(title);
+                //       load_individual_hydroservers_group(title);
+                //       break;
+                //     case true:
+                //       $($title_list).hide();
+                //       $("#pop-up_description").html("");
+                //       $("#pop-up_description").hide();
+                //       $("#accordion_servers").hide();
+                //
+                //       break;
+                //   }
+                //   // console.log(description);
+                //   let description_html=`<h3><u>${title}</u></h3>
+                //   <h5>Description:</h5>
+                //   <p>${description}</p>`;
+                //   $("#pop-up_description").html(description_html);
+                //
+                // });
+                //
+                // addContextMenuToListItem(
+                //     $("#current-Groupservers").find("li:last-child")
+                // )
                 $(".ui-state-default").click(function(){
                   console.log("hola");
                 });
@@ -963,230 +1203,270 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 */
    load_individual_hydroservers_group = function(group_name){
-    console.log(layersDict);
-    // THIS WILL REMOVE ANY LAYERS FROM A HYDROSERVER //
-    for (var key of Object.keys(layersDict)) {
-        map.removeLayer(layersDict[key])
-        delete layersDict[key]
-        map.updateSize()
-    };
-
+     let servers_with_keywords = [];
+     let key_words_to_search = get_all_the_checked_keywords();
      let group_name_obj={
        group: group_name
      };
      console.log(group_name_obj);
      $.ajax({
-         type: "GET",
-         url: `${apiServer}/catalog-group/`,
-         dataType: "JSON",
-         data: group_name_obj,
-         success: result => {
-             console.log(result);
-             let servers = result["hydroserver"]
-             console.log("this are the servers");
-             console.log(servers);
+       type:"GET",
+       url: `${apiServer}/keyword-group/`,
+       dataType: "JSON",
+       data: group_name_obj,
+       success: function(result){
+         console.log(result);
+
+         //ALL THE SERVERS IN THE SELECTED GROUP //
+         let all_servers_in_group = result.hydroserver;
+         console.log(all_servers_in_group);
+
+         //LOOK FOR THE SERVERS THAT HAVE KEYWORDS //
+         let keywords_in_servers = get_servers_with_keywords_from_group(result, key_words_to_search);
+         console.log(keywords_in_servers);
+         $.ajax({
+             type: "GET",
+             url: `${apiServer}/catalog-group/`,
+             dataType: "JSON",
+             data: group_name_obj,
+             success: result => {
+                 console.log(result);
+                 let servers = result["hydroserver"]
+                 console.log("this are the servers");
+                 console.log(servers);
 
 
-             // $("#current-servers").empty() //Resetting the catalog
+                 // $("#current-servers").empty() //Resetting the catalog
 
-             //USE A FUNCTION TO FIND THE LI ASSOCIATED WITH THAT GROUP  AND DELETE IT FROM THE MAP AND MAKE ALL
-             // THE CHECKBOXES VISIBLE //
+                 //USE A FUNCTION TO FIND THE LI ASSOCIATED WITH THAT GROUP  AND DELETE IT FROM THE MAP AND MAKE ALL
+                 // THE CHECKBOXES VISIBLE //
 
-             let extent = ol.extent.createEmpty()
-             console.log(servers);
-             let id_group_separator = `${group_name}_list_separator`;
-             let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
-             $(title_group).appendTo("#current-servers")
+                 let extent = ol.extent.createEmpty()
+                 console.log(servers);
+                 let id_group_separator = `${group_name}_list_separator`;
+                 let title_group=`<ul id= ${id_group_separator}>
+                    <h5 class = "title-separators" >${group_name}<h5>
+                 </ul> `
 
-             servers.forEach(server => {
-                 let {
-                     title,
-                     url,
-                     geoserver_url,
-                     layer_name,
-                     extents,
-                     siteInfo
-                 } = server
+                 // let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
 
+                 $(title_group).appendTo("#current-servers") ;
 
-                 let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                 <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                 <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                 </li>`;
+                 servers.forEach(function(server){
+                     let {
+                         title,
+                         url,
+                         geoserver_url,
+                         layer_name,
+                         extents,
+                         siteInfo
+                     } = server
 
-                 $(newHtml).appendTo("#current-servers")
-                 console.log($(newHtml));
-                 addContextMenuToListItem(
-                     $("#current-servers").find("li:last-child")
-                 )
-                 let lis = document.getElementById("current-servers").getElementsByTagName("li");
-                 let li_arrays = Array.from(lis);
-                 let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
+                     if(keywords_in_servers.includes(title) || key_words_to_search.length == 0){
+                       console.log(keywords_in_servers.includes(title));
+                       let newHtml = `
+                       <li class="ui-state-default" layer-name="${title}" id="${title}" >
+                       <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
+                       <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                       </li>
+                       `;
 
-                 // let input_check = document.querySelector(newHtml);
-                 console.log(input_check);
+                       // $(newHtml).appendTo("#current-servers")
+                       $(newHtml).appendTo(`#${id_group_separator}`);
+                       console.log($(newHtml));
+                       addContextMenuToListItem(
+                           $("#current-servers").find("li:last-child")
+                       )
+                       console.log(document.getElementById("current-servers"));
+                       let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                       console.log(lis);
+                       let li_arrays = Array.from(lis);
+                       console.log(li_arrays);
 
-                 input_check.firstElementChild.addEventListener("change", function(){
-                   console.log(this);
-                   if(this.checked){
-                     console.log(" it is checked");
-                     // load_individual_hydroservers_group(title);
-                     let sites = JSON.parse(siteInfo)
-                     // console.log(extents);
-                     console.log(sites);
-                     sites = sites.map(site => {
-                         return {
-                             type: "Feature",
-                             geometry: {
-                                 type: "Point",
-                                 coordinates: ol.proj.transform(
-                                     [
-                                         parseFloat(site.longitude),
-                                         parseFloat(site.latitude)
-                                     ],
-                                     "EPSG:4326",
-                                     "EPSG:3857"
-                                 )
-                             },
-                             properties: {
-                                 name: site.sitename,
-                                 code: site.sitecode,
-                                 network: site.network,
-                                 hs_url: url,
-                                 hs_name: title
-                             }
+                       let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
+
+                       // let input_check = document.querySelector(newHtml);
+                       console.log(input_check);
+
+                       input_check.firstElementChild.addEventListener("change", function(){
+                         console.log(this);
+                         if(this.checked){
+                           console.log(" it is checked");
+                           // load_individual_hydroservers_group(title);
+                           let sites = JSON.parse(siteInfo)
+                           // console.log(extents);
+                           console.log(sites);
+                           sites = sites.map(site => {
+                               return {
+                                   type: "Feature",
+                                   geometry: {
+                                       type: "Point",
+                                       coordinates: ol.proj.transform(
+                                           [
+                                               parseFloat(site.longitude),
+                                               parseFloat(site.latitude)
+                                           ],
+                                           "EPSG:4326",
+                                           "EPSG:3857"
+                                       )
+                                   },
+                                   properties: {
+                                       name: site.sitename,
+                                       code: site.sitecode,
+                                       network: site.network,
+                                       hs_url: url,
+                                       hs_name: title
+                                   }
+                               }
+                           })
+
+                           let sitesGeoJSON = {
+                               type: "FeatureCollection",
+                               crs: {
+                                   type: "name",
+                                   properties: {
+                                       name: "EPSG:3857"
+                                   }
+                               },
+                               features: sites
+                           }
+
+                           const vectorSource = new ol.source.Vector({
+                               features: new ol.format.GeoJSON().readFeatures(
+                                   sitesGeoJSON
+                               )
+                           })
+
+                           const vectorLayer = new ol.layer.Vector({
+                               source: vectorSource,
+                               style: featureStyle()
+                           })
+
+                           map.addLayer(vectorLayer)
+                           ol.extent.extend(extent, vectorSource.getExtent())
+
+                           vectorLayer.set("selectable", true)
+
+                           // $(newHtml).appendTo("#current-servers")
+                           // console.log($(newHtml));
+                           // addContextMenuToListItem(
+                           //     $("#current-servers").find("li:last-child")
+                           // )
+
+                           layersDict[title] = vectorLayer
                          }
-                     })
+                         else{
+                           // delete the lsit of hydroservers being display // make a function to delete it
+                           console.log("it is not checked");
+                           // remove the layers from map
+                           map.removeLayer(layersDict[title])
+                           delete layersDict[title]
+                           map.updateSize()
+                         }
 
-                     let sitesGeoJSON = {
-                         type: "FeatureCollection",
-                         crs: {
-                             type: "name",
-                             properties: {
-                                 name: "EPSG:3857"
-                             }
-                         },
-                         features: sites
-                     }
+                       });
 
-                     const vectorSource = new ol.source.Vector({
-                         features: new ol.format.GeoJSON().readFeatures(
-                             sitesGeoJSON
-                         )
-                     })
 
-                     const vectorLayer = new ol.layer.Vector({
-                         source: vectorSource,
-                         style: featureStyle()
-                     })
+                       let sites = JSON.parse(siteInfo)
+                       // console.log(extents);
+                       console.log(sites);
+                       sites = sites.map(site => {
+                           return {
+                               type: "Feature",
+                               geometry: {
+                                   type: "Point",
+                                   coordinates: ol.proj.transform(
+                                       [
+                                           parseFloat(site.longitude),
+                                           parseFloat(site.latitude)
+                                       ],
+                                       "EPSG:4326",
+                                       "EPSG:3857"
+                                   )
+                               },
+                               properties: {
+                                   name: site.sitename,
+                                   code: site.sitecode,
+                                   network: site.network,
+                                   hs_url: url,
+                                   hs_name: title
+                               }
+                           }
+                       })
 
-                     map.addLayer(vectorLayer)
-                     ol.extent.extend(extent, vectorSource.getExtent())
+                       let sitesGeoJSON = {
+                           type: "FeatureCollection",
+                           crs: {
+                               type: "name",
+                               properties: {
+                                   name: "EPSG:3857"
+                               }
+                           },
+                           features: sites
+                       }
 
-                     vectorLayer.set("selectable", true)
+                       const vectorSource = new ol.source.Vector({
+                           features: new ol.format.GeoJSON().readFeatures(
+                               sitesGeoJSON
+                           )
+                       })
 
-                     // $(newHtml).appendTo("#current-servers")
-                     // console.log($(newHtml));
-                     // addContextMenuToListItem(
-                     //     $("#current-servers").find("li:last-child")
-                     // )
+                       const vectorLayer = new ol.layer.Vector({
+                           source: vectorSource,
+                           style: featureStyle()
+                       })
 
-                     layersDict[title] = vectorLayer
+                       map.addLayer(vectorLayer)
+                       ol.extent.extend(extent, vectorSource.getExtent())
+
+                       vectorLayer.set("selectable", true)
+
+                       // $(newHtml).appendTo("#current-servers")
+                       // console.log($(newHtml));
+                       // addContextMenuToListItem(
+                       //     $("#current-servers").find("li:last-child")
+                       // )
+
+                       layersDict[title] = vectorLayer;
                    }
-                   else{
-                     // delete the lsit of hydroservers being display // make a function to delete it
-                     console.log("it is not checked");
-                     // remove the layers from map
-                     map.removeLayer(layersDict[title])
-                     delete layersDict[title]
+                 })
+
+                 if (servers.length) {
+                     map.getView().fit(extent, map.getSize())
                      map.updateSize()
-                   }
-
-                 });
-
-
-                 let sites = JSON.parse(siteInfo)
-                 // console.log(extents);
-                 console.log(sites);
-                 sites = sites.map(site => {
-                     return {
-                         type: "Feature",
-                         geometry: {
-                             type: "Point",
-                             coordinates: ol.proj.transform(
-                                 [
-                                     parseFloat(site.longitude),
-                                     parseFloat(site.latitude)
-                                 ],
-                                 "EPSG:4326",
-                                 "EPSG:3857"
-                             )
-                         },
-                         properties: {
-                             name: site.sitename,
-                             code: site.sitecode,
-                             network: site.network,
-                             hs_url: url,
-                             hs_name: title
-                         }
-                     }
-                 })
-
-                 let sitesGeoJSON = {
-                     type: "FeatureCollection",
-                     crs: {
-                         type: "name",
-                         properties: {
-                             name: "EPSG:3857"
-                         }
+                 }
+             },
+             error: function(error) {
+                 console.log(error)
+                 $.notify(
+                     {
+                         message: `Something went wrong loading the hydroservers for the group called ${group}. Please see the console for details.`
                      },
-                     features: sites
-                 }
-
-                 const vectorSource = new ol.source.Vector({
-                     features: new ol.format.GeoJSON().readFeatures(
-                         sitesGeoJSON
-                     )
-                 })
-
-                 const vectorLayer = new ol.layer.Vector({
-                     source: vectorSource,
-                     style: featureStyle()
-                 })
-
-                 map.addLayer(vectorLayer)
-                 ol.extent.extend(extent, vectorSource.getExtent())
-
-                 vectorLayer.set("selectable", true)
-
-                 // $(newHtml).appendTo("#current-servers")
-                 // console.log($(newHtml));
-                 // addContextMenuToListItem(
-                 //     $("#current-servers").find("li:last-child")
-                 // )
-
-                 layersDict[title] = vectorLayer
-             })
-
-             if (servers.length) {
-                 map.getView().fit(extent, map.getSize())
-                 map.updateSize()
+                     {
+                         type: "danger",
+                         allow_dismiss: true,
+                         z_index: 20000,
+                         delay: 5000
+                     }
+                 )
              }
-         },
-         error: function(error) {
-             console.log(error)
-             $.notify(
-                 {
-                     message: `Something went wrong loading the catalog. Please see the console for details.`
-                 },
-                 {
-                     type: "danger",
-                     allow_dismiss: true,
-                     z_index: 20000,
-                     delay: 5000
-                 }
-             )
-         }
+         })
+       },
+       error: function(error) {
+           console.log(error)
+           $.notify(
+               {
+                   message: `Something went wrong loading the hydroservers for the group called ${group}`
+               },
+               {
+                   type: "danger",
+                   allow_dismiss: true,
+                   z_index: 20000,
+                   delay: 5000
+               }
+           )
+       }
+
      })
 
    };
@@ -1213,8 +1493,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                       title,
                       description
                   } = group
-                  let newHtml = `<li class="ui-state-default" id="${title}">
+                  let newHtml = `
 
+                  <li class="ui-state-default" id="${title}">
                   <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
                   <div>
                     <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
@@ -1222,7 +1503,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                   </li>
                   <ul id=${title}list class="ul-list" style = "display: none">
-                  </ul>`
+                  </ul>
+                  `
                   $(newHtml).appendTo("#current-Groupservers");
 
                   let li_object = document.getElementById(`${title}`);
@@ -1232,6 +1514,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   console.log(input_check);
                   if(input_check.checked){
                     load_individual_hydroservers_group(title);
+                    // keyword_filter(title);
                   }
 
                   input_check.addEventListener("change", function(){
@@ -1239,6 +1522,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     if(this.checked){
                       console.log(" it is checked");
                       load_individual_hydroservers_group(title);
+                      // keyword_filter(title);
                     }
                     else{
                       // delete the lsit of hydroservers being display // make a function to delete it
@@ -1248,60 +1532,23 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                   });
 
-                  // console.log(li_arrays);
-                  // console.log(keywords_in_servers);
-                  // servers_with_no_keyword = all_servers_titles.filter(x => !keywords_in_servers.includes(x));
 
                   let $title="#"+title;
                   let $title_list="#"+title+"list";
                   console.log($title_list);
-                  // we need a change here more simple and the click event only works if it is checkboxed and i
-                  // we will probably just load the individual hydroservers and just disable the click option.
-                  // it is going to be good to put something that if it is clicked load the different hydroservers of the
-                  // groups selected right?
 
-                  // the easiest proposal can be to start will all the boxes checked and show all the hydroservers associated with it,
-                  // but we need to need to first add an id to the input boxes or just look for the li id and look for the input checkbox, and
-                  // then add the event.
 
-                  // however the loading has  to divide by the name of the hydroserver group // DONE
+                  $($title).click(function(){
+                    $("#pop-up_description2").html("");
 
-                  // this should also be for the search forkey words// so know it would be more efficient //
+                    actual_group = `&actual-group=${title}`;
 
-                  // in addition, it would be good to separate the
+                    let description_html=`<h1><u>${title}</u></h1>
+                    <p>${description}</p>`;
+                    // $("#pop-up_description").html(description_html);
+                    $("#pop-up_description2").html(description_html);
 
-                  // $($title).click(function(){
-                  //   $("#pop-up_description2").html("");
-                  //
-                  //   actual_group = `&actual-group=${title}`;
-                  //   console.log(actual_group);
-                  //   console.log($($title_list).is(":visible"));
-                  //   $(".ul-list").hide();
-                  //   $("#current-servers-list").html("");
-                  //   switch ($($title_list).is(":visible")) {
-                  //     case false:
-                  //       console.log("true");
-                  //       $($title_list).show();
-                  //       $("#pop-up_description").show();
-                  //       // get_keywords_from_group(title);
-                  //       load_individual_hydroservers_group(title);
-                  //       break;
-                  //     case true:
-                  //       console.log("false");
-                  //       $($title_list).hide();
-                  //       $("#pop-up_description").html("");
-                  //       $("#pop-up_description").hide();
-                  //       $("#accordion_servers").hide();
-                  //
-                  //       break;
-                  //   }
-                  //   // console.log(description);
-                  //   let description_html=`<h1><u>${title}</u></h1>
-                  //   <p>${description}</p>`;
-                  //   $("#pop-up_description").html(description_html);
-                  //   $("#pop-up_description2").html(description_html);
-                  //
-                  // });
+                  });
 
                   addContextMenuToListItem(
                       $("#current-Groupservers").find("li:last-child")
@@ -1391,128 +1638,449 @@ var CRAZYSEARCH_PACKAGE = (function() {
       var datastring = $modalAddSOAP.serialize();
       datastring += actual_group;
 
+
       console.log("This is the serialize string of datastring");
       console.log(datastring);
       //Submitting the data to the controller
       $("#soapAddLoading").removeClass("hidden");
       $("#btn-add-soap").hide();
+
       $.ajax({
           type: "POST",
           url: `${apiServer}/soap-group/`,
           dataType: "HTML",
           data: datastring,
           success: function(result) {
+
+              // put second filter // and also put a warning message that says that the new layers has been uploaded,
+              // put another warnign saying that it is added, but because of the filter you cannot see it. Probably a warning one
+              // put another warning if something gets wrong with the data base or with other thing.
+
               //Returning the geoserver layer metadata from the controller
               var json_response = JSON.parse(result)
-              console.log("This is the result from the controllers function call");
               console.log(json_response);
+              let group_name = actual_group.split('=')[1];
+              let id_group_separator = `${group_name}_list_separator`;
+
+
               if (json_response.status === "true") {
-                  let {title, siteInfo, url, group} = json_response
+                  // put the ajax call and also the filter //
+                  let servers_with_keywords = [];
+                  let key_words_to_search = get_all_the_checked_keywords();
+                  let group_name_obj={
+                    group: group_name
+                  };
+                  console.log(group_name_obj);
+                  $.ajax({
+                    type:"GET",
+                    url: `${apiServer}/keyword-group/`,
+                    dataType: "JSON",
+                    data: group_name_obj,
+                    success: function(result2){
+                      console.log(result);
 
-                  let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                  <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                  <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                  </li>`
+                      //ALL THE SERVERS IN THE SELECTED GROUP //
+                      let all_servers_in_group = result2.hydroserver;
+                      console.log(all_servers_in_group);
 
-                  let sites = JSON.parse(siteInfo)
-                  console.log("These are the sites");
-                  console.log(sites);
-                  sites = sites.map(site => {
-                      return {
-                          type: "Feature",
-                          geometry: {
-                              type: "Point",
-                              coordinates: ol.proj.transform(
-                                  [
-                                      parseFloat(site.longitude),
-                                      parseFloat(site.latitude)
-                                  ],
-                                  "EPSG:4326",
-                                  "EPSG:3857"
-                              )
-                          },
-                          properties: {
-                              name: site.sitename,
-                              code: site.sitecode,
-                              network: site.network,
-                              hs_url: url,
-                              hs_name: title
-                          }
-                      }
-                  })
+                      //LOOK FOR THE SERVERS THAT HAVE KEYWORDS //
+                      let keywords_in_servers = get_servers_with_keywords_from_group(result2, key_words_to_search);
+                      console.log(keywords_in_servers);
 
-                  let sitesGeoJSON = {
-                      type: "FeatureCollection",
-                      crs: {
-                          type: "name",
-                          properties: {
-                              name: "EPSG:3857"
-                          }
-                      },
-                      features: sites
-                  }
 
-                  const vectorSource = new ol.source.Vector({
-                      features: new ol.format.GeoJSON().readFeatures(
-                          sitesGeoJSON
+                    let {title, siteInfo, url, group} = json_response
+                    if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
+                      console.log(keywords_in_servers.includes(title));
+                      let newHtml = `
+                      <li class="ui-state-default" layer-name="${title}" id="${title}" >
+                      <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
+                      <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                      </li>
+                      `;
+
+                      // $(newHtml).appendTo("#current-servers")
+                      $(newHtml).appendTo(`#${id_group_separator}`); ////////***********ONLY THING THAT CHANGES **********////
+
+                      // THIS CHANGES //
+                      console.log($(newHtml));
+                      addContextMenuToListItem(
+                          $("#current-servers").find("li:last-child")
                       )
-                  })
+                      console.log(document.getElementById("current-servers"));
+                      let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                      console.log(lis);
+                      let li_arrays = Array.from(lis);
+                      console.log(li_arrays);
 
-                  const vectorLayer = new ol.layer.Vector({
-                      source: vectorSource,
-                      style: featureStyle()
-                  })
+                      let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
 
-                  map.addLayer(vectorLayer)
-                  console.log("this is the vector layer baby");
-                  console.log(vectorLayer);
-                  console.log("this is the geojson layer baby");
-                  console.log(sitesGeoJSON);
+                      // let input_check = document.querySelector(newHtml);
+                      console.log(input_check);
 
-                  vectorLayer.set("selectable", true)
+                      input_check.firstElementChild.addEventListener("change", function(){
+                        console.log(this);
+                        if(this.checked){
+                          console.log(" it is checked");
+                          // load_individual_hydroservers_group(title);
+                          let sites = JSON.parse(siteInfo)
+                          // console.log(extents);
+                          console.log(sites);
+                          sites = sites.map(site => {
+                              return {
+                                  type: "Feature",
+                                  geometry: {
+                                      type: "Point",
+                                      coordinates: ol.proj.transform(
+                                          [
+                                              parseFloat(site.longitude),
+                                              parseFloat(site.latitude)
+                                          ],
+                                          "EPSG:4326",
+                                          "EPSG:3857"
+                                      )
+                                  },
+                                  properties: {
+                                      name: site.sitename,
+                                      code: site.sitecode,
+                                      network: site.network,
+                                      hs_url: url,
+                                      hs_name: title
+                                  }
+                              }
+                          })
 
-                  $(newHtml).appendTo("#current-servers")
-                  addContextMenuToListItem(
-                      $("#current-servers").find("li:last-child")
-                  )
+                          let sitesGeoJSON = {
+                              type: "FeatureCollection",
+                              crs: {
+                                  type: "name",
+                                  properties: {
+                                      name: "EPSG:3857"
+                                  }
+                              },
+                              features: sites
+                          }
 
-                  layersDict[title] = vectorLayer
-                  $("#soapAddLoading").addClass("hidden")
-                  $("#btn-add-soap").show()
+                          const vectorSource = new ol.source.Vector({
+                              features: new ol.format.GeoJSON().readFeatures(
+                                  sitesGeoJSON
+                              )
+                          })
 
-                  $("#modalAddSoap").modal("hide")
-                  $("#modalAddSoap").each(function() {
-                      this.reset()
-                  })
+                          const vectorLayer = new ol.layer.Vector({
+                              source: vectorSource,
+                              style: featureStyle()
+                          })
 
-                  // map.getView().fit(vectorSource.getExtent(), map.getSize());
+                          map.addLayer(vectorLayer)
+                          ol.extent.extend(extent, vectorSource.getExtent())
 
-                  $.notify(
-                      {
-                          message: `Successfully Added the HydroServer to the Map`
-                      },
-                      {
-                          type: "success",
-                          allow_dismiss: true,
-                          z_index: 20000,
-                          delay: 5000
+                          vectorLayer.set("selectable", true)
+
+                          // $(newHtml).appendTo("#current-servers")
+                          // console.log($(newHtml));
+                          // addContextMenuToListItem(
+                          //     $("#current-servers").find("li:last-child")
+                          // )
+
+                          layersDict[title] = vectorLayer
+                        }
+                        else{
+                          // delete the lsit of hydroservers being display // make a function to delete it
+                          console.log("it is not checked");
+
+                          // remove the layers from map
+                          map.removeLayer(layersDict[title])
+                          delete layersDict[title]
+                          map.updateSize()
+                        }
+
+                      });
+
+
+                      let sites = JSON.parse(siteInfo)
+                      // console.log(extents);
+                      console.log(sites);
+                      sites = sites.map(site => {
+                          return {
+                              type: "Feature",
+                              geometry: {
+                                  type: "Point",
+                                  coordinates: ol.proj.transform(
+                                      [
+                                          parseFloat(site.longitude),
+                                          parseFloat(site.latitude)
+                                      ],
+                                      "EPSG:4326",
+                                      "EPSG:3857"
+                                  )
+                              },
+                              properties: {
+                                  name: site.sitename,
+                                  code: site.sitecode,
+                                  network: site.network,
+                                  hs_url: url,
+                                  hs_name: title
+                              }
+                          }
+                      })
+
+                      let sitesGeoJSON = {
+                          type: "FeatureCollection",
+                          crs: {
+                              type: "name",
+                              properties: {
+                                  name: "EPSG:3857"
+                              }
+                          },
+                          features: sites
                       }
-                  )
-              } else {
-                  $("#soapAddLoading").addClass("hidden")
-                  $("#btn-add-soap").show()
-                  $.notify(
-                      {
-                          message: `Failed to add server. Please check Url and try again.`
-                      },
-                      {
-                          type: "danger",
-                          allow_dismiss: true,
-                          z_index: 20000,
-                          delay: 5000
-                      }
-                  )
-              }
+
+                      const vectorSource = new ol.source.Vector({
+                          features: new ol.format.GeoJSON().readFeatures(
+                              sitesGeoJSON
+                          )
+                      })
+
+                      const vectorLayer = new ol.layer.Vector({
+                          source: vectorSource,
+                          style: featureStyle()
+                      })
+
+                      map.addLayer(vectorLayer)
+                      ol.extent.extend(extent, vectorSource.getExtent())
+
+                      vectorLayer.set("selectable", true)
+
+                      // $(newHtml).appendTo("#current-servers")
+                      // console.log($(newHtml));
+                      // addContextMenuToListItem(
+                      //     $("#current-servers").find("li:last-child")
+                      // )
+
+                      layersDict[title] = vectorLayer;
+
+
+
+                      // let newHtml = `<li class="ui-state-default" layer-name="${title}">
+                      // <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
+                      // <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+                      // </li>`
+                      //
+                      // $(newHtml).appendTo("#current-servers")
+                      // console.log($(newHtml));
+                      // addContextMenuToListItem(
+                      //     $("#current-servers").find("li:last-child")
+                      // )
+                      // let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                      // let li_arrays = Array.from(lis);
+                      // let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
+                      //
+                      // // let input_check = document.querySelector(newHtml);
+                      // console.log(input_check);
+                      //
+                      // input_check.firstElementChild.addEventListener("change", function(){
+                      //   console.log(this);
+                      //   if(this.checked){
+                      //     console.log(" it is checked");
+                      //     // load_individual_hydroservers_group(title);
+                      //     let sites = JSON.parse(siteInfo)
+                      //     // console.log(extents);
+                      //     console.log(sites);
+                      //     sites = sites.map(site => {
+                      //         return {
+                      //             type: "Feature",
+                      //             geometry: {
+                      //                 type: "Point",
+                      //                 coordinates: ol.proj.transform(
+                      //                     [
+                      //                         parseFloat(site.longitude),
+                      //                         parseFloat(site.latitude)
+                      //                     ],
+                      //                     "EPSG:4326",
+                      //                     "EPSG:3857"
+                      //                 )
+                      //             },
+                      //             properties: {
+                      //                 name: site.sitename,
+                      //                 code: site.sitecode,
+                      //                 network: site.network,
+                      //                 hs_url: url,
+                      //                 hs_name: title
+                      //             }
+                      //         }
+                      //     })
+                      //
+                      //     let sitesGeoJSON = {
+                      //         type: "FeatureCollection",
+                      //         crs: {
+                      //             type: "name",
+                      //             properties: {
+                      //                 name: "EPSG:3857"
+                      //             }
+                      //         },
+                      //         features: sites
+                      //     }
+                      //
+                      //     const vectorSource = new ol.source.Vector({
+                      //         features: new ol.format.GeoJSON().readFeatures(
+                      //             sitesGeoJSON
+                      //         )
+                      //     })
+                      //
+                      //     const vectorLayer = new ol.layer.Vector({
+                      //         source: vectorSource,
+                      //         style: featureStyle()
+                      //     })
+                      //
+                      //     map.addLayer(vectorLayer)
+                      //     ol.extent.extend(extent, vectorSource.getExtent())
+                      //
+                      //     vectorLayer.set("selectable", true)
+                      //
+                      //     // $(newHtml).appendTo("#current-servers")
+                      //     // console.log($(newHtml));
+                      //     // addContextMenuToListItem(
+                      //     //     $("#current-servers").find("li:last-child")
+                      //     // )
+                      //
+                      //     layersDict[title] = vectorLayer
+                      //   }
+                      //   else{
+                      //     // delete the lsit of hydroservers being display // make a function to delete it
+                      //     console.log("it is not checked");
+                      //     // remove the layers from map
+                      //     map.removeLayer(layersDict[title])
+                      //     delete layersDict[title]
+                      //     map.updateSize()
+                      //   }
+                      //
+                      // });
+                      //
+                      //
+                      // let sites = JSON.parse(siteInfo)
+                      // console.log("These are the sites");
+                      // console.log(sites);
+                      // sites = sites.map(site => {
+                      //     return {
+                      //         type: "Feature",
+                      //         geometry: {
+                      //             type: "Point",
+                      //             coordinates: ol.proj.transform(
+                      //                 [
+                      //                     parseFloat(site.longitude),
+                      //                     parseFloat(site.latitude)
+                      //                 ],
+                      //                 "EPSG:4326",
+                      //                 "EPSG:3857"
+                      //             )
+                      //         },
+                      //         properties: {
+                      //             name: site.sitename,
+                      //             code: site.sitecode,
+                      //             network: site.network,
+                      //             hs_url: url,
+                      //             hs_name: title
+                      //         }
+                      //     }
+                      // })
+                      //
+                      // let sitesGeoJSON = {
+                      //     type: "FeatureCollection",
+                      //     crs: {
+                      //         type: "name",
+                      //         properties: {
+                      //             name: "EPSG:3857"
+                      //         }
+                      //     },
+                      //     features: sites
+                      // }
+                      //
+                      // const vectorSource = new ol.source.Vector({
+                      //     features: new ol.format.GeoJSON().readFeatures(
+                      //         sitesGeoJSON
+                      //     )
+                      // })
+                      //
+                      // const vectorLayer = new ol.layer.Vector({
+                      //     source: vectorSource,
+                      //     style: featureStyle()
+                      // })
+                      //
+                      // map.addLayer(vectorLayer)
+                      // console.log("this is the vector layer baby");
+                      // console.log(vectorLayer);
+                      // console.log("this is the geojson layer baby");
+                      // console.log(sitesGeoJSON);
+                      //
+                      // vectorLayer.set("selectable", true)
+                      //
+                      // // $(newHtml).appendTo("#current-servers")
+                      // // addContextMenuToListItem(
+                      // //     $("#current-servers").find("li:last-child")
+                      // // )
+                      //
+                      // layersDict[title] = vectorLayer
+
+                      $("#soapAddLoading").addClass("hidden")
+                      $("#btn-add-soap").show()
+
+                      $("#modalAddSoap").modal("hide")
+                      $("#modalAddSoap").each(function() {
+                          this.reset()
+                      })
+
+                      // map.getView().fit(vectorSource.getExtent(), map.getSize());
+
+                      $.notify(
+                          {
+                              message: `Successfully Added the HydroServer to the Map`
+                          },
+                          {
+                              type: "success",
+                              allow_dismiss: true,
+                              z_index: 20000,
+                              delay: 5000
+                          }
+                      )
+                    }
+                    else {
+                      $("#soapAddLoading").addClass("hidden")
+                      $("#btn-add-soap").show()
+                      $.notify(
+                          {
+                              message: `${title} was added to the group, but is not displaying because it did nto contain
+                              the keywords that that the search especified.`
+                          },
+                          {
+                              type: "warning",
+                              allow_dismiss: true,
+                              z_index: 20000,
+                              delay: 5000
+                          }
+                      )
+                  }
+                },
+                    error: function(error) {
+                        $("#soapAddLoading").addClass("hidden")
+                        $("#btn-add-soap").show()
+                        console.log(error)
+                        $.notify(
+                            {
+                                message: `There was an error when applying the filter of key words to the new added layer`
+                            },
+                            {
+                                type: "danger",
+                                allow_dismiss: true,
+                                z_index: 20000,
+                                delay: 5000
+                            }
+                        )
+                    }
+                  // PON EL IF FINAL HERE //
+              })
+            }
+
+
           },
           error: function(error) {
               $("#soapAddLoading").addClass("hidden")
@@ -1537,6 +2105,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
   $("#btn-add-soap").on("click", add_hydroserver);
 
 
+//fixed the issue
   delete_hydroserver= function(){
       $modalInterface.find(".success").html("")
       let arrayActual_group=actual_group.split('=')[1];
@@ -2236,9 +2805,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
       init_jquery_var()
       addDefaultBehaviorToAjax()
-      load_group_hydroservers()
       init_menu()
       init_map()
+      get_all_the_checked_keywords();
+
+      load_group_hydroservers()
+
       // load_catalog()
       createDropdownMenu(cata);
   })
