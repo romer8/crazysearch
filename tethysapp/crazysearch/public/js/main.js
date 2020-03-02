@@ -123,8 +123,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
         update_catalog,
         upload_file,
         createExportCanvas,
-        createDropdownMenu,
-        createDescriptions,
         create_group_hydroservers,
         load_group_hydroservers,
         addExpandableMenu,
@@ -136,7 +134,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
         delete_group_of_hydroservers,
         get_keywords_from_group,
         remove_individual_hydroservers_group,
-        keyword_filter,
         get_all_the_checked_keywords,
         get_servers_with_keywords_from_group,
         remove_list_and_layers_from_hydroservers,
@@ -144,7 +141,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         get_active_hydroservers_groups,
         lis_deleted = [],
         layers_deleted = [],
-        lis_separators = [];
+        lis_separators = [],
+        get_notification;
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -159,56 +157,51 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
-    createDropdownMenu = function(catalogCreated){
-      console.log(catalogCreated);
-      let dropdown_classArray=document.getElementsByClassName("selectpicker");
-      let element_dropdown=document.getElementById("content_description");
-      Array.from(dropdown_classArray).forEach(function(dropdown){
-        catalogCreated.forEach(function(element){
-          let option = document.createElement("option");
-          option.text=element.title;
-          dropdown.add(option);
-        });
-        // Add a function to add a the title description as well
-        dropdown.addEventListener("change", function(e){
-            console.log("hola nene");
-          if(e.target.value !== "Select a group of Hydroservers" ){
-            let title_option = e.target.value;
-            let description_option= catalogCreated.find(x => x.title === title_option).description;
-            createDescriptions("description",title_option, description_option);
-          }
-          else {
-            element_dropdown.style.display="none";
+    /*
+    ************ FUNCTION NAME: GET_NOTIFICATION **********************
+    ************ PURPOSE: THE FUNCTIONS GIVES NOTIFICATIONS ***********
+    *********** NEEDS FIX, NOT CURRENTLY BEING USED *********************
+    */
 
-          }
-            //add a function to do the change this function probably needs some change in the DOM
-        })
-      });
-      element_dropdown.style.visibility="visible";
+    get_notification = function(type1, message1){
+        $.notify(
+            {
+                message: message1
+            },
+            {
+                type: type1,
+                allow_dismiss: true,
+                z_index: 20000,
+                delay: 5000
+            }
+        )
+    }
+    /*
+    ************ FUNCTION NAME: SET_COLOR **********************
+    ************ PURPOSE:RETURN A RANDOM COLOR FROM THE LIST OF COLORS  ***********
+    */
 
-    };
-    createDescriptions = function(id,option_title, option_description){
-      let elementId=document.getElementById(id);
-      console.log(elementId);
-      let titles= elementId.querySelector("h2");
-      console.log(titles);
-      titles.innerHTML=option_title;
-
-      let descriptions= elementId.querySelector("p");
-      descriptions.innerHTML=option_description;
-    };
-
-    // List of colors for generating the styling of the points on the map
     set_color = function() {
         var color = colors[Math.floor(Math.random() * colors.length)]
         return color
     }
-    // Return a random color from the list of colors
+    /*
+    ************ FUNCTION NAME: CLEA_COORDS**********************
+    ************ PURPOSE: Clear the point/polygon coordinates so that its easier for the post request to process the form ***********
+    */
+
     clear_coords = function() {
         $("#poly-lat-lon").val("")
         $("#point-lat-lon").val("")
     }
-    //Clear the point/polygon coordinates so that its easier for the post request to process the form
+
+
+    /*
+    ************ FUNCTION NAME: get_random_color**********************
+    ************ PURPOSE:LIST OF COLOTS FOR GENERATIING TEH STYLING OF THE POINTS ON THE MAP  ***********
+    */
+
+    //
     get_random_color = function() {
         var letters = "012345".split("")
         var color = "#"
@@ -219,7 +212,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
         }
         return color
     }
-    // Leaving this here as it is pretty neat snippet of code
+
+    /*
+    ************ FUNCTION NAME: INIT_MAP**********************
+    ************ PURPOSE:INIT MAP WITH THE OPENLAYERS BASE MAP AND THE OTHER ADDEDLAYERS OF HYDROSERVERS  ***********
+    */
+
     init_map = function() {
         var projection = ol.proj.get("EPSG:3857")
         var baseLayer = new ol.layer.Tile({
@@ -400,6 +398,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
             .change()
         // init_events()
     }
+    /*
+    ************ FUNCTION NAME: INIT_JEQUERY_VAR**********************
+    ************ PURPOSE: INITIALIZE ALL THE JQUERY VARIABLES USED***********
+    */
     init_jquery_var = function(){
       $modalAddGroupHydro= $("#modalAddGroupServer");
       // $modalAddHS = $("#modalAddHS");
@@ -414,6 +416,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
       // $modalUpload = $("#modalUpload");
       // $btnUpload = $("#btn-add-shp");
     }
+
+    /*
+    ************ FUNCTION NAME: addContextMenuToListItem **********************
+    ************ PURPOSE: ADD THE MENU HAMBUGER OF THE INDIVIDUAL HYDROSERVERS ***********
+    */
     addContextMenuToListItem = function($listItem) {
         var contextMenuId
         $listItem.find(".hmbrgr-div img").contextMenu("menu", ContextMenuBase, {
@@ -552,6 +559,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
             error: function(error) {
               console.log(error);
+              // get_notification("danger",`Something were wrong when applying the filter with the keywords`);
               $.notify(
                   {
                       message: `Something were wrong when applying the filter with the keywords`
@@ -588,6 +596,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       layers_deleted = [];
       lis_separators = [];
 
+      // get_notification("info", `You need to select at least one keyword` )
       $.notify(
           {
               message: `You need to select at least one keyword`
@@ -611,16 +620,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
   */
   reset_keywords = function(){
     // UNCHECK ALL THE BOXES AND CHECK IF THERE WAS SOME THAT WERE CHECKED BEFORE //
-    // let check = true;
     console.log("IN THE FUNCTION FOR RESETING ");
     let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
-    // console.log(datastring);
     datastring.forEach(function(data){
-      // console.log(Array.from(data.children));
       Array.from(data.children).forEach(function(column){
         if(Array.from(column.children)[0].checked ==true){
-          // console.log();
-          // check = false;
           Array.from(column.children)[0].checked = false;
         }
       })
@@ -629,14 +633,25 @@ var CRAZYSEARCH_PACKAGE = (function() {
       console.log("I am here with no keywords");
       console.log(lis_deleted);
       console.log(layers_deleted);
+      console.log(typeof(layers_deleted));
       console.log(lis_separators);
       let index = 0;
 
       lis_deleted.forEach( function(lis){
+        lis.style.visibility = "visible";
+        console.log("hola");
         let title = lis.attributes['layer-name'].value;
+        console.log("hola");
+
         lis_separators[index].appendChild(lis);
+        console.log("hola");
+
         layersDict[title] = layers_deleted[index];
-        map.addLayer(layers_deleted[index]);
+        console.log("hola");
+
+        map.addLayer(layersDict[title]);
+        console.log("hola");
+
         index = index + 1;
       })
 
@@ -687,7 +702,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
     console.log(input_check_array);
     return input_check_array
   }
-  //////////////////*********************************************************************************************************/////////////////////
   /*
   ************ FUNCTION NAME : GET_SERVERS_WITH_KEYWORDS_FROM_GROUP
   ************ PURPOSE : THIS WILL GET TEH SERVERS WITH KEYWORDS
@@ -712,102 +726,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
     return keywords_in_servers;
   }
 
-  remove_list_and_layers_from_hydroservers= function(servers_with_no_keyword, all_servers_titles, keywords_in_servers, all_servers_in_group, group){
-
-    servers_with_no_keyword = all_servers_titles.filter(x => !keywords_in_servers.includes(x));
-    console.log(servers_with_no_keyword.length);
-    console.log(all_servers_titles.length);
-
-    let lis = document.getElementById("current-servers").getElementsByTagName("li");
-    let li_arrays = Array.from(lis);
-    console.log(li_arrays);
-
-    let lis_to_delete = li_arrays.filter(x => servers_with_no_keyword.includes(x.attributes['layer-name'].value));
-    console.log(lis_to_delete);
-    console.log(keywords_in_servers);
-    // so the deletion will be //
-
-
-    if(keywords_in_servers.length !== 0){
-      // change //
-      let ul_servers = document.getElementById("current-servers");
-      lis_to_delete.forEach(function(li_tag){
-        ul_servers.removeChild(li_tag);
-      });
-    }
-
-
-    // console.log(servers_with_no_keyword);
-    if(servers_with_no_keyword.length !== all_servers_titles.length){
-      console.log("removing layers");
-      servers_with_no_keyword.forEach(function(server_to_remove_from_map){
-          map.removeLayer(layersDict[server_to_remove_from_map]);
-          delete layersDict[server_to_remove_from_map];
-          map.updateSize();
-      });
-    }
-  }
-
-
-  keyword_filter = function(group){
-    // GET THE KEYWORDS //
-    let key_words_to_search = get_all_the_checked_keywords();
-
-    console.log(key_words_to_search);
-    if(key_words_to_search.length > 0){
-
-    // input_check_array.forEach(function(hydroserver_group){
-      let servers_with_no_keyword=[];
-      let all_servers_titles=[];
-      let send_group={
-        group: group
-      };
-
-      $.ajax({
-        type:"GET",
-        url: `${apiServer}/keyword-group/`,
-        dataType: "JSON",
-        data: send_group,
-        success: function(result){
-          console.log(result);
-
-          //look which servers do not have a selected search keyword//
-          let keywords_in_servers = get_servers_with_keywords_from_group(result,key_words_to_search);
-          console.log(keywords_in_servers);
-
-
-          let all_servers_in_group = result.hydroserver;
-          console.log(all_servers_in_group);
-
-
-            all_servers_in_group.forEach(server_in_group => {
-                      let {
-                          title,
-                          url,
-                          geoserver_url,
-                          layer_name,
-                          extents,
-                          siteInfo
-                      } = server_in_group
-                      all_servers_titles.push(title);
-            })
-
-
-            console.log(all_servers_in_group);
-            remove_list_and_layers_from_hydroservers(servers_with_no_keyword, all_servers_titles, keywords_in_servers, all_servers_in_group)
-
-        },
-        error: function(error) {
-          console.log(error);
-        }
-      });
-    }
-
-  }
-
-
-
-//************ THIS FUNCTION CREATES A GROUP OF HYDRSOERVERS AND ADDS IT TO THE MENU *******/////
+  /*
+  ************ FUNCTION NAME : CREATE_GROUP_HYDROSERVERS
+  ************ PURPOSE : CREATES A GROUP OF HYDRSOERVERS AND ADDS IT TO THE MENU
+  */
     create_group_hydroservers = function(){
       //CHECKS IF THE INPUT IS EMPTY ///
       if($("#addGroup-title").val() == ""){
@@ -862,23 +784,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
               if(group.message !== "There was an error while adding th group.") {
                 let title=group.title;
                 let description=group.description;
-                // let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                // <input class="chkbx-layer" type="checkbox"><span class="group-name">${title}</span>
-                // <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                // </li>
-                // <ul class="hydroserver-list" style = "display: none">
-                // </ul>`
+
                 let newHtml = `<li class="ui-state-default" id="${title}">
                 <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
-
                 <div>
                   <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
                 </div>
-
-                </li>
-                <ul id=${title}list class="ul-list" style = "display: none">
-                </ul>`
-
+                </li>`
 
                 $(newHtml).appendTo("#current-Groupservers");
 
@@ -889,7 +801,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(input_check);
                 if(input_check.checked){
                   load_individual_hydroservers_group(title);
-                  // keyword_filter(title);
                 }
 
                 input_check.addEventListener("change", function(){
@@ -897,7 +808,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   if(this.checked){
                     console.log(" it is checked");
                     load_individual_hydroservers_group(title);
-                    // keyword_filter(title);
 
                   }
                   else{
@@ -929,44 +839,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     $("#current-Groupservers").find("li:last-child")
                 )
 
-                // $(newHtml).appendTo("#current-Groupservers")
-                // let $title="#"+title;
-                // let $title_list="#"+title+"list";
-                //
-                //
-                // $($title).click(function(){
-                //   actual_group = `&actual-group=${title}`;
-                //   console.log(actual_group);
-                //   console.log($($title_list).is(":visible"));
-                //   $(".ul-list").hide();
-                //   $("#current-servers-list").html("");
-                //   switch ($($title_list).is(":visible")) {
-                //     case false:
-                //       // console.log("making visible");
-                //       $($title_list).show();
-                //       $("#pop-up_description").show();
-                //       // get_keywords_from_group(title);
-                //       load_individual_hydroservers_group(title);
-                //       break;
-                //     case true:
-                //       $($title_list).hide();
-                //       $("#pop-up_description").html("");
-                //       $("#pop-up_description").hide();
-                //       $("#accordion_servers").hide();
-                //
-                //       break;
-                //   }
-                //   // console.log(description);
-                //   let description_html=`<h3><u>${title}</u></h3>
-                //   <h5>Description:</h5>
-                //   <p>${description}</p>`;
-                //   $("#pop-up_description").html(description_html);
-                //
-                // });
-                //
-                // addContextMenuToListItem(
-                //     $("#current-Groupservers").find("li:last-child")
-                // )
+
                 $(".ui-state-default").click(function(){
                   console.log("hola");
                 });
@@ -981,6 +854,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                     // map.getView().fit(vectorSource.getExtent(), map.getSize());
 
+                    // get_notification("success",`Successfully Created Group of HydroServers to the database` );
                     $.notify(
                         {
                             message: `Successfully Created Group of HydroServers to the database`
@@ -996,6 +870,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               } else {
                   $("#soapAddLoading").addClass("hidden")
                   $("#btn-add-addHydro").show()
+                  // get_notification("danger",`Failed to add to the group. Please check and try again.` )
                   $.notify(
                       {
                           message: `Failed to add to the group. Please check and try again.`
@@ -1013,6 +888,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               $("#soapAddLoading").addClass("hidden")
               $("#btn-add-addHydro").show()
               console.log(error)
+              // get_notification("danger",`There was an error while adding a group of hydroserver` );
               $.notify(
                   {
                       message: `There was an error while adding a group of hydroserver`
@@ -1040,7 +916,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     let groups_to_delete=[];
     datastring.forEach(function(data){
       if(data.checked== true){
-        let group_name = data.nextElementSibling.innerHTML
+        let group_name = data.nextElementSibling.innerHTML;
         groups_to_delete.push(group_name);
       }
     });
@@ -1060,7 +936,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         let hydroservers_to_erase = result.hydroservers;
         console.log(groups_to_erase);
         console.log(hydroservers_to_erase);
-        $("#pop-up_description").empty()
+        $("#pop-up_description2").empty()
 
 
         groups_to_erase.forEach(function(group){
@@ -1075,16 +951,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             map.removeLayer(layersDict[hydroserver]);
         });
         map.updateSize();
-
-        // var title = json_response.title
-        // WE NEED TO ERASE ONLY THE SELECTED OPTION//
-
-        //need to grab the selected id's from the list and delete them//
-        // need to make sure the layers are delete from the interface/map if they are
-        // by layer name...for the <li> in the box display and by checking the layerDict in the other
-        //so if it is there it gets erased....
-
-
+        // get_notification("sucess",`Successfully Deleted Group of HydroServer!`);
 
           $.notify(
               {
@@ -1103,15 +970,21 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
     })
 
-    // console.log(datastring);
   }
-  $("#btn-delete-hydroserver-group").on("click", delete_group_of_hydroservers);
 
+  $("#btn-delete-hydroserver-group").on("click", delete_group_of_hydroservers);
+  /*
+  ****** FU1NCTION NAME : addExpandableMenu *********
+  ****** FUNCTION PURPOSE: call and expandable menu*********
+  */
     addExpandableMenu = function(clName){
       let element= document.getElementsByClassName(className);
 
     }
-
+    /*
+    ****** FU1NCTION NAME : REMOVE_INDIVIDUAL_HYDROSERVERS_GROUPS *********
+    ****** FUNCTION PURPOSE: MAKES THE LAYERS OF HYDROSERVERS AND THE GROUP TAG TO DISSAPEAR WHEN THE GROUP NAME IS UNCHECK*********
+    */
     remove_individual_hydroservers_group = function(group_name){
 
       let group_name_obj={
@@ -1129,9 +1002,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log("this are the servers");
               console.log(servers);
 
-
-              // $("#current-servers").empty() //Resetting the catalog
-
               //USE A FUNCTION TO FIND THE LI ASSOCIATED WITH THAT GROUP  AND DELETE IT FROM THE MAP AND MAKE ALL
               // THE CHECKBOXES VISIBLE //
 
@@ -1139,11 +1009,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log(servers);
               let id_group_separator = `${group_name}_list_separator`;
               let tag_to_delete = document.getElementById(id_group_separator);
+              console.log(tag_to_delete);
               tag_to_delete.parentNode.removeChild(tag_to_delete);
               // $("#current-servers").remove(id_group_separator);
 
               let lis = document.getElementById("current-servers").getElementsByTagName("li");
               let li_arrays = Array.from(lis);
+              console.log(li_arrays);
               servers.forEach(server => {
                   let {
                       title,
@@ -1153,22 +1025,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
                       extents,
                       siteInfo
                   } = server
-                  let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                  <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                  <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                  </li>`
 
                   map.removeLayer(layersDict[title])
                   delete layersDict[title]
                   map.updateSize()
-
-
-                  // console.log(li_arrays);
-                  console.log(li_arrays[0].attributes['layer-name'].value);
-                  // console.log(keywords_in_servers);
                   let lis_to_delete = li_arrays.filter(x => title === x.attributes['layer-name'].value);
 
-                  // console.log(lis_to_delete);
                   // so the deletion will be //
 
                   let ul_servers = document.getElementById("current-servers");
@@ -1182,6 +1044,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           },
           error: function(error) {
               console.log(error)
+              // get_notification("danger",`Something went wrong loading the catalog. Please see the console for details.`);
               $.notify(
                   {
                       message: `Something went wrong loading the catalog. Please see the console for details.`
@@ -1197,6 +1060,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       })
 
     };
+
 /*
 ****** FU1NCTION NAME : load_individual_hydroservers_group*********
 ****** FUNCTION PURPOSE: LOADS THE SERVERS OF A HYDROSERVER WHEN THE HYDROSERVER GROUPS IS CLICKED*********
@@ -1347,12 +1211,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                            vectorLayer.set("selectable", true)
 
-                           // $(newHtml).appendTo("#current-servers")
-                           // console.log($(newHtml));
-                           // addContextMenuToListItem(
-                           //     $("#current-servers").find("li:last-child")
-                           // )
-
                            layersDict[title] = vectorLayer
                          }
                          else{
@@ -1421,23 +1279,22 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                        vectorLayer.set("selectable", true)
 
-                       // $(newHtml).appendTo("#current-servers")
-                       // console.log($(newHtml));
-                       // addContextMenuToListItem(
-                       //     $("#current-servers").find("li:last-child")
-                       // )
+
 
                        layersDict[title] = vectorLayer;
                    }
                  })
 
+                 ///CHANGE TO ZOOM TO EACH ONE OF THE LAYERS //
                  if (servers.length) {
-                     map.getView().fit(extent, map.getSize())
-                     map.updateSize()
+
+                     // map.getView().fit(extent, map.getSize())
+                     // map.updateSize()
                  }
              },
              error: function(error) {
-                 console.log(error)
+                 console.log(error);
+                 // get_notification("danger",`Something went wrong loading the hydroservers for the group called ${group}. Please see the console for details.` )
                  $.notify(
                      {
                          message: `Something went wrong loading the hydroservers for the group called ${group}. Please see the console for details.`
@@ -1453,7 +1310,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
          })
        },
        error: function(error) {
-           console.log(error)
+           console.log(error);
+           // get_notification("danger",`Something went wrong loading the hydroservers for the group called ${group}` );
            $.notify(
                {
                    message: `Something went wrong loading the hydroservers for the group called ${group}`
@@ -1514,7 +1372,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   console.log(input_check);
                   if(input_check.checked){
                     load_individual_hydroservers_group(title);
-                    // keyword_filter(title);
                   }
 
                   input_check.addEventListener("change", function(){
@@ -1522,7 +1379,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     if(this.checked){
                       console.log(" it is checked");
                       load_individual_hydroservers_group(title);
-                      // keyword_filter(title);
                     }
                     else{
                       // delete the lsit of hydroservers being display // make a function to delete it
@@ -1558,7 +1414,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
       error: function(error) {
           $("#soapAddLoading").addClass("hidden")
           $("#btn-add-addHydro").show()
-          console.log(error)
+          console.log(error);
+          // get_notification("danger",`There was an error while adding a group of hydroserver`);
           $.notify(
               {
                   message: `There was an error while adding a group of hydroserver`
@@ -1579,8 +1436,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
   ****** FU1NCTION NAME: add_hydroserver *********
   ****** FUNCTION PURPOSE: ADD AN INDIVIDUAL HYDROSERVER TO A GROUP *********
   */
-
-  // NEED TO CHANGE THINGS SIMILAR TO LOAD_INDIVIDUAL_HYDROSERVERS///
 
   add_hydroserver = function(){
     if($("#extent").is(":checked")){
@@ -1677,7 +1532,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     dataType: "JSON",
                     data: group_name_obj,
                     success: function(result2){
-                      console.log(result);
+                      console.log(result2);
 
                       //ALL THE SERVERS IN THE SELECTED GROUP //
                       let all_servers_in_group = result2.hydroserver;
@@ -1689,7 +1544,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
                     let {title, siteInfo, url, group} = json_response
-                    if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
+                    // if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
                       console.log(keywords_in_servers.includes(title));
                       let newHtml = `
                       <li class="ui-state-default" layer-name="${title}" id="${title}" >
@@ -1698,11 +1553,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
                       </li>
                       `;
 
-                      // $(newHtml).appendTo("#current-servers")
+                      // $(newHtml).appendTo("#current-servers")\
                       $(newHtml).appendTo(`#${id_group_separator}`); ////////***********ONLY THING THAT CHANGES **********////
+                      // console.log($(newHtml));
+                      document.getElementById(`${title}`).style.visibility = "hidden";
 
-                      // THIS CHANGES //
-                      console.log($(newHtml));
+
+
+                      // MAKES THE LAYER INVISIBLE
                       addContextMenuToListItem(
                           $("#current-servers").find("li:last-child")
                       )
@@ -1771,18 +1629,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
                               style: featureStyle()
                           })
 
-                          map.addLayer(vectorLayer)
-                          ol.extent.extend(extent, vectorSource.getExtent())
+                            map.addLayer(vectorLayer)
+                            // ol.extent.extend(extent, vectorSource.getExtent())
+                            vectorLayer.set("selectable", true)
+                            layersDict[title] = vectorLayer
 
-                          vectorLayer.set("selectable", true)
 
-                          // $(newHtml).appendTo("#current-servers")
-                          // console.log($(newHtml));
-                          // addContextMenuToListItem(
-                          //     $("#current-servers").find("li:last-child")
-                          // )
-
-                          layersDict[title] = vectorLayer
                         }
                         else{
                           // delete the lsit of hydroservers being display // make a function to delete it
@@ -1795,6 +1647,17 @@ var CRAZYSEARCH_PACKAGE = (function() {
                         }
 
                       });
+
+                      if(keywords_in_servers.includes(title) || key_words_to_search.length ==0){
+                          document.getElementById(`${title}`).style.visibility = "visible";
+                      }
+                      else{
+                        console.log("it not going to be shown, but it is going to be added");
+                        lis_deleted.push(document.getElementById(`${title}`));
+                        lis_separators.push(document.getElementById(`${id_group_separator}`));
+                        document.getElementById(`${title}`).parentNode.removeChild(document.getElementById(`${title}`));
+                      }
+
 
 
                       let sites = JSON.parse(siteInfo)
@@ -1848,178 +1711,48 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                       map.addLayer(vectorLayer)
                       ol.extent.extend(extent, vectorSource.getExtent())
-
                       vectorLayer.set("selectable", true)
-
-                      // $(newHtml).appendTo("#current-servers")
-                      // console.log($(newHtml));
-                      // addContextMenuToListItem(
-                      //     $("#current-servers").find("li:last-child")
-                      // )
-
                       layersDict[title] = vectorLayer;
 
+                      map.getView().fit(vectorSource.getExtent());
+                      map.updateSize()
 
 
-                      // let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                      // <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                      // <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                      // </li>`
-                      //
-                      // $(newHtml).appendTo("#current-servers")
-                      // console.log($(newHtml));
-                      // addContextMenuToListItem(
-                      //     $("#current-servers").find("li:last-child")
-                      // )
-                      // let lis = document.getElementById("current-servers").getElementsByTagName("li");
-                      // let li_arrays = Array.from(lis);
-                      // let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
-                      //
-                      // // let input_check = document.querySelector(newHtml);
-                      // console.log(input_check);
-                      //
-                      // input_check.firstElementChild.addEventListener("change", function(){
-                      //   console.log(this);
-                      //   if(this.checked){
-                      //     console.log(" it is checked");
-                      //     // load_individual_hydroservers_group(title);
-                      //     let sites = JSON.parse(siteInfo)
-                      //     // console.log(extents);
-                      //     console.log(sites);
-                      //     sites = sites.map(site => {
-                      //         return {
-                      //             type: "Feature",
-                      //             geometry: {
-                      //                 type: "Point",
-                      //                 coordinates: ol.proj.transform(
-                      //                     [
-                      //                         parseFloat(site.longitude),
-                      //                         parseFloat(site.latitude)
-                      //                     ],
-                      //                     "EPSG:4326",
-                      //                     "EPSG:3857"
-                      //                 )
-                      //             },
-                      //             properties: {
-                      //                 name: site.sitename,
-                      //                 code: site.sitecode,
-                      //                 network: site.network,
-                      //                 hs_url: url,
-                      //                 hs_name: title
-                      //             }
-                      //         }
-                      //     })
-                      //
-                      //     let sitesGeoJSON = {
-                      //         type: "FeatureCollection",
-                      //         crs: {
-                      //             type: "name",
-                      //             properties: {
-                      //                 name: "EPSG:3857"
-                      //             }
-                      //         },
-                      //         features: sites
-                      //     }
-                      //
-                      //     const vectorSource = new ol.source.Vector({
-                      //         features: new ol.format.GeoJSON().readFeatures(
-                      //             sitesGeoJSON
-                      //         )
-                      //     })
-                      //
-                      //     const vectorLayer = new ol.layer.Vector({
-                      //         source: vectorSource,
-                      //         style: featureStyle()
-                      //     })
-                      //
-                      //     map.addLayer(vectorLayer)
-                      //     ol.extent.extend(extent, vectorSource.getExtent())
-                      //
-                      //     vectorLayer.set("selectable", true)
-                      //
-                      //     // $(newHtml).appendTo("#current-servers")
-                      //     // console.log($(newHtml));
-                      //     // addContextMenuToListItem(
-                      //     //     $("#current-servers").find("li:last-child")
-                      //     // )
-                      //
-                      //     layersDict[title] = vectorLayer
-                      //   }
-                      //   else{
-                      //     // delete the lsit of hydroservers being display // make a function to delete it
-                      //     console.log("it is not checked");
-                      //     // remove the layers from map
-                      //     map.removeLayer(layersDict[title])
-                      //     delete layersDict[title]
-                      //     map.updateSize()
-                      //   }
-                      //
-                      // });
-                      //
-                      //
-                      // let sites = JSON.parse(siteInfo)
-                      // console.log("These are the sites");
-                      // console.log(sites);
-                      // sites = sites.map(site => {
-                      //     return {
-                      //         type: "Feature",
-                      //         geometry: {
-                      //             type: "Point",
-                      //             coordinates: ol.proj.transform(
-                      //                 [
-                      //                     parseFloat(site.longitude),
-                      //                     parseFloat(site.latitude)
-                      //                 ],
-                      //                 "EPSG:4326",
-                      //                 "EPSG:3857"
-                      //             )
-                      //         },
-                      //         properties: {
-                      //             name: site.sitename,
-                      //             code: site.sitecode,
-                      //             network: site.network,
-                      //             hs_url: url,
-                      //             hs_name: title
-                      //         }
-                      //     }
-                      // })
-                      //
-                      // let sitesGeoJSON = {
-                      //     type: "FeatureCollection",
-                      //     crs: {
-                      //         type: "name",
-                      //         properties: {
-                      //             name: "EPSG:3857"
-                      //         }
-                      //     },
-                      //     features: sites
-                      // }
-                      //
-                      // const vectorSource = new ol.source.Vector({
-                      //     features: new ol.format.GeoJSON().readFeatures(
-                      //         sitesGeoJSON
-                      //     )
-                      // })
-                      //
-                      // const vectorLayer = new ol.layer.Vector({
-                      //     source: vectorSource,
-                      //     style: featureStyle()
-                      // })
-                      //
-                      // map.addLayer(vectorLayer)
-                      // console.log("this is the vector layer baby");
-                      // console.log(vectorLayer);
-                      // console.log("this is the geojson layer baby");
-                      // console.log(sitesGeoJSON);
-                      //
-                      // vectorLayer.set("selectable", true)
-                      //
-                      // // $(newHtml).appendTo("#current-servers")
-                      // // addContextMenuToListItem(
-                      // //     $("#current-servers").find("li:last-child")
-                      // // )
-                      //
-                      // layersDict[title] = vectorLayer
+                      if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
+                        // get_notification("sucess",`Successfully Added the HydroServer to the Map`);
+                        $.notify(
+                            {
+                                message: `Successfully Added the HydroServer to the Map`
+                            },
+                            {
+                                type: "success",
+                                allow_dismiss: true,
+                                z_index: 20000,
+                                delay: 5000
+                            }
+                        )
+                      }
+                      else{
+
+                        map.removeLayer(layersDict[title])
+                        layers_deleted.push(layersDict[title]);
+                        delete layersDict[title]
+                        map.updateSize()
+                        // get_notification("warning",`${title} was added to the group, but is not displaying because it did not contain
+                        // the keywords that that the search especified.`);
+                        $.notify(
+                            {
+                                message: `${title} was added to the group, but is not displaying because it did not contain
+                                the keywords that that the search especified.`
+                            },
+                            {
+                                type: "warning",
+                                allow_dismiss: true,
+                                z_index: 20000,
+                                delay: 5000
+                            }
+                        )
+                      }
 
                       $("#soapAddLoading").addClass("hidden")
                       $("#btn-add-soap").show()
@@ -2029,41 +1762,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
                           this.reset()
                       })
 
-                      // map.getView().fit(vectorSource.getExtent(), map.getSize());
 
-                      $.notify(
-                          {
-                              message: `Successfully Added the HydroServer to the Map`
-                          },
-                          {
-                              type: "success",
-                              allow_dismiss: true,
-                              z_index: 20000,
-                              delay: 5000
-                          }
-                      )
-                    }
-                    else {
-                      $("#soapAddLoading").addClass("hidden")
-                      $("#btn-add-soap").show()
-                      $.notify(
-                          {
-                              message: `${title} was added to the group, but is not displaying because it did nto contain
-                              the keywords that that the search especified.`
-                          },
-                          {
-                              type: "warning",
-                              allow_dismiss: true,
-                              z_index: 20000,
-                              delay: 5000
-                          }
-                      )
-                  }
+
                 },
                     error: function(error) {
                         $("#soapAddLoading").addClass("hidden")
                         $("#btn-add-soap").show()
-                        console.log(error)
+                        console.log(error);
+                        // get_notification("danger", `There was an error when applying the filter of key words to the new added layer`);
                         $.notify(
                             {
                                 message: `There was an error when applying the filter of key words to the new added layer`
@@ -2076,7 +1782,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                             }
                         )
                     }
-                  // PON EL IF FINAL HERE //
               })
             }
 
@@ -2084,8 +1789,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
           },
           error: function(error) {
               $("#soapAddLoading").addClass("hidden")
-              $("#btn-add-soap").show()
-              console.log(error)
+              $("#btn-add-soap").show();
+              console.log(error);
+              // get_notification("danger",`Invalid Hydroserver SOAP Url. Please check and try again.`)
               $.notify(
                   {
                       message: `Invalid Hydroserver SOAP Url. Please check and try again.`
@@ -2104,8 +1810,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
   $("#btn-add-soap").on("click", add_hydroserver);
 
+  /*
+  ****** FU1NCTION NAME: delete_hydroserver *********
+  ****** FUNCTION PURPOSE: DELETE THE SELECTED HYDROSERVERS OF A GROUP*********
+  */
 
-//fixed the issue
   delete_hydroserver= function(){
       $modalInterface.find(".success").html("")
       let arrayActual_group=actual_group.split('=')[1];
@@ -2121,7 +1830,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log(result);
               var json_response = JSON.parse(result)
               // var title = json_response.title
-              $("#current-servers").empty() //Resetting the catalog. So that it is updated.
+              // $("#current-servers").empty() //Resetting the catalog. So that it is updated.
+              // let element = document.getElementById(arrayActual_group);
+              // element.parentNode.removeChild(element);
+
               $("#modalDelete").modal("hide")
               $("#modalDelete").each(function() {
                   this.reset()
@@ -2130,14 +1842,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                 let i_string=i.toString();
                 let title=json_response[i_string];
+                let element = document.getElementById(title);
+                element.parentNode.removeChild(element);
                 //Removing layer from the frontend
                 console.log(title);
                 map.removeLayer(layersDict[title])
                 delete layersDict[title]
                 map.updateSize()
                 console.log(arrayActual_group);
-                load_individual_hydroservers_group(arrayActual_group) //Reloading the new catalog
-
+                // load_individual_hydroservers_group(arrayActual_group) //Reloading the new catalog
+                // get_notification("sucess",`Successfully Deleted the HydroServer!`);
                 $.notify(
                     {
                         message: `Successfully Deleted the HydroServer!`
@@ -2152,31 +1866,31 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
               }
-              // //Removing layer from the frontend
-              // map.removeLayer(layersDict[title])
-              // delete layersDict[title]
-              // map.updateSize()
-              // load_catalog() //Reloading the new catalog
-              //
-              // $.notify(
-              //     {
-              //         message: `Successfully Deleted the HydroServer!`
-              //     },
-              //     {
-              //         type: "success",
-              //         allow_dismiss: true,
-              //         z_index: 20000,
-              //         delay: 5000
-              //     }
-              // )
+
           },
           error: error => {
-              console.log(error)
+              console.log(error);
+              // get_notification("danger",`Something were wrong while deleting a hydroserver or group of hydroservers!`);
+              $.notify(
+                  {
+                      message: `Something were wrong while deleting a hydroserver or group of hydroservers!`
+                  },
+                  {
+                      type: "danger",
+                      allow_dismiss: true,
+                      z_index: 20000,
+                      delay: 5000
+                  }
+              )
           }
       })
   }
   $("#btn-del-server").on("click", delete_hydroserver)
 
+  /*
+  ****** FU1NCTION NAME: GET_HS_LIST_FROM_HYDRPSERVER *********
+  ****** FUNCTION PURPOSE: GET THE LIST OF HYDROSERVERS THAT A GROUP OF HYDROSERVER CONTAINS *********
+  */
   get_hs_list_from_hydroserver = function(){
     if(actual_group == undefined){
       actual_group="";
@@ -2230,431 +1944,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
   }
   $("#delete-server").on("click", get_hs_list_from_hydroserver);
 
-    add_soap=function(){
-      if($("#extent").is(":checked")){
-        var zoom= map.getView().getZoom();
-        if(zoom < 8){
-            $modalAddSOAP.find(".warning").html("<b>The zoom level has to be 8 or greater. Please check and try again.</b>")
-            return false
-        }
-        else {
-          $modalAddSOAP.find(".warning").html("")
-        }
-        $('#chk_val').empty()
-        var level=map.getView().calculateExtent(map.getSize())
-        $(
-              '<input type="text" name="extent_val" id="extent_val" value=' +
-                  '"' +
-                  level +
-                  '"' +
-                  " hidden>"
-          ).appendTo($("#chk_val"))
-      }
-      if($("#soap-title").val() == ""){
-        $modalAddSOAP.find(".warning").html(  "<b>Please enter a title. This field cannot be blank.</b>")
-        return false
-      }
-      else {
-        $modalAddSOAP.find(".warning").html("")
-      }
-      if(
-        $("#soap-url").val() == "http://hydroportal.cuahsi.org/nwisdv/cuahsi_1_1.asmx?WSDL" ||
-        $("#soap-url").val() =="http://hydroportal.cuahsi.org/nwisuv/cuahsi_1_1.asmx?WSDL")
-        {
-          $modalAddSOAP
-                .find(".warning")
-                .html(
-                    "<b>Please zoom in further to be able to access the NWIS Values</b>"
-                )
-            return false
-        }
-        else {
-            $modalAddSOAP.find(".warning").html("")
-        }
-        if ($("#soap-title").val() != "") {
-          var regex = new RegExp("^[a-zA-Z ]+$")
-          var title = $("#soap-title").val()
-          if (!regex.test(title)) {
-              $modalAddSOAP
-                  .find(".warning")
-                  .html("<b>Please enter Letters only for the title.</b>");
-              return false
-          }
-        } else {
-            $modalAddSOAP.find(".warning").html("");
-        }
-        var datastring = $modalAddSOAP.serialize();
-
-        console.log("This is the serialize string of datastring");
-        console.log(datastring);
-        //Submitting the data to the controller
-        $("#soapAddLoading").removeClass("hidden");
-        $("#btn-add-soap").hide();
-        $.ajax({
-            type: "POST",
-            url: `${apiServer}/soap/`,
-            dataType: "HTML",
-            data: datastring,
-            success: function(result) {
-                //Returning the geoserver layer metadata from the controller
-                var json_response = JSON.parse(result)
-                console.log("This is the result from the controllers function call");
-                console.log(json_response);
-                if (json_response.status === "true") {
-                    let {title, siteInfo, url} = json_response
-
-                    let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                    <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                    <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                    </li>`
-
-                    let sites = JSON.parse(siteInfo)
-                    console.log("These are the sites");
-                    console.log(sites);
-                    sites = sites.map(site => {
-                        return {
-                            type: "Feature",
-                            geometry: {
-                                type: "Point",
-                                coordinates: ol.proj.transform(
-                                    [
-                                        parseFloat(site.longitude),
-                                        parseFloat(site.latitude)
-                                    ],
-                                    "EPSG:4326",
-                                    "EPSG:3857"
-                                )
-                            },
-                            properties: {
-                                name: site.sitename,
-                                code: site.sitecode,
-                                network: site.network,
-                                hs_url: url,
-                                hs_name: title
-                            }
-                        }
-                    })
-
-                    let sitesGeoJSON = {
-                        type: "FeatureCollection",
-                        crs: {
-                            type: "name",
-                            properties: {
-                                name: "EPSG:3857"
-                            }
-                        },
-                        features: sites
-                    }
-
-                    const vectorSource = new ol.source.Vector({
-                        features: new ol.format.GeoJSON().readFeatures(
-                            sitesGeoJSON
-                        )
-                    })
-
-                    const vectorLayer = new ol.layer.Vector({
-                        source: vectorSource,
-                        style: featureStyle()
-                    })
-
-                    map.addLayer(vectorLayer)
-                    console.log("this is the vector layer baby");
-                    console.log(vectorLayer);
-                    console.log("this is the geojson layer baby");
-                    console.log(sitesGeoJSON);
-
-                    vectorLayer.set("selectable", true)
-
-                    $(newHtml).appendTo("#current-servers")
-                    addContextMenuToListItem(
-                        $("#current-servers").find("li:last-child")
-                    )
-
-                    layersDict[title] = vectorLayer
-                    $("#soapAddLoading").addClass("hidden")
-                    $("#btn-add-soap").show()
-
-                    $("#modalAddSoap").modal("hide")
-                    $("#modalAddSoap").each(function() {
-                        this.reset()
-                    })
-
-                    // map.getView().fit(vectorSource.getExtent(), map.getSize());
-
-                    $.notify(
-                        {
-                            message: `Successfully Added the HydroServer to the Map`
-                        },
-                        {
-                            type: "success",
-                            allow_dismiss: true,
-                            z_index: 20000,
-                            delay: 5000
-                        }
-                    )
-                } else {
-                    $("#soapAddLoading").addClass("hidden")
-                    $("#btn-add-soap").show()
-                    $.notify(
-                        {
-                            message: `Failed to add server. Please check Url and try again.`
-                        },
-                        {
-                            type: "danger",
-                            allow_dismiss: true,
-                            z_index: 20000,
-                            delay: 5000
-                        }
-                    )
-                }
-            },
-            error: function(error) {
-                $("#soapAddLoading").addClass("hidden")
-                $("#btn-add-soap").show()
-                console.log(error)
-                $.notify(
-                    {
-                        message: `Invalid Hydroserver SOAP Url. Please check and try again.`
-                    },
-                    {
-                        type: "danger",
-                        allow_dismiss: true,
-                        z_index: 20000,
-                        delay: 5000
-                    }
-                )
-            }
-        })
-    }
-
-    // $("#btn-add-soap").on("click", add_soap);
-
-    get_hs_list = function() {
-      console.log("hola");
-        $.ajax({
-            type: "GET",
-            url: `${apiServer}/catalog/`,
-            dataType: "JSON",
-            success: function(result) {
-                //Dynamically generate the list of existing hydroservers
-                var server = result["hydroserver"]
-                var HSTableHtml =
-                    '<table id="tbl-hydroservers"><thead><th></th><th>Title</th><th>URL</th></thead><tbody>'
-                if (server.length === 0) {
-                    $modalDelete
-                        .find(".modal-body")
-                        .html(
-                            "<b>There are no hydroservers in the Catalog.</b>"
-                        )
-                } else {
-                    for (var i = 0; i < server.length; i++) {
-                        var title = server[i].title
-                        var url = server[i].url
-                        HSTableHtml +=
-                            "<tr>" +
-                            '<td><input type="checkbox" name="server" id="server" value="' +
-                            title +
-                            '"></td>' +
-                            '<td class="hs_title">' +
-                            title +
-                            "</td>" +
-                            '<td class="hs_url">' +
-                            url +
-                            "</td>" +
-                            "</tr>"
-                    }
-                    HSTableHtml += "</tbody></table>"
-                    $modalDelete.find(".modal-body").html(HSTableHtml)
-                }
-            },
-            error: function(error) {
-                console.log(error)
-            }
-        })
-    }
-    // $("#delete-server").on("click", get_hs_list);
-
-    //Deleting a layer from the database and then deleting it from the frontend
-    update_catalog = function() {
-      console.log("hola");
-        $modalInterface.find(".success").html("")
-        var datastring = $modalDelete.serialize() //Delete the record in the database
-        console.log(datastring);
-        $.ajax({
-            type: "POST",
-            url: `${apiServer}/delete/`,
-            data: datastring,
-            dataType: "HTML",
-            success: function(result) {
-                console.log(result);
-                var json_response = JSON.parse(result)
-                // var title = json_response.title
-                $("#current-servers").empty() //Resetting the catalog. So that it is updated.
-                $("#modalDelete").modal("hide")
-                $("#modalDelete").each(function() {
-                    this.reset()
-                })
-                for(let i=0; i<Object.keys(json_response).length; ++i){
-
-                  let i_string=i.toString();
-                  let title=json_response[i_string];
-                  //Removing layer from the frontend
-                  console.log(title);
-                  map.removeLayer(layersDict[title])
-                  delete layersDict[title]
-                  map.updateSize()
-                  load_catalog() //Reloading the new catalog
-
-                  $.notify(
-                      {
-                          message: `Successfully Deleted the HydroServer!`
-                      },
-                      {
-                          type: "success",
-                          allow_dismiss: true,
-                          z_index: 20000,
-                          delay: 5000
-                      }
-                  )
-
-
-                }
-                // //Removing layer from the frontend
-                // map.removeLayer(layersDict[title])
-                // delete layersDict[title]
-                // map.updateSize()
-                // load_catalog() //Reloading the new catalog
-                //
-                // $.notify(
-                //     {
-                //         message: `Successfully Deleted the HydroServer!`
-                //     },
-                //     {
-                //         type: "success",
-                //         allow_dismiss: true,
-                //         z_index: 20000,
-                //         delay: 5000
-                //     }
-                // )
-            },
-            error: error => {
-                console.log(error)
-            }
-        })
-    }
-
-    // $("#btn-del-server").on("click", update_catalog)
-
-    //Load all the existing layers from the database
-      load_catalog = () => {
-          $.ajax({
-              type: "GET",
-              url: `${apiServer}/catalog/`,
-              dataType: "JSON",
-              success: result => {
-                  let servers = result["hydroserver"]
-                  console.log("this are the servers");
-                  console.log(servers);
-                  $("#current-servers").empty() //Resetting the catalog
-                  let extent = ol.extent.createEmpty()
-                  console.log(servers);
-                  servers.forEach(server => {
-                      let {
-                          title,
-                          url,
-                          geoserver_url,
-                          layer_name,
-                          extents,
-                          siteInfo
-                      } = server
-                      let newHtml = `<li class="ui-state-default" layer-name="${title}">
-                      <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                      <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
-                      </li>`
-
-                      let sites = JSON.parse(siteInfo)
-                      console.log(extents);
-                      console.log(sites);
-                      sites = sites.map(site => {
-                          return {
-                              type: "Feature",
-                              geometry: {
-                                  type: "Point",
-                                  coordinates: ol.proj.transform(
-                                      [
-                                          parseFloat(site.longitude),
-                                          parseFloat(site.latitude)
-                                      ],
-                                      "EPSG:4326",
-                                      "EPSG:3857"
-                                  )
-                              },
-                              properties: {
-                                  name: site.sitename,
-                                  code: site.sitecode,
-                                  network: site.network,
-                                  hs_url: url,
-                                  hs_name: title
-                              }
-                          }
-                      })
-
-                      let sitesGeoJSON = {
-                          type: "FeatureCollection",
-                          crs: {
-                              type: "name",
-                              properties: {
-                                  name: "EPSG:3857"
-                              }
-                          },
-                          features: sites
-                      }
-
-                      const vectorSource = new ol.source.Vector({
-                          features: new ol.format.GeoJSON().readFeatures(
-                              sitesGeoJSON
-                          )
-                      })
-
-                      const vectorLayer = new ol.layer.Vector({
-                          source: vectorSource,
-                          style: featureStyle()
-                      })
-
-                      map.addLayer(vectorLayer)
-                      ol.extent.extend(extent, vectorSource.getExtent())
-
-                      vectorLayer.set("selectable", true)
-
-                      $(newHtml).appendTo("#current-servers")
-                      addContextMenuToListItem(
-                          $("#current-servers").find("li:last-child")
-                      )
-
-                      layersDict[title] = vectorLayer
-                  })
-
-                  if (servers.length) {
-                      map.getView().fit(extent, map.getSize())
-                      map.updateSize()
-                  }
-              },
-              error: function(error) {
-                  console.log(error)
-                  $.notify(
-                      {
-                          message: `Something went wrong loading the catalog. Please see the console for details.`
-                      },
-                      {
-                          type: "danger",
-                          allow_dismiss: true,
-                          z_index: 20000,
-                          delay: 5000
-                      }
-                  )
-              }
-          })
-      }
+/// NEEDS TO BE ADDED TO THE APP FOR EXISTING CATALOGS //
   const add_central = () => {
       let modal = $("#addCentral"),
           mWarning = modal.find(".warning"),
@@ -2743,7 +2033,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
       })
   }
   $("#btn-add-central").on("click", add_central);
-  //The following three functions are necessary to make dynamic ajax requests
+
+
+//The following three functions are necessary to make dynamic ajax requests//
+
+  /*
+  ****** FU1NCTION NAME: addDefaultBehaviorToAjax *********
+  ****** FUNCTION PURPOSE: make dynamic ajax requests *********
+  */
   addDefaultBehaviorToAjax = function() {
       // Add CSRF token to appropriate ajax requests
       $.ajaxSetup({
@@ -2754,10 +2051,18 @@ var CRAZYSEARCH_PACKAGE = (function() {
           }
       })
   }
+  /*
+  ****** FU1NCTION NAME: checkCsrfSafe *********
+  ****** FUNCTION PURPOSE: CHECK THE OPERATIONS THAT DOES NOT NEED A CSRF VERIFICATION *********
+  */
   checkCsrfSafe = function(method) {
       // these HTTP methods do not require CSRF protection
       return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
   }
+  /*
+  ****** FU1NCTION NAME: getCookie *********
+  ****** FUNCTION PURPOSE: Retrieve a cookie value from the csrf token *********
+  */
   getCookie = function(name) {
       var cookie
       var cookies
@@ -2778,7 +2083,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
       return cookieValue
   }
-  //Initialize the context menu (The little hamburger in the Current HydroServers list item). It currently supports zoom to or delete layer. You can add more functionality here.
+  /*
+  ****** FU1NCTION NAME: init_menu *********
+  ****** FUNCTION PURPOSE: Initialize the context menu (The little hamburger in the Current HydroServers list item). It currently supports zoom to or delete layer. You can add more functionality here. *********
+  */
   init_menu = function() {
       ContextMenuBase = [
           {
@@ -2803,15 +2111,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
    *************************************************************************/
   $(function() {
 
-      init_jquery_var()
-      addDefaultBehaviorToAjax()
-      init_menu()
-      init_map()
-      get_all_the_checked_keywords();
+      init_jquery_var();
+      addDefaultBehaviorToAjax();
+      init_menu();
+      init_map();
 
       load_group_hydroservers()
 
-      // load_catalog()
-      createDropdownMenu(cata);
+
   })
 })() // End of package wrapper
