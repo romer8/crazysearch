@@ -553,8 +553,29 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   map.updateSize();
                 })
 
+                let id_group_separator = `${hydroserver_group}_list_separator`;
+                let separator_element = document.getElementById(id_group_separator);
+                console.log(separator_element);
+                let children_element = Array.from(separator_element.children);
+                console.log(children_element);
+                if(children_element.length <= 2){
+                    let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                      $(no_servers).appendTo(`#${id_group_separator}`) ;
+                }
+                else{
+                  let separators = Array.from(document.getElementsByClassName("no_groups_tag"));
+                  if(separators.length){
+                      separators.forEach(function(separator){
+                        separator.parentNode.removeChild(separator);
+                      })
+                  }
+
+                }
+
                 $("#soapAddLoading").addClass("hidden")
-                $("#btn-key-search").show()
+                $("#btn-key-search").show();
+
+
             },
 
             error: function(error) {
@@ -595,6 +616,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
       lis_deleted = [];
       layers_deleted = [];
       lis_separators = [];
+
+      let separator_elements = Array.from(document.getElementsByClassName("no_groups_tag"));
+      separator_elements.forEach(function(element){
+        element.parentNode.removeChild(element);
+      })
+
 
       // get_notification("info", `You need to select at least one keyword` )
       $.notify(
@@ -658,6 +685,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
       lis_deleted = [];
       layers_deleted = [];
       lis_separators = [];
+      let separator_elements = Array.from(document.getElementsByClassName("no_groups_tag"));
+      separator_elements.forEach(function(element){
+        element.parentNode.removeChild(element);
+      })
 
   }
   $("#btn-r-reset").on("click", reset_keywords);
