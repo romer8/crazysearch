@@ -936,12 +936,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
         let hydroservers_to_erase = result.hydroservers;
         console.log(groups_to_erase);
         console.log(hydroservers_to_erase);
-        $("#pop-up_description2").empty()
+        $("#pop-up_description2").empty();
+
 
 
         groups_to_erase.forEach(function(group){
           let element=document.getElementById(group);
           element.parentNode.removeChild(element);
+          let id_group_separator = `${group}_list_separator`;
+          let separator = document.getElementById(id_group_separator);
+          separator.parentNode.removeChild(separator);
         });
 
         hydroservers_to_erase.forEach(function(hydroserver){
@@ -1115,6 +1119,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  // let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
 
                  $(title_group).appendTo("#current-servers") ;
+                 if(servers.length <= 0){
+                   let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                   $(no_servers).appendTo(`#${id_group_separator}`) ;
+                 }
 
                  servers.forEach(function(server){
                      let {
@@ -1357,12 +1365,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
                   <div>
                     <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
-                  </div>
-
-                  </li>
-                  <ul id=${title}list class="ul-list" style = "display: none">
-                  </ul>
-                  `
+                  </div>`
                   $(newHtml).appendTo("#current-Groupservers");
 
                   let li_object = document.getElementById(`${title}`);
@@ -1546,6 +1549,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     let {title, siteInfo, url, group} = json_response
                     // if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
                       console.log(keywords_in_servers.includes(title));
+                      let no_servers_tag = Array.from(document.getElementById(`${id_group_separator}`).getElementsByTagName("P"))[0];
+                      console.log(no_servers_tag);
+                      if(no_servers_tag !== undefined){
+                        no_servers_tag.parentNode.removeChild(no_servers_tag);
+
+                      }
+
                       let newHtml = `
                       <li class="ui-state-default" layer-name="${title}" id="${title}" >
                       <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
@@ -1829,6 +1839,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           success: function(result) {
               console.log(result);
               var json_response = JSON.parse(result)
+              console.log(json_response);
               // var title = json_response.title
               // $("#current-servers").empty() //Resetting the catalog. So that it is updated.
               // let element = document.getElementById(arrayActual_group);
@@ -1852,6 +1863,25 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(arrayActual_group);
                 // load_individual_hydroservers_group(arrayActual_group) //Reloading the new catalog
                 // get_notification("sucess",`Successfully Deleted the HydroServer!`);
+
+                let id_group_separator = `${arrayActual_group}_list_separator`;
+                let separator_element = document.getElementById(id_group_separator);
+                console.log(separator_element);
+                let children_element = Array.from(separator_element.children);
+                console.log(children_element);
+                if(children_element.length <= 2){
+                    let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                      $(no_servers).appendTo(`#${id_group_separator}`) ;
+                }
+
+                // let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
+
+                // $(title_group).appendTo("#current-servers") ;
+                // if(servers.length <= 0){
+                //   $(no_servers).appendTo(`#${id_group_separator}`) ;
+                // }
+
+
                 $.notify(
                     {
                         message: `Successfully Deleted the HydroServer!`
