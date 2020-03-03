@@ -141,3 +141,13 @@
   color: #cc2418;
   align-items: center;
 }
+#app-content-wrapper #app-content #app-navigation{
+  padding: 2% 0.2%;
+  overflow-x: hidden;
+}
+#app-content-wrapper #app-content #app-navigation .nav{
+  overflow-x: hidden;
+}
+#app-content-wrapper{
+  overflow-y: hidden;
+}
