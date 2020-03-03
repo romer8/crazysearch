@@ -949,10 +949,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
         });
 
         hydroservers_to_erase.forEach(function(hydroserver){
-            let layer_name= $(`.ui-state-default[layer-name=${hydroserver}]`);
-            let element_erase= layer_name[0];
-            element_erase.parentNode.removeChild(element_erase);
+
             map.removeLayer(layersDict[hydroserver]);
+            delete layersDict[title]
+
         });
         map.updateSize();
         // get_notification("sucess",`Successfully Deleted Group of HydroServer!`);
@@ -1113,8 +1113,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  console.log(servers);
                  let id_group_separator = `${group_name}_list_separator`;
                  let title_group=`<ul id= ${id_group_separator}>
-                    <h5 class = "title-separators" >${group_name}<h5>
-                 </ul> `
+                 <button class="btn btn-info btn-block" id >${group_name} </button>
+                  </ul> `
 
                  // let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
 
