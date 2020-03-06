@@ -142,7 +142,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         lis_deleted = [],
         layers_deleted = [],
         lis_separators = [],
-        get_notification;
+        get_notification,
+        activate_deactivate_graphs;
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -157,6 +158,27 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+
+    /*
+    ************ FUNCTION NAME: ACTIVATE_DEACTIVATE_GRAPHS **********************
+    ************ PURPOSE: THE FUNCTIONS SHOWS THE GRAPHS IN THE LOWER PORTION OF THE MAP ***********
+    */
+    activate_deactivate_graphs = function(){
+      // console.log("the switch is on/off");
+      let actual_state=$(this).prop('checked');
+      if(actual_state){
+        //make the down part visible and also give the design of the model//
+        console.log("on");
+      }
+      else{
+        //make the down part invisible, but remain with the same variables.
+        console.log("off");
+      }
+    };
+    $('#sG').change(activate_deactivate_graphs)
+
+
+
     /*
     ************ FUNCTION NAME: GET_NOTIFICATION **********************
     ************ PURPOSE: THE FUNCTIONS GIVES NOTIFICATIONS ***********
@@ -2094,7 +2116,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
       })
   }
   $("#btn-add-central").on("click", add_central);
-
+  // $('#switchGraphs').on("click",function() {
+  //     // $('#console-event').html('Toggle: ' + $(this).prop('checked'))
+  //     console.log("hola nene");
+  // })
 
 //The following three functions are necessary to make dynamic ajax requests//
 
@@ -2176,8 +2201,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
       addDefaultBehaviorToAjax();
       init_menu();
       init_map();
-
+      // activate_deactivate_graphs();
       load_group_hydroservers()
+
+      // let switch_graphs = document.getElementById("switchGraphs");
+      // console.log(switch_graphs);
+      // switch_graphs.addEventListener("click", function(){
+      //   console.log("hola");
+      // })
 
 
   })
