@@ -3,14 +3,73 @@
   padding-top: 5%;
   font-weight: bold;
 }
+/* #content_map{
+  width: 100%;
+  display:flex;
+  height: 200%;
+  flex-direction: column;
+} */
 
-#map {
+/* #container_map{
+  width: 100%;
+  height: 100%;
+  flex:1 1 70%;
+  order: 1;
+
+} */
+#app-content-wrapper #app-content{
+  height: 100%;
+  /* when the graph is on */
+}
+
+#inner-app-content{
+  width: 100%;
+  display:flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 0 0 0 0;
+  /* position: fixed; */
+}
+
+#map{
+  width: 100%;
+  height: 100%;
+  /* position: fixed; */
+  flex:1 1 70%;
+  order: 1;
+  overflow-y: hidden;
+}
+#graph{
+  flex: 1 1 30%;
+  order: 2;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+#options{
+  padding-left: 2%;
+  flex: 1 1 20%;
+  order: 1;
+  width: 100%;
+  height: 100%;
+}
+
+#plots{
+  flex: 1 1 80%;
+  order: 2;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* #map {
     width: 100%;
     height: 100%;
     position: fixed;
     margin-left: -15px;
     margin-top: -20px;
-}
+} */
 
 
 .hmbrgr-div {
@@ -144,4 +203,4 @@
   overflow-y: hidden;
 }
 .toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px; }
- .toggle.ios .toggle-handle { border-radius: 20px; }
+.toggle.ios .toggle-handle { border-radius: 20px; }

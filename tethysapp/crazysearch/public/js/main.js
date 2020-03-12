@@ -143,7 +143,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         layers_deleted = [],
         lis_separators = [],
         get_notification,
-        activate_deactivate_graphs;
+        activate_deactivate_graphs,
+        activate_layer_values;
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -160,19 +161,160 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ]
 
     /*
+    ************ FUNCTION NAME: ACTIVATE_LAYER_VALUES **********************
+    ************ PURPOSE: THE FUNCTIONS RETRIEVES THE DATA FROM THE LAYERS WHEN ONE MAKES A CLICK ***********
+    */
+    activate_layer_values = function (){
+      map.on('singleclick', function(evt) {
+        let object_request={};
+        var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            //you can add a condition on layer to restrict the listener
+            return feature;
+            });
+        if (feature) {
+          console.log(feature.values_['hs_name']);
+          console.log(feature);
+
+          // code here
+          object_request={
+            hs_name:feature.values_['hs_name'],
+            site_name: feature.values_['name'],
+            hs_url: feature.values_['hs_url'],
+            code: feature.values_['code'],
+            network: feature.values_['network']
+          };
+          $.ajax({
+            type:"GET",
+            url: `${apiServer}/get-values-hs/`,
+            dataType: "JSON",
+            data: object_request,
+            success: function(result){
+              console.log(result);
+              // create Dict //
+              let object_code_and_variable={}
+              let variables = result['variables'];
+              let code_variable =result['codes'];
+              for(let i=0; i< variables.length ; ++i){
+                object_code_and_variable[`${variables[i]}`]=code_variable[i];
+              }
+              console.log(object_code_and_variable);
+              let variable_select = $("#variables_graph");
+              variable_select.empty();
+              let i = 0;
+              let array_variables=[]
+              // let variables_select = document.getElementById("variables_graph");
+              variables.forEach(function(variable){
+                let option;
+                let option_begin;
+                // if(!array_variables.includes(variable)){
+                  array_variables.push(variable);
+                  if(i === 0){
+                    console.log("initial");
+                    option = `<option selected = "selected">Variables Ready ..</option>`;
+                    option_begin = `<option value=${i}>${variable}</option>`;
+                    variable_select.append(option_begin)
+                  }
+                  else{
+                    option = `<option value=${i} >${variable}</option>`;
+
+                  }
+                  variable_select.append(option)
+
+                  variable_select.selectpicker("refresh");
+                  i = i+1;
+
+                // }
+              });
+              variable_select.change(function(){
+                //CONTINUE HERE // AND TRY TO SEE HOW IT GOES //
+                var selectedItem = $('#variables_graph')['0'].value;
+                var selectedItemText = $('#variables_graph')['0'].text;
+                console.log(selectedItem);
+                object_request['variable']=selectedItem;
+                object_request['code_variable']= code_variable[`${selectedItem}`];
+                console.log(object_request);
+                $.ajax({
+                  type:"GET",
+                  url: `${apiServer}/get-values-graph-hs/`,
+                  dataType: "JSON",
+                  data: object_request,
+                  success: function(result){
+                    console.log(result);
+                  }
+                })
+              })
+              // console.log(variable_select);
+
+            }
+          })
+
+        }
+      });
+    }
+
+    /*
     ************ FUNCTION NAME: ACTIVATE_DEACTIVATE_GRAPHS **********************
     ************ PURPOSE: THE FUNCTIONS SHOWS THE GRAPHS IN THE LOWER PORTION OF THE MAP ***********
     */
     activate_deactivate_graphs = function(){
       // console.log("the switch is on/off");
       let actual_state=$(this).prop('checked');
+      let element_graphs=document.getElementById("graph");
+      // let element_graphs2=document.getElementById("graph2");
+      let element_map =document.getElementById("map");
       if(actual_state){
         //make the down part visible and also give the design of the model//
         console.log("on");
+
+        element_graphs.style.cssText=  "display: flex; flex-direction: row;";
+        map.updateSize();
+        var trace1 = {
+          x: [1, 2, 3, 4, 5],
+          y: [1, 6, 3, 6, 1],
+          mode: 'markers',
+          type: 'scatter',
+          name: 'Team A',
+          text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
+          marker: { size: 12 }
+        };
+
+        var trace2 = {
+          x: [1.5, 2.5, 3.5, 4.5, 5.5],
+          y: [4, 1, 7, 1, 4],
+          mode: 'markers',
+          type: 'scatter',
+          name: 'Team B',
+          text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
+          marker: { size: 12 }
+        };
+
+        var data = [ trace1, trace2 ];
+
+        var layout = {
+          xaxis: {
+            range: [ 0.75, 5.25 ]
+          },
+          yaxis: {
+            range: [0, 8]
+          },
+          title:'Data Labels Hover',
+          autosize: true
+        };
+
+        Plotly.newPlot('plots', data, layout);
+
       }
+
       else{
         //make the down part invisible, but remain with the same variables.
         console.log("off");
+        // element_map.style.cssText = "width: 100%;height: 100%; flex:1 1 100%;";
+        // element_graphs.style.cssText=  "width: 100%;height: 0%;visibility: hidden;";
+        // $("#graph2").hide();
+        $("#graph").hide();
+        map.updateSize();
+
+
       }
     };
     $('#sG').change(activate_deactivate_graphs)
@@ -1268,9 +1410,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
                            })
 
                            map.addLayer(vectorLayer)
+
+
+
                            ol.extent.extend(extent, vectorSource.getExtent())
 
                            vectorLayer.set("selectable", true)
+
 
                            layersDict[title] = vectorLayer
                          }
@@ -1339,6 +1485,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
                        ol.extent.extend(extent, vectorSource.getExtent())
 
                        vectorLayer.set("selectable", true)
+                       // select interaction working on "click"
+                       // var selectClick = new Select({
+                       //   condition: click
+                       // });
+                       // map.addInteraction(selectClick);
+                       //
+                       // selectClick.on('select', function(e){
+                       //   console.log("hola");
+                       // })
+
 
 
 
@@ -1358,7 +1514,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  // get_notification("danger",`Something went wrong loading the hydroservers for the group called ${group}. Please see the console for details.` )
                  $.notify(
                      {
-                         message: `Something went wrong loading the hydroservers for the group called ${group}. Please see the console for details.`
+                         message: `Something went wrong loading the hydroservers for the group called ${group_name}. Please see the console for details.`
                      },
                      {
                          type: "danger",
@@ -1375,7 +1531,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
            // get_notification("danger",`Something went wrong loading the hydroservers for the group called ${group}` );
            $.notify(
                {
-                   message: `Something went wrong loading the hydroservers for the group called ${group}`
+                   message: `Something went wrong loading the hydroservers for the group called ${group_name}`
                },
                {
                    type: "danger",
@@ -2202,14 +2358,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
       init_menu();
       init_map();
       // activate_deactivate_graphs();
-      load_group_hydroservers()
+      load_group_hydroservers();
 
       // let switch_graphs = document.getElementById("switchGraphs");
       // console.log(switch_graphs);
       // switch_graphs.addEventListener("click", function(){
       //   console.log("hola");
       // })
-
+     activate_layer_values();
 
   })
 })() // End of package wrapper

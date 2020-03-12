@@ -624,6 +624,7 @@ def keyWordsForGroup(request):
     list={}
     print("inside the keywordsgroup function")
     specific_group=request.GET.get('group')
+
     SessionMaker = app.get_persistent_store_database(Persistent_Store_Name, as_sessionmaker=True)
 
     # print(SessionMaker)
@@ -685,3 +686,385 @@ def keyWordsForGroup(request):
     # print(len(hs_list))
     # print(list)
     return JsonResponse(list)
+
+def get_values_hs(request):
+    list={}
+    return_obj={}
+    # print("Inside the get_values_hs function")
+    # print(request)
+    hs_name = request.GET.get('hs_name')
+    # print(hs_name)
+    hs_url = request.GET.get('hs_url')
+    # print(hs_url)
+    site_name = request.GET.get('site_name')
+    # print(site_name)
+
+    SessionMaker = app.get_persistent_store_database(Persistent_Store_Name, as_sessionmaker=True)
+
+    # print(SessionMaker)
+    session = SessionMaker()  # Initiate a session
+    # hydroservers_group = session.query(HydroServer_Individual).filter(Groups.title == hs_name)
+    client = Client(hs_url)
+    # print(client)
+    keywords = client.service.GetVariables('[:]')
+    keywords_dict = xmltodict.parse(keywords)
+    keywords_dict_object = json.dumps(keywords_dict)
+
+    keywords_json = json.loads(keywords_dict_object)
+    # print(keywords_json)
+    array_variables=keywords_json['variablesResponse']['variables']['variable']
+    array_keywords_hydroserver=[]
+    array_variables_codes = []
+    # print(type(array_variables))
+    # print(array_variables)
+    if isinstance(array_variables,type([])):
+        # print("inside the list iption")
+        for words in array_variables:
+            # print("priting words")
+            # print(type(words))
+            # print(words)
+            # print(words.get('variableName'))
+            # print(words['variableName'])
+            array_keywords_hydroserver.append(words['variableName'])
+            array_variables_codes.append(words['variableCode']['#text'])
+        # words_to_search[name] = array_keywords_hydroserver
+    if isinstance(array_variables,dict):
+        array_keywords_hydroserver.append(array_variables['variableName'])
+        array_variables_codes.append(array_variables['variableCode']['#text'])
+
+
+    return_obj['variables']=array_keywords_hydroserver
+    return_obj['codes']=array_variables_codes
+
+
+    # sites_values = client.service.GetValues(site_name,"discharge",)
+    # # print(sites_values)
+    #
+    # # print(sites)
+    # sites_values_dict = xmltodict.parse(sites_values)
+    # sites_values_json_object = json.dumps(sites_values_dict)
+    #
+    # sites_values_json = json.loads(sites_values_json_object)
+    # # Parsing the sites and creating a sites object. See utilities.py
+    # print("-------------------------------------")
+    # # print(sites_json)
+    # sites_values_object = parseJSON(sites_values_json)
+    # # print(sites_object)
+    # # converted_sites_object=[x['sitename'].decode("UTF-8") for x in sites_object]
+    #
+    # # sites_parsed_json = json.dumps(converted_sites_object)
+    # sites_values_parsed_json = json.dumps(sites_values_object)
+    # print(sites_values_parsed_json)
+    # return_obj['siteInfo'] = sites_values_parsed_json
+
+    return JsonResponse(return_obj)
+
+def get_values_graph_hs(request):
+    list={}
+    return_obj={}
+    print("Inside the get_values_graphs function")
+    print(request)
+    hs_name = request.GET.get('hs_name')
+    print(hs_name)
+    hs_url = request.GET.get('hs_url')
+    print(hs_url)
+    site_name = request.GET.get('site_name')
+    print(site_name)
+    site_code =  request.GET.get('code')
+    print(site_code)
+    network = request.GET.get('network')
+    variable_text = request.GET.get('variable')
+    code_variable =request.GET.get ('code_variable')
+    start_date = ""
+    end_date = ""
+    variable_desc = network + ':' + code_variable
+    print(variable_desc)
+    site_desc = network + ':' + site_code
+    print(site_desc)
+    client = Client(hs_url)  # Connect to the HydroServer endpoint
+    # print(client)
+    site_info_Mc = client.service.GetSiteInfo(site_desc)
+    site_info_Mc_dict = xmltodict.parse(site_info_Mc)
+    site_info_Mc_json_object = json.dumps(site_info_Mc_dict)
+    site_info_Mc_json = json.loads(site_info_Mc_json_object)
+    values = client.service.GetValues(
+        site_desc, variable_desc, start_date, end_date, "")
+    # print(values)
+    values_dict = xmltodict.parse(values)  # Converting xml to dict
+    values_json_object = json.dumps(values_dict)
+    values_json = json.loads(values_json_object)
+    times_series = values_json['timeSeriesResponse'][
+        'timeSeries']  # Timeseries object for the variable
+    # print(times_series)
+    return_obj['siteInfo']= site_info_Mc_json
+    return_obj['values'] = times_series
+    # print(site_info_Mc_json)
+
+    if times_series['values'] is not None:
+        return_obj['siteInfo']= site_info_Mc_json
+        methodID = []
+        object_methods= site_info_Mc_json['sitesResponse']['site']['seriesCatalog']['series']
+        for object_method in object_methods:
+            methodID.append(object_method['method']['@methodID'])
+        return_obj['values'] = times_series
+        return_obj['methodsID']=methodID
+    #     print("times series is true")
+        graph_json = {}  # json object that will be returned to the front end
+        graph_json["variable"] = times_series['variable']['variableName']
+        graph_json["unit"] = times_series[
+            'variable']['unit']['unitAbbreviation']
+        graph_json["title"] = site_desc + ':' + \
+            times_series['variable']['variableName']
+        for j in times_series['values']:  # Parsing the timeseries
+            print("first for loop")
+            print(j)
+    #         # empty list which will have the time stamp and values within
+    #         # the specified date range.
+            data_values = []
+            if j == "value":
+    #             # If there are multiple timeseries than value the following
+    #             # code is executed
+                print(type((times_series['values']['value'])))
+                if(isinstance(times_series['values']['value'],list)):
+                    print("it is a list with isInstace")
+                if type(times_series['values']['value']) is list:
+                    print("it is a list the timeseries")
+                    count = 0
+                    for k in times_series['values']['value']:
+                        print(k)
+    #                     try:
+    #                         if k['@methodCode'] == variable_method:
+    #                             count = count + 1
+    #                             time = k['@dateTimeUTC']
+    #                             time1 = time.replace("T", "-")
+    #                             time_split = time1.split("-")
+    #                             year = int(time_split[0])
+    #                             month = int(time_split[1])
+    #                             day = int(time_split[2])
+    #                             hour_minute = time_split[3].split(":")
+    #                             hour = int(hour_minute[0])
+    #                             minute = int(hour_minute[1])
+    #                             value = float(str(k['#text']))
+    #                             date_string = datetime(
+    #                                 year, month, day, hour, minute)
+    #                             # Creating a timestamp as javascript cannot
+    #                             # recognize datetime object
+    #                             time_stamp = calendar.timegm(
+    #                                 date_string.utctimetuple()) * 1000
+    #                             data_values.append([time_stamp, value])
+    #                             data_values.sort()
+    #                         graph_json["values"] = data_values
+    #                         graph_json["count"] = count
+    #                     except KeyError:  # The Key Error kicks in when there is only one timeseries
+    #                         count = count + 1
+    #                         time = k['@dateTimeUTC']
+    #                         time1 = time.replace("T", "-")
+    #                         time_split = time1.split("-")
+    #                         year = int(time_split[0])
+    #                         month = int(time_split[1])
+    #                         day = int(time_split[2])
+    #                         hour_minute = time_split[3].split(":")
+    #                         hour = int(hour_minute[0])
+    #                         minute = int(hour_minute[1])
+    #                         value = float(str(k['#text']))
+    #                         date_string = datetime(
+    #                             year, month, day, hour, minute)
+    #                         time_stamp = calendar.timegm(
+    #                             date_string.utctimetuple()) * 1000
+    #                         data_values.append([time_stamp, value])
+    #                         data_values.sort()
+    #                     graph_json["values"] = data_values
+    #                     graph_json["count"] = count
+    #             else:  # The else statement is executed is there is only one value in the timeseries
+    #                 try:
+    #                     print("not list the time series then")
+    #                     print(type(times_series))
+    #                     if times_series['values']['value']['@methodCode'] == variable_method:
+    #                         time = times_series['values'][
+    #                             'value']['@dateTimeUTC']
+    #                         time1 = time.replace("T", "-")
+    #                         time_split = time1.split("-")
+    #                         year = int(time_split[0])
+    #                         month = int(time_split[1])
+    #                         day = int(time_split[2])
+    #                         hour_minute = time_split[3].split(":")
+    #                         hour = int(hour_minute[0])
+    #                         minute = int(hour_minute[1])
+    #                         value = float(
+    #                             str(times_series['values']['value']['#text']))
+    #                         date_string = datetime(
+    #                             year, month, day, hour, minute)
+    #                         time_stamp = calendar.timegm(
+    #                             date_string.utctimetuple()) * 1000
+    #                         data_values.append([time_stamp, value])
+    #                         data_values.sort()
+    #                         graph_json["values"] = data_values
+    #                         graph_json["count"] = 1
+    #                 except KeyError:
+    #                     time = times_series['values'][
+    #                         'value']['@dateTimeUTC']
+    #                     time1 = time.replace("T", "-")
+    #                     time_split = time1.split("-")
+    #                     year = int(time_split[0])
+    #                     month = int(time_split[1])
+    #                     day = int(time_split[2])
+    #                     hour_minute = time_split[3].split(":")
+    #                     hour = int(hour_minute[0])
+    #                     minute = int(hour_minute[1])
+    #                     value = float(
+    #                         str(times_series['values']['value']['#text']))
+    #                     date_string = datetime(
+    #                         year, month, day, hour, minute)
+    #                     time_stamp = calendar.timegm(
+    #                         date_string.utctimetuple()) * 1000
+    #                     data_values.append([time_stamp, value])
+    #                     data_values.sort()
+    #                     graph_json["values"] = data_values
+    #                     graph_json["count"] = 1
+
+    # Returning the timeseries object along with the relevant metadata
+
+    # request.session['graph_obj'] = graph_json
+
+    # return JsonResponse(graph_json)
+    return JsonResponse(return_obj)
+
+
+    # Requesting the session object to retrieve metadata about the site
+
+    # url = soap_object['url']
+    # site_desc = soap_object['site']
+    # network = soap_object['network']
+    # variable = request.POST['select_var']
+    # start_date = request.POST["start_date"]
+    # end_date = request.POST["end_date"]
+    # # Manipulating the variable string to get the relevant string
+    # variable = str(variable)
+    # variable = variable.replace("[", "").replace("]", "").replace(
+    #     "u", "").replace(" ", "").replace("'", "")
+    # variable = variable.split(',')
+    # variable_text = variable[0]
+    # variable_method = variable[1]
+    # variable_desc = network + ':' + variable_text
+    # client = Client(url)  # Connect to the HydroServer endpoint
+    # Get values for the given site,variable, start date, end date.
+
+    # values = client.service.GetValues(
+    #     site_desc, variable_desc, start_date, end_date, "")
+    # values_dict = xmltodict.parse(values)  # Converting xml to dict
+    # # Converting the dict to json to make it easy to parse the data
+    # values_json_object = json.dumps(values_dict)
+    # values_json = json.loads(values_json_object)
+    # times_series = values_json['timeSeriesResponse'][
+    #     'timeSeries']  # Timeseries object for the variable
+
+    # Parsing the timeseries if its not null
+    # if times_series['values'] is not None:
+    #     graph_json = {}  # json object that will be returned to the front end
+    #     graph_json["variable"] = times_series['variable']['variableName']
+    #     graph_json["unit"] = times_series[
+    #         'variable']['unit']['unitAbbreviation']
+    #     graph_json["title"] = site_desc + ':' + \
+    #         times_series['variable']['variableName']
+    #     for j in times_series['values']:  # Parsing the timeseries
+    #         # empty list which will have the time stamp and values within
+    #         # the specified date range.
+    #         data_values = []
+    #         if j == "value":
+    #             # If there are multiple timeseries than value the following
+    #             # code is executed
+    #             if type((times_series['values']['value'])) is list:
+    #                 count = 0
+    #                 for k in times_series['values']['value']:
+    #                     try:
+    #                         if k['@methodCode'] == variable_method:
+    #                             count = count + 1
+    #                             time = k['@dateTimeUTC']
+    #                             time1 = time.replace("T", "-")
+    #                             time_split = time1.split("-")
+    #                             year = int(time_split[0])
+    #                             month = int(time_split[1])
+    #                             day = int(time_split[2])
+    #                             hour_minute = time_split[3].split(":")
+    #                             hour = int(hour_minute[0])
+    #                             minute = int(hour_minute[1])
+    #                             value = float(str(k['#text']))
+    #                             date_string = datetime(
+    #                                 year, month, day, hour, minute)
+    #                             # Creating a timestamp as javascript cannot
+    #                             # recognize datetime object
+    #                             time_stamp = calendar.timegm(
+    #                                 date_string.utctimetuple()) * 1000
+    #                             data_values.append([time_stamp, value])
+    #                             data_values.sort()
+    #                         graph_json["values"] = data_values
+    #                         graph_json["count"] = count
+    #                     except KeyError:  # The Key Error kicks in when there is only one timeseries
+    #                         count = count + 1
+    #                         time = k['@dateTimeUTC']
+    #                         time1 = time.replace("T", "-")
+    #                         time_split = time1.split("-")
+    #                         year = int(time_split[0])
+    #                         month = int(time_split[1])
+    #                         day = int(time_split[2])
+    #                         hour_minute = time_split[3].split(":")
+    #                         hour = int(hour_minute[0])
+    #                         minute = int(hour_minute[1])
+    #                         value = float(str(k['#text']))
+    #                         date_string = datetime(
+    #                             year, month, day, hour, minute)
+    #                         time_stamp = calendar.timegm(
+    #                             date_string.utctimetuple()) * 1000
+    #                         data_values.append([time_stamp, value])
+    #                         data_values.sort()
+    #                     graph_json["values"] = data_values
+    #                     graph_json["count"] = count
+    #             else:  # The else statement is executed is there is only one value in the timeseries
+    #                 try:
+    #                     if times_series['values']['value']['@methodCode'] == variable_method:
+    #                         time = times_series['values'][
+    #                             'value']['@dateTimeUTC']
+    #                         time1 = time.replace("T", "-")
+    #                         time_split = time1.split("-")
+    #                         year = int(time_split[0])
+    #                         month = int(time_split[1])
+    #                         day = int(time_split[2])
+    #                         hour_minute = time_split[3].split(":")
+    #                         hour = int(hour_minute[0])
+    #                         minute = int(hour_minute[1])
+    #                         value = float(
+    #                             str(times_series['values']['value']['#text']))
+    #                         date_string = datetime(
+    #                             year, month, day, hour, minute)
+    #                         time_stamp = calendar.timegm(
+    #                             date_string.utctimetuple()) * 1000
+    #                         data_values.append([time_stamp, value])
+    #                         data_values.sort()
+    #                         graph_json["values"] = data_values
+    #                         graph_json["count"] = 1
+    #                 except KeyError:
+    #                     time = times_series['values'][
+    #                         'value']['@dateTimeUTC']
+    #                     time1 = time.replace("T", "-")
+    #                     time_split = time1.split("-")
+    #                     year = int(time_split[0])
+    #                     month = int(time_split[1])
+    #                     day = int(time_split[2])
+    #                     hour_minute = time_split[3].split(":")
+    #                     hour = int(hour_minute[0])
+    #                     minute = int(hour_minute[1])
+    #                     value = float(
+    #                         str(times_series['values']['value']['#text']))
+    #                     date_string = datetime(
+    #                         year, month, day, hour, minute)
+    #                     time_stamp = calendar.timegm(
+    #                         date_string.utctimetuple()) * 1000
+    #                     data_values.append([time_stamp, value])
+    #                     data_values.sort()
+    #                     graph_json["values"] = data_values
+    #                     graph_json["count"] = 1
+    #
+    # # Returning the timeseries object along with the relevant metadata
+    # request.session['graph_obj'] = graph_json
+
+    # return JsonResponse(graph_json)

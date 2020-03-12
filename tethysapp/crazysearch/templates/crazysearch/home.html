@@ -59,8 +59,39 @@
 
 {% block app_content %}
 <!-- <div id="content_map"> -->
-  <div id="map" class="map"></div>
-  <div id="graph"></div>
+<!-- <div id="container_map"> -->
+  <div id="map" class="map">
+
+  </div>
+<!-- </div> -->
+
+  <div id="graph">
+    <div id="options">
+      <h3>Plot Option</h3>
+      <p> Variables for ... </p>
+      <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info">
+        <option > No Variables Available . . .</option>
+        <!-- <option >Hot Dog, Fries and a Soda</option>
+        <option>Burger, Shake and a Smile</option>
+        <option>Sugar, Spice and all things nice</option> -->
+      </select>
+      <br>
+      <br>
+      <p>Type of plots</p>
+      <select class="selectpicker">
+        <option>Select your plot . .</option>
+        <option>Scatter</option>
+        <option>Whisker and Box Plot</option>
+        <option>Option 3</option>
+        <option>Option 4</option>
+      </select>
+    </div>
+    <div id="plots">
+
+    </div>
+
+  </div>
+  <!-- <div id="graph" style="display:none"><h1>HOLA</h1></div> -->
 <!-- </div> -->
 
  <!-- <div> -->

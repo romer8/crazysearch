@@ -82,6 +82,14 @@ class Crazysearch(TethysAppBase):
                    url='crazysearch/keyword-group',
                    controller='crazysearch.controllers.keyWordsForGroup'),
             ## Find the keywords for each hydrpserver in a group##
+            UrlMap(name='get-values-hs',
+                   url='crazysearch/get-values-hs',
+                   controller='crazysearch.controllers.get_values_hs'),
+            ## Get the variables of a hydroserver
+            UrlMap(name='get-values-hs',
+                   url='crazysearch/get-values-graph-hs',
+                   controller='crazysearch.controllers.get_values_graph_hs'),
+            ## Get the values of a hydroserver
         )
 
         return url_maps
