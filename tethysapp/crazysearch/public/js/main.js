@@ -74,12 +74,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         shpSource,
         shpLayer,
         wmsLayer,
-        wmsSource,
-        cata
-      cata=[{
-        title:"hola",
-        description:" this is just a mere description for the hola example"
-      }];
+        wmsSource
     /************************************************************************
      *                    PRIVATE FUNCTION DECLARATIONS
      *************************************************************************/
@@ -144,7 +139,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
         lis_separators = [],
         get_notification,
         activate_deactivate_graphs,
-        activate_layer_values;
+        activate_layer_values,
+        initialize_graphs,
+        object_request_graphs ={},
+        select_variable_change,
+        codes_variables_array={};
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -159,6 +158,112 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+    /*
+    ************ FUNCTION NAME: SELECT_VARIABLE_CHANGE **********************
+    ************ PURPOSE: SELECT A VARIABLE FROM A DROPDOWN AND CHANGE THE GRAPH ***********
+    */
+    select_variable_change = function(){
+      console.log("new change on this");
+      console.log(this);
+      // let object_request2 = {};
+      // object_request2['hs_name']=feature.values_['hs_name'];
+      // object_request2['site_name']=feature.values_['name'];
+      // object_request2['hs_url']=feature.values_['hs_url'];
+      // object_request2['code']=feature.values_['code'];
+      // object_request2['network']=feature.values_['network'];
+      //CONTINUE HERE // AND TRY TO SEE HOW IT GOES //
+      // console.log(object_request);
+      let selectedItem = $('#variables_graph')['0'].value;
+      let selectedItemText = $('#variables_graph')['0'].text;
+      // console.log(selectedItem);
+
+      object_request_graphs['variable']=selectedItem;
+      object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`];
+      // console.log(object_request2);
+
+      $.ajax({
+        type:"GET",
+        url: `${apiServer}/get-values-graph-hs/`,
+        dataType: "JSON",
+        data: object_request_graphs,
+        success: function(result1){
+          console.log(result1);
+          if(result1.graphs !== undefined){
+            console.log(result1);
+            let time_series_array = result1['graphs']['values2'];
+            console.log(time_series_array);
+
+            let x_array = [];
+            time_series_array.forEach(function(x){
+              x_array.push(x[0]);
+            })
+            let y_array=[]
+            time_series_array.forEach(function(y){
+              y_array.push(y[1]);
+            })
+            console.log(x_array);
+            console.log(y_array);
+            let title_graph = `${result1['graphs']['title']}`
+            initialize_graphs(x_array,y_array,title_graph);
+         }
+         else{
+           let title_graph=  ` No data available ${object_request_graphs['site_name']} - ${selectedItemText}`
+           initialize_graphs([],[],title_graph);
+         }
+
+
+
+        }
+      })
+      // console.log(object_request_graphs);
+
+    }
+    $("#variables_graph").change(select_variable_change)
+    /*
+    ************ FUNCTION NAME: INITIALIZE_GRAPHS **********************
+    ************ PURPOSE: INITIALIZES ANY GRAH IN THE TIME SERIE OR BEGINNING ***********
+    */
+    initialize_graphs = function(xArray,yArray,title_graph){
+      let element_graphs=document.getElementById("graph");
+      $("#graphs").empty();
+      // let element_graphs2=document.getElementById("graph2");
+      let element_map =document.getElementById("map");
+      // if(actual_state){
+        //make the down part visible and also give the design of the model//
+        console.log("on");
+
+        element_graphs.style.cssText=  "display: flex; flex-direction: row;";
+        map.updateSize();
+        var trace1 = {
+          x: xArray,
+          y: yArray,
+          // mode: 'markers',
+          mode: 'lines',
+          type: 'scatter',
+          name: 'No data Available',
+          text: [],
+          marker: { size: 5 },
+          line: {color: '#17BECF'}
+        };
+
+
+        var data = [trace1];
+
+        var layout = {
+          xaxis: {
+            // range: [ 0.75, 5.25 ]
+          },
+          yaxis: {
+            // range: [0, 8]
+          },
+          title: title_graph,
+          autosize: true
+        };
+
+        Plotly.newPlot('plots', data, layout);
+    // }
+  }
+
 
     /*
     ************ FUNCTION NAME: ACTIVATE_LAYER_VALUES **********************
@@ -166,42 +271,49 @@ var CRAZYSEARCH_PACKAGE = (function() {
     */
     activate_layer_values = function (){
       map.on('singleclick', function(evt) {
+        evt.stopPropagation();
+        $("#graphs").empty();
+
         let object_request={};
+        console.log(object_request);
+
         var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
             //you can add a condition on layer to restrict the listener
             return feature;
             });
         if (feature) {
           console.log(feature.values_['hs_name']);
-          console.log(feature);
+          // console.log(feature);
 
           // code here
-          object_request={
-            hs_name:feature.values_['hs_name'],
-            site_name: feature.values_['name'],
-            hs_url: feature.values_['hs_url'],
-            code: feature.values_['code'],
-            network: feature.values_['network']
-          };
+          object_request['hs_name']=feature.values_['hs_name'];
+          object_request['site_name']=feature.values_['name'];
+          object_request['hs_url']=feature.values_['hs_url'];
+          object_request['code']=feature.values_['code'];
+          object_request['network']=feature.values_['network'];
           $.ajax({
             type:"GET",
             url: `${apiServer}/get-values-hs/`,
             dataType: "JSON",
             data: object_request,
             success: function(result){
-              console.log(result);
+              // console.log(result);
               // create Dict //
-              let object_code_and_variable={}
+              evt.stopPropagation();
+
+              let object_code_and_variable = {};
               let variables = result['variables'];
               let code_variable =result['codes'];
+              codes_variables_array = JSON.parse(JSON.stringify(code_variable));
               for(let i=0; i< variables.length ; ++i){
                 object_code_and_variable[`${variables[i]}`]=code_variable[i];
               }
-              console.log(object_code_and_variable);
+              // console.log(object_code_and_variable);
               let variable_select = $("#variables_graph");
               variable_select.empty();
               let i = 0;
               let array_variables=[]
+              let option_variables;
               // let variables_select = document.getElementById("variables_graph");
               variables.forEach(function(variable){
                 let option;
@@ -210,40 +322,74 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   array_variables.push(variable);
                   if(i === 0){
                     console.log("initial");
-                    option = `<option selected = "selected">Variables Ready ..</option>`;
-                    option_begin = `<option value=${i}>${variable}</option>`;
+                    // option = `<option selected = "selected>Variables Ready ..</option>`;
+                    option_begin = `<option value=${i} selected= "selected">${variable}</option>`;
                     variable_select.append(option_begin)
+
                   }
                   else{
                     option = `<option value=${i} >${variable}</option>`;
 
                   }
                   variable_select.append(option)
+                  // variable_select.append(option_variables)
 
                   variable_select.selectpicker("refresh");
                   i = i+1;
 
                 // }
               });
-              variable_select.change(function(){
-                //CONTINUE HERE // AND TRY TO SEE HOW IT GOES //
-                var selectedItem = $('#variables_graph')['0'].value;
-                var selectedItemText = $('#variables_graph')['0'].text;
-                console.log(selectedItem);
-                object_request['variable']=selectedItem;
-                object_request['code_variable']= code_variable[`${selectedItem}`];
-                console.log(object_request);
-                $.ajax({
-                  type:"GET",
-                  url: `${apiServer}/get-values-graph-hs/`,
-                  dataType: "JSON",
-                  data: object_request,
-                  success: function(result){
-                    console.log(result);
-                  }
-                })
+              console.log(object_request);
+              console.log($('#variables_graph'));
+              let object_request2 = {};
+              object_request2['hs_name']=feature.values_['hs_name'];
+              object_request2['site_name']=feature.values_['name'];
+              object_request2['hs_url']=feature.values_['hs_url'];
+              object_request2['code']=feature.values_['code'];
+              object_request2['network']=feature.values_['network'];
+              //CONTINUE HERE // AND TRY TO SEE HOW IT GOES //
+              // console.log(object_request);
+              var selectedItem = $('#variables_graph')['0'].value;
+              var selectedItemText = $('#variables_graph')['0'].text;
+              console.log(selectedItem);
+
+              object_request2['variable']=selectedItem;
+              object_request2['code_variable']= code_variable[`${selectedItem}`];
+              object_request_graphs = JSON.parse(JSON.stringify(object_request2));
+              console.log(object_request2);
+              $.ajax({
+                type:"GET",
+                url: `${apiServer}/get-values-graph-hs/`,
+                dataType: "JSON",
+                data: object_request2,
+                success: function(result1){
+                  if(result1.graphs !== undefined){
+                    console.log(result1);
+                    // let time_series_array = result1['graphs']['values'];
+                    let time_series_array = result1['graphs']['values2'];
+                    console.log(time_series_array);
+
+                    let x_array = [];
+                    time_series_array.forEach(function(x){
+                      x_array.push(x[0]);
+                    })
+                    let y_array=[]
+                    time_series_array.forEach(function(y){
+                      // console.log(y[1]);
+                      y_array.push(y[1]);
+                    })
+                    console.log(x_array);
+                    console.log(y_array);
+                    let title_graph = `${result1['graphs']['title']}`
+                    initialize_graphs(x_array,y_array,title_graph);
+                 }
+                 else{
+                   let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
+                   initialize_graphs([],[],title_graph);
+                 }
+
+                }
               })
-              // console.log(variable_select);
 
             }
           })
@@ -257,54 +403,28 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ PURPOSE: THE FUNCTIONS SHOWS THE GRAPHS IN THE LOWER PORTION OF THE MAP ***********
     */
     activate_deactivate_graphs = function(){
+      // console.log("hola");
+      // if(xArray === undefined){
+      //   xArray =[];
+      // }
+      // if(yArray === undefined){
+      //   yArray =[];
+      // }
+      // if(title_graph === undefined){
+      //   title_graph = "No datapoint or variable selected"
+      // }
       // console.log("the switch is on/off");
       let actual_state=$(this).prop('checked');
       let element_graphs=document.getElementById("graph");
+      element_graphs.style.cssText=  "display: flex; flex-direction: row;";
+
+      // $("#graphs").empty();
       // let element_graphs2=document.getElementById("graph2");
       let element_map =document.getElementById("map");
       if(actual_state){
-        //make the down part visible and also give the design of the model//
-        console.log("on");
 
-        element_graphs.style.cssText=  "display: flex; flex-direction: row;";
-        map.updateSize();
-        var trace1 = {
-          x: [1, 2, 3, 4, 5],
-          y: [1, 6, 3, 6, 1],
-          mode: 'markers',
-          type: 'scatter',
-          name: 'Team A',
-          text: ['A-1', 'A-2', 'A-3', 'A-4', 'A-5'],
-          marker: { size: 12 }
-        };
-
-        var trace2 = {
-          x: [1.5, 2.5, 3.5, 4.5, 5.5],
-          y: [4, 1, 7, 1, 4],
-          mode: 'markers',
-          type: 'scatter',
-          name: 'Team B',
-          text: ['B-a', 'B-b', 'B-c', 'B-d', 'B-e'],
-          marker: { size: 12 }
-        };
-
-        var data = [ trace1, trace2 ];
-
-        var layout = {
-          xaxis: {
-            range: [ 0.75, 5.25 ]
-          },
-          yaxis: {
-            range: [0, 8]
-          },
-          title:'Data Labels Hover',
-          autosize: true
-        };
-
-        Plotly.newPlot('plots', data, layout);
 
       }
-
       else{
         //make the down part invisible, but remain with the same variables.
         console.log("off");
@@ -312,8 +432,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
         // element_graphs.style.cssText=  "width: 100%;height: 0%;visibility: hidden;";
         // $("#graph2").hide();
         $("#graph").hide();
-        map.updateSize();
+        if(map !==undefined){
+          map.updateSize();
 
+        }
 
       }
     };
@@ -2366,6 +2488,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
       //   console.log("hola");
       // })
      activate_layer_values();
+     let empty_array=[];
+     initialize_graphs([],[],"No data Available");
 
   })
 })() // End of package wrapper
