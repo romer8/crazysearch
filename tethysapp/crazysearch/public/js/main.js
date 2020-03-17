@@ -824,6 +824,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
           let send_group={
             group: hydroserver_group
           };
+          $("#KeywordLoading").css({"margin-left":'40%', position:'relative',"z-index": 9999});
+          $("#KeywordLoading").removeClass("hidden");
+          $("#btn-key-search").hide();
+
 
           $.ajax({
             type:"GET",
@@ -921,8 +925,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   }
 
                 }
+                $("#KeywordLoading").addClass("hidden");
 
-                $("#soapAddLoading").addClass("hidden")
                 $("#btn-key-search").show();
 
 
