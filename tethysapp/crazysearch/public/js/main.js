@@ -318,7 +318,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           object_request['code']=feature.values_['code'];
           object_request['network']=feature.values_['network'];
           // $("#plots").hide();
-          // $("#graphAddLoading").css({left:'15%', position:'absolute'});
+          $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
           $("#graphAddLoading").removeClass("hidden");
 
           $.ajax({
