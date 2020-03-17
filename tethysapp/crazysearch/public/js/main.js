@@ -199,16 +199,27 @@ var CRAZYSEARCH_PACKAGE = (function() {
             })
             let y_array=[]
             time_series_array.forEach(function(y){
-              y_array.push(y[1]);
+              // console.log(y[1]);
+              if(y[1]===-9999){
+                y_array.push(null)
+              }
+              else{
+                y_array.push(y[1]);
+              }
+
             })
             console.log(x_array);
             console.log(y_array);
-            let title_graph = `${result1['graphs']['title']}`
-            initialize_graphs(x_array,y_array,title_graph);
+            let title_graph = `${result1['graphs']['title']}`;
+            let units_x = `${result1['graphs']['unit']}` ;
+            let units_y = "Time";
+            let variable_name_legend = `${result1['graphs']['variable']}`;
+            initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend );
          }
          else{
-           let title_graph=  ` No data available ${object_request_graphs['site_name']} - ${selectedItemText}`
-           initialize_graphs([],[],title_graph);
+           let title_graph=  `${object_request_graphs['site_name']} - ${selectedItemText}
+           No Data Available`
+           initialize_graphs([],[],title_graph,"","","");
          }
 
 
@@ -223,7 +234,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: INITIALIZE_GRAPHS **********************
     ************ PURPOSE: INITIALIZES ANY GRAH IN THE TIME SERIE OR BEGINNING ***********
     */
-    initialize_graphs = function(xArray,yArray,title_graph){
+    initialize_graphs = function(xArray,yArray,title_graph,xTitle,yTitle,legend1){
       let element_graphs=document.getElementById("graph");
       $("#graphs").empty();
       // let element_graphs2=document.getElementById("graph2");
@@ -240,7 +251,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           // mode: 'markers',
           mode: 'lines',
           type: 'scatter',
-          name: 'No data Available',
+          name: legend1,
           text: [],
           marker: { size: 5 },
           line: {color: '#17BECF'}
@@ -251,13 +262,28 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         var layout = {
           xaxis: {
-            // range: [ 0.75, 5.25 ]
+            title: {
+             text: xTitle,
+             font: {
+               size: 15,
+               color: '#7f7f7f'
+             }
+           }
+            // range: [ 0, 5.25 ]
           },
           yaxis: {
-            // range: [0, 8]
+            title: {
+             text: yTitle,
+             font: {
+               size: 15,
+               color: '#7f7f7f'
+             }
+           }
+            // range: [0, 4]
           },
           title: title_graph,
-          autosize: true
+          autosize: true,
+          showlegend:true
         };
 
         Plotly.newPlot('plots', data, layout);
@@ -291,15 +317,45 @@ var CRAZYSEARCH_PACKAGE = (function() {
           object_request['hs_url']=feature.values_['hs_url'];
           object_request['code']=feature.values_['code'];
           object_request['network']=feature.values_['network'];
+          // $("#plots").hide();
+          // $("#graphAddLoading").css({left:'15%', position:'absolute'});
+          $("#graphAddLoading").removeClass("hidden");
+
           $.ajax({
             type:"GET",
             url: `${apiServer}/get-values-hs/`,
             dataType: "JSON",
             data: object_request,
             success: function(result){
-              // console.log(result);
+              console.log(result);
               // create Dict //
               evt.stopPropagation();
+              // let graphs_data_array = result['graph_data'];
+              // let myIndex = 0;
+              // graphs_data_array.forEach(function(graph_data_array){
+              //   let variable_name_count = `${graph_data_array['variable']}(Data Points: ${graph_data_array['count']})`;
+              //   let option;
+              //   let option_begin;
+              //   if(myIndex === 0){
+              //     console.log("initial");
+              //     // option = `<option selected = "selected>Variables Ready ..</option>`;
+              //     option_begin = `<option value=${myIndex} selected= "selected">${variable_name_count}</option>`;
+              //     variable_select.append(option_begin)
+              //
+              //   }
+              //   else{
+              //     option = `<option value=${myIndex} >${variable_name_count}</option>`;
+              //
+              //   }
+              //   variable_select.append(option)
+              //   // variable_select.append(option_variables)
+              //
+              //   variable_select.selectpicker("refresh");
+              //   myIndex = myIndex+1;
+              //
+              // })
+
+
 
               let object_code_and_variable = {};
               let variables = result['variables'];
@@ -323,12 +379,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   if(i === 0){
                     console.log("initial");
                     // option = `<option selected = "selected>Variables Ready ..</option>`;
-                    option_begin = `<option value=${i} selected= "selected">${variable}</option>`;
+                    option_begin = `<option value=${i} selected= "selected">${variable} (${result['counts'][i]}) Data Points Counted </option>`;
                     variable_select.append(option_begin)
 
                   }
                   else{
-                    option = `<option value=${i} >${variable}</option>`;
+                    option = `<option value=${i} >${variable} (${result['counts'][i]}) Data Points Counted</option>`;
 
                   }
                   variable_select.append(option)
@@ -371,21 +427,44 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                     let x_array = [];
                     time_series_array.forEach(function(x){
+
                       x_array.push(x[0]);
                     })
                     let y_array=[]
                     time_series_array.forEach(function(y){
                       // console.log(y[1]);
-                      y_array.push(y[1]);
+                      if(y[1]===-9999){
+                        y_array.push(null)
+                      }
+                      else{
+                        y_array.push(y[1]);
+                      }
+
                     })
                     console.log(x_array);
                     console.log(y_array);
-                    let title_graph = `${result1['graphs']['title']}`
-                    initialize_graphs(x_array,y_array,title_graph);
+                    let title_graph = `${result1['graphs']['title']}`;
+                    let units_x = `${result1['graphs']['unit']}` ;
+                    let units_y = "Time" ;
+                    let variable_name_legend = `${result1['graphs']['variable']}`;
+
+
+                    initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend);
+                    $("#graphAddLoading").addClass("hidden")
+                    // $("#plots").show();
+                    // Plotly.Plots.resize();
+
+
                  }
                  else{
                    let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
-                   initialize_graphs([],[],title_graph);
+                   initialize_graphs([],[],title_graph,"","","");
+                   $("#graphAddLoading").addClass("hidden")
+                   // $("#plots").show();
+                   // Plotly.Plots.resize();
+
+
+
                  }
 
                 }
@@ -403,34 +482,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ PURPOSE: THE FUNCTIONS SHOWS THE GRAPHS IN THE LOWER PORTION OF THE MAP ***********
     */
     activate_deactivate_graphs = function(){
-      // console.log("hola");
-      // if(xArray === undefined){
-      //   xArray =[];
-      // }
-      // if(yArray === undefined){
-      //   yArray =[];
-      // }
-      // if(title_graph === undefined){
-      //   title_graph = "No datapoint or variable selected"
-      // }
-      // console.log("the switch is on/off");
+
       let actual_state=$(this).prop('checked');
       let element_graphs=document.getElementById("graph");
-      element_graphs.style.cssText=  "display: flex; flex-direction: row;";
 
-      // $("#graphs").empty();
-      // let element_graphs2=document.getElementById("graph2");
       let element_map =document.getElementById("map");
       if(actual_state){
-
-
+        element_graphs.style.cssText=  "display: flex; flex-direction: row;";
       }
       else{
-        //make the down part invisible, but remain with the same variables.
         console.log("off");
-        // element_map.style.cssText = "width: 100%;height: 100%; flex:1 1 100%;";
-        // element_graphs.style.cssText=  "width: 100%;height: 0%;visibility: hidden;";
-        // $("#graph2").hide();
         $("#graph").hide();
         if(map !==undefined){
           map.updateSize();
@@ -440,8 +501,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
     };
     $('#sG').change(activate_deactivate_graphs)
-
-
 
     /*
     ************ FUNCTION NAME: GET_NOTIFICATION **********************
@@ -1832,6 +1891,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       console.log(datastring);
       //Submitting the data to the controller
       $("#soapAddLoading").removeClass("hidden");
+
       $("#btn-add-soap").hide();
 
       $.ajax({
@@ -2489,7 +2549,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       // })
      activate_layer_values();
      let empty_array=[];
-     initialize_graphs([],[],"No data Available");
+     initialize_graphs([],[],"No data Available","","");
 
   })
 })() // End of package wrapper

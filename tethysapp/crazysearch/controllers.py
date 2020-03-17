@@ -691,14 +691,23 @@ def keyWordsForGroup(request):
 def get_values_hs(request):
     list_catalog={}
     return_obj={}
-    # print("Inside the get_values_hs function")
-    # print(request)
+    print(request)
     hs_name = request.GET.get('hs_name')
-    # print(hs_name)
     hs_url = request.GET.get('hs_url')
-    # print(hs_url)
     site_name = request.GET.get('site_name')
-    # print(site_name)
+    site_code =  request.GET.get('code')
+    network = request.GET.get('network')
+
+
+    # variable_text = request.GET.get('variable')
+    # code_variable =request.GET.get ('code_variable')
+
+
+    # print("Inside the get_values_hs function")
+
+    # hs_name = request.GET.get('hs_name')
+    # hs_url = request.GET.get('hs_url')
+    # site_name = request.GET.get('site_name')
 
     SessionMaker = app.get_persistent_store_database(Persistent_Store_Name, as_sessionmaker=True)
 
@@ -716,6 +725,9 @@ def get_values_hs(request):
     array_variables=keywords_json['variablesResponse']['variables']['variable']
     array_keywords_hydroserver=[]
     array_variables_codes = []
+    array_variables_lengths = []
+    length_values = 0
+
     # print(type(array_variables))
     # print(array_variables)
     if isinstance(array_variables,type([])):
@@ -726,41 +738,89 @@ def get_values_hs(request):
             # print(words)
             # print(words.get('variableName'))
             # print(words['variableName'])
+            variable_text = words['variableName']
+            code_variable = words['variableCode']['#text']
+            start_date = ""
+            end_date = ""
+            variable_desc = network + ':' + code_variable
+            print(variable_desc)
+            site_desc = network + ':' + site_code
+            print(site_desc)
+            values = client.service.GetValues(
+                site_desc, variable_desc, start_date, end_date, "")
+
+            values_dict = xmltodict.parse(values)  # Converting xml to dict
+            values_json_object = json.dumps(values_dict)
+            values_json = json.loads(values_json_object)
+            times_series = values_json['timeSeriesResponse'][
+                'timeSeries']  # Timeseries object for the variable
+            # print(times_series)
+            if times_series['values'] is not None:
+                length_values= len(times_series['values']['value'])
+                print(variable_text," ", length_values )
+            else:
+                length_values = 0
+                print(variable_text," ", length_values )
+
+
+            array_variables_lengths.append(length_values)
+
+
             array_keywords_hydroserver.append(words['variableName'])
             array_variables_codes.append(words['variableCode']['#text'])
         # words_to_search[name] = array_keywords_hydroserver
     if isinstance(array_variables,dict):
+        variable_text = array_variables['variableName']
+        code_variable = array_variables['variableCode']['#text']
+        start_date = ""
+        end_date = ""
+        variable_desc = network + ':' + code_variable
+        print(variable_desc)
+        site_desc = network + ':' + site_code
+        print(site_desc)
+        values = client.service.GetValues(
+            site_desc, variable_desc, start_date, end_date, "")
+        # print(values)
+
+        values_dict = xmltodict.parse(values)  # Converting xml to dict
+        values_json_object = json.dumps(values_dict)
+        values_json = json.loads(values_json_object)
+        times_series = values_json['timeSeriesResponse'][
+            'timeSeries']  # Timeseries object for the variable
+        # print(times_series)
+        if times_series['values'] is not None:
+
+            length_values= len(times_series['values']['value'])
+            print(variable_text," ", length_values )
+        else:
+            length_values = 0
+            print(variable_text," ", length_values )
+
+
+
+        array_variables_lengths.append(length_values)
+
+        # site_info_Mc = client.service.GetSiteInfo(site_desc)
+        # site_info_Mc_dict = xmltodict.parse(site_info_Mc)
+        # site_info_Mc_json_object = json.dumps(site_info_Mc_dict)
+        # site_info_Mc_json = json.loads(site_info_Mc_json_object)
+
+
         array_keywords_hydroserver.append(array_variables['variableName'])
         array_variables_codes.append(array_variables['variableCode']['#text'])
 
 
     return_obj['variables']=array_keywords_hydroserver
     return_obj['codes']=array_variables_codes
+    return_obj['counts'] = array_variables_lengths
 
-
-    # sites_values = client.service.GetValues(site_name,"discharge",)
-    # # print(sites_values)
-    #
-    # # print(sites)
-    # sites_values_dict = xmltodict.parse(sites_values)
-    # sites_values_json_object = json.dumps(sites_values_dict)
-    #
-    # sites_values_json = json.loads(sites_values_json_object)
-    # # Parsing the sites and creating a sites object. See utilities.py
-    # print("-------------------------------------")
-    # # print(sites_json)
-    # sites_values_object = parseJSON(sites_values_json)
-    # # print(sites_object)
-    # # converted_sites_object=[x['sitename'].decode("UTF-8") for x in sites_object]
-    #
-    # # sites_parsed_json = json.dumps(converted_sites_object)
-    # sites_values_parsed_json = json.dumps(sites_values_object)
-    # print(sites_values_parsed_json)
-    # return_obj['siteInfo'] = sites_values_parsed_json
 
     return JsonResponse(return_obj)
 
 def get_values_graph_hs(request):
+# def get_values_graph_hs(hs_name, hs_url, site_name, site_code, network, code_variable):
+    # let's do the change baby ok
+
     list_catalog={}
     return_obj={}
     print("Inside the get_values_graphs function")
@@ -798,10 +858,12 @@ def get_values_graph_hs(request):
         'timeSeries']  # Timeseries object for the variable
     # print(times_series)
     return_obj['siteInfo']= site_info_Mc_json
+    object_with_methods_and_variables ={}
     return_obj['values'] = times_series
     # print(site_info_Mc_json)
 
     if times_series['values'] is not None:
+
         return_obj['siteInfo']= site_info_Mc_json
         methodID = []
         object_methods= site_info_Mc_json['sitesResponse']['site']['seriesCatalog']['series']
@@ -809,21 +871,30 @@ def get_values_graph_hs(request):
         if(isinstance(object_methods,(dict))):
             print("adding to the methodID as a dict")
             methodID.append(object_methods['method']['@methodID'])
+
+            variable_name_ = object_methods['variable']['variableName']
+            object_with_methods_and_variables[variable_name_]= object_methods['method']['@methodID']
+            print(object_with_methods_and_variables)
         else:
             for object_method in object_methods:
                 print("adding to the methodID as an arraylist")
                 methodID.append(object_method['method']['@methodID'])
+                variable_name_ = object_method['variable']['variableName']
+                object_with_methods_and_variables[variable_name_]= object_method['method']['@methodID']
+                print(object_with_methods_and_variables)
+
 
         print(methodID)
         return_obj['values'] = times_series
         return_obj['methodsID']=methodID
+        return_obj['methods_variables']=object_with_methods_and_variables
     #     print("times series is true")
         graph_json = {}  # json object that will be returned to the front end
         graph_json["variable"] = times_series['variable']['variableName']
         graph_json["unit"] = times_series[
             'variable']['unit']['unitAbbreviation']
-        graph_json["title"] = site_desc + ':' + \
-            times_series['variable']['variableName']
+        graph_json["title"] = site_name + ' ' + \
+            "( " + times_series['variable']['variableName'] + " )"
         for j in times_series['values']:  # Parsing the timeseries
             print("first for loop")
             print(j)
@@ -847,14 +918,15 @@ def get_values_graph_hs(request):
 
                         try:
                             # if k['@methodCode'] == variable_method:
-                            if k['@methodCode'] == methodID[0]:
+                            # if k['@methodCode'] == methodID[0]:
+                            if k['@methodCode'] == object_with_methods_and_variables[times_series['variable']['variableName']]:
                                 count = count + 1
                                 time = k['@dateTimeUTC']
-                                print(time)
+                                # print(time)
                                 time1 = time.replace("T", "-")
-                                print(type(time1))
+                                # print(type(time1))
                                 # print(time1[10])
-                                print(time1)
+                                # print(time1)
 
                                 time_split = time1.split("-")
                                 year = int(time_split[0])
@@ -868,10 +940,10 @@ def get_values_graph_hs(request):
                                     year, month, day, hour, minute)
                                 # Creating a timestamp as javascript cannot
                                 # recognize datetime object
-                                print(date_string)
-                                print(type(date_string))
+                                # print(date_string)
+                                # print(type(date_string))
                                 date_string_converted = date_string.strftime("%Y-%m-%d %H:%M:%S")
-                                print(date_string_converted)
+                                # print(date_string_converted)
                                 data_values2.append([date_string_converted,value])
                                 data_values2.sort()
                                 time_stamp = calendar.timegm(
@@ -880,7 +952,7 @@ def get_values_graph_hs(request):
                                 data_values.sort()
                             graph_json["values2"] = data_values2
 
-                            graph_json["values"] = data_values
+                            # graph_json["values"] = data_values
                             graph_json["count"] = count
                             # print("we are out of here if not problem")
                         except KeyError:  # The Key Error kicks in when there is only one timeseries
@@ -897,7 +969,7 @@ def get_values_graph_hs(request):
                             value = float(str(k['#text']))
                             date_string = datetime(
                                 year, month, day, hour, minute)
-                            print(date_string)
+                            # print(date_string)
                             data_values2.append([date_string,value])
                             data_values2.sort()
                             time_stamp = calendar.timegm(
@@ -906,7 +978,7 @@ def get_values_graph_hs(request):
                             data_values.sort()
                         graph_json["values2"] = data_values2
 
-                        graph_json["values"] = data_values
+                        # graph_json["values"] = data_values
                         graph_json["count"] = count
                         return_obj['graphs']=graph_json
                         # print("we are out of here if problem")
@@ -916,12 +988,13 @@ def get_values_graph_hs(request):
                         print("not list the time series then")
                         print(type(times_series))
                         # if times_series['values']['value']['@methodCode'] == variable_method:
-                        if times_series['values']['value']['@methodCode'] == methodID[0]:
+                        # if times_series['values']['value']['@methodCode'] == methodID[0]:
+                        if times_series['values']['value']['@methodCode'] == object_with_methods_and_variables[times_series['variable']['variableName']]:
                             time = times_series['values'][
                                 'value']['@dateTimeUTC']
-                            print(time)
+                            # print(time)
                             time1 = time.replace("T", "-")
-                            print(time1)
+                            # print(time1)
                             time_split = time1.split("-")
                             year = int(time_split[0])
                             month = int(time_split[1])
@@ -944,7 +1017,7 @@ def get_values_graph_hs(request):
                             data_values.sort()
                             graph_json["values2"] = data_values2
 
-                            graph_json["values"] = data_values
+                            # graph_json["values"] = data_values
                             graph_json["count"] = 1
                             return_obj['graphs']=graph_json
 
@@ -963,7 +1036,7 @@ def get_values_graph_hs(request):
                             str(times_series['values']['value']['#text']))
                         date_string = datetime(
                             year, month, day, hour, minute)
-                        print(date_string)
+                        # print(date_string)
 
                         time_stamp = calendar.timegm(
                             date_string.utctimetuple()) * 1000
@@ -973,16 +1046,13 @@ def get_values_graph_hs(request):
                         data_values2.append([date_string,value])
                         data_values2.sort()
                         graph_json["values2"] = data_values2
-                        graph_json["values"] = data_values
+                        # graph_json["values"] = data_values
                         graph_json["count"] = 1
                         return_obj['graphs']=graph_json
+    # else:
+    #     graph_json = {}  # json object that will be returned to the front end
+    #     graph_json["count"] = 0
+    #     return_obj["graphs"]=graph_json
 
-
-    # Returning the timeseries object along with the relevant metadata
-
-    # request.session['graph_obj'] = graph_json
-
-    # return JsonResponse(graph_json)
-    # print(return_obj)
     print("done with get_values_graph")
     return JsonResponse(return_obj)
