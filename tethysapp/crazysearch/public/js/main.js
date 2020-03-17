@@ -180,7 +180,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
       object_request_graphs['variable']=selectedItem;
       object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`];
       // console.log(object_request2);
-
+      $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
+      $("#graphAddLoading").removeClass("hidden");
       $.ajax({
         type:"GET",
         url: `${apiServer}/get-values-graph-hs/`,
@@ -215,11 +216,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
             let units_y = "Time";
             let variable_name_legend = `${result1['graphs']['variable']}`;
             initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend );
+            $("#graphAddLoading").addClass("hidden")
+
          }
          else{
            let title_graph=  `${object_request_graphs['site_name']} - ${selectedItemText}
            No Data Available`
            initialize_graphs([],[],title_graph,"","","");
+           $("#graphAddLoading").addClass("hidden")
+
          }
 
 
