@@ -1,5 +1,6 @@
 {% extends "crazysearch/base.html" %}
 {% load tethys_gizmos %}
+{% load static %}
 
 {% block app_navigation_items %}
 <!--The Hydroservers are added to this box-->
@@ -66,10 +67,11 @@
 <!-- </div> -->
 
   <div id="graph">
+
     <div id="options">
       <h3>Plot Option</h3>
       <p> Variables for ... </p>
-      <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info">
+      <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info" width: '100%'>
         <option > No Variables Available . . .</option>
         <!-- <option >Hot Dog, Fries and a Soda</option>
         <option>Burger, Shake and a Smile</option>
@@ -85,9 +87,11 @@
         <option>Option 3</option>
         <option>Option 4</option>
       </select>
-    </div>
-    <div id="plots">
 
+    </div>
+    <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />
+
+    <div id="plots">
     </div>
 
   </div>
