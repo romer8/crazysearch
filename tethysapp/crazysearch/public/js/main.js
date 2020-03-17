@@ -1001,6 +1001,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
   */
   reset_keywords = function(){
     // UNCHECK ALL THE BOXES AND CHECK IF THERE WAS SOME THAT WERE CHECKED BEFORE //
+    $("#KeywordLoading").css({"margin-left":'40%', position:'relative',"z-index": 9999});
+    $("#KeywordLoading").removeClass("hidden");
+    $("#btn-key-search").hide();
     console.log("IN THE FUNCTION FOR RESETING ");
     let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
     datastring.forEach(function(data){
@@ -1043,6 +1046,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       separator_elements.forEach(function(element){
         element.parentNode.removeChild(element);
       })
+      $("#KeywordLoading").addClass("hidden");
 
   }
   $("#btn-r-reset").on("click", reset_keywords);
