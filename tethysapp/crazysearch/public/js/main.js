@@ -143,7 +143,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         initialize_graphs,
         object_request_graphs ={},
         select_variable_change,
-        codes_variables_array={};
+        codes_variables_array={},
+        reset_graphs;
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -158,6 +159,20 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+    /*
+    ************ FUNCTION NAME: RESET_GRAPHS **********************
+    ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
+    */
+    reset_graphs = function(){
+      initialize_graphs([],[],"No Data Available","","","");
+      console.log("no mames");
+      $("#variables_graph").empty();
+      let option_begin = `<option selected= "selected">No variables Available </option>`;
+      $("#variables_graph").append(option_begin)
+    }
+
+    $('#reset_graphs').on('click',reset_graphs)
+
     /*
     ************ FUNCTION NAME: SELECT_VARIABLE_CHANGE **********************
     ************ PURPOSE: SELECT A VARIABLE FROM A DROPDOWN AND CHANGE THE GRAPH ***********
