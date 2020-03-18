@@ -146,7 +146,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
         codes_variables_array={},
         reset_graphs,
         change_type_graphs,
-        active_map_feature = {};
+        active_map_feature_graphs = {
+          'scatter':{},
+          'bar':{}
+        };
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -168,40 +171,59 @@ var CRAZYSEARCH_PACKAGE = (function() {
     change_type_graphs = function(){
       console.log($("#type_graph_select")['0'].value);
       let chart_type= $("#type_graph_select")['0'].value;
-      // console.log(active_map_feature);
+      // console.log(active_map_feature_graphs);
 
 
       if(chart_type === "Data Bar Chart"){
-        $.ajax({
-          type:"GET",
-          url: `${apiServer}/get-values-hs/`,
-          dataType: "JSON",
-          data: active_map_feature,
-          success: function(result){
-            console.log(result);
-            initialize_graphs(result['variables'],result['counts'],undefined,undefined,undefined,undefined,"bar");
-          },
-          error: function(error) {
-            console.log(error);
-            // get_notification("danger",`Something were wrong when applying the filter with the keywords`);
-            $.notify(
-                {
-                    message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
-                },
-                {
-                    type: "danger",
-                    allow_dismiss: true,
-                    z_index: 20000,
-                    delay: 5000
-                }
-            )
+        if(active_map_feature_graphs['bar']['y_array'].length > 0){
+          initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+        }
+        else{
+          $.notify(
+              {
+                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
 
-          }
-        })
+
+        }
+        // $.ajax({
+        //   type:"GET",
+        //   url: `${apiServer}/get-values-hs/`,
+        //   dataType: "JSON",
+        //   data: object_request_graphs,
+        //   success: function(result){
+        //     console.log(result);
+        //     initialize_graphs(result['variables'],result['counts'],undefined,undefined,undefined,undefined,"bar");
+        //   },
+        //   error: function(error) {
+        //     console.log(error);
+        //     // get_notification("danger",`Something were wrong when applying the filter with the keywords`);
+        //     $.notify(
+        //         {
+        //             message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+        //         },
+        //         {
+        //             type: "danger",
+        //             allow_dismiss: true,
+        //             z_index: 20000,
+        //             delay: 5000
+        //         }
+        //     )
+        //
+        //   }
+        // })
       }
 
       if(chart_type === "Scatter"){
         console.log("HOLA");
+        // initialize_graphs(active_map_feature_graphs['scatter']['x_a'])
 
       }
 
@@ -411,11 +433,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
           console.log(feature.values_['hs_name']);
           // console.log(feature);
           // ADD TO THE GLOBAL OBJECT THAT CONTAINS INFORMATION//
-          active_map_feature['hs_name']=feature.values_['hs_name'];
-          active_map_feature['site_name']=feature.values_['name'];
-          active_map_feature['hs_url']=feature.values_['hs_url'];
-          active_map_feature['code']=feature.values_['code'];
-          active_map_feature['network']=feature.values_['network'];
+          // active_map_feature_graphs['hs_name']=feature.values_['hs_name'];
+          // active_map_feature_graphs['site_name']=feature.values_['name'];
+          // active_map_feature_graphs['hs_url']=feature.values_['hs_url'];
+          // active_map_feature_graphs['code']=feature.values_['code'];
+          // active_map_feature_graphs['network']=feature.values_['network'];
 
 
           // code here
@@ -437,6 +459,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
             success: function(result){
               console.log(result);
               // create Dict //
+              active_map_feature_graphs['bar']['x_array'] =result['variables'];
+              active_map_feature_graphs['bar']['y_array'] = result['counts'];
+              active_map_feature_graphs['bar']['type'] = 'bar';
               evt.stopPropagation();
               let object_code_and_variable = {};
               let variables = result['variables'];
@@ -529,6 +554,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     let units_y = "Time" ;
                     let variable_name_legend = `${result1['graphs']['variable']}`;
                     let type = "scatter";
+
+                    active_map_feature_graphs['scatter']['x_array'] = x_array;
+                    active_map_feature_graphs['scatter']['y_array'] = y_array;
+                    active_map_feature_graphs['scatter']['title_graph'] = title_graph;
+                    active_map_feature_graphs['scatter']['units_x'] = units_x;
+                    active_map_feature_graphs['scatter']['units_y'] = units_y;
+                    active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
+                    active_map_feature_graphs['scatter']['type'] = type;
+
 
                     initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
                     $("#graphAddLoading").addClass("hidden")
