@@ -332,6 +332,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           // console.log(feature);
 
           // code here
+          $("#siteName_title").html(feature.values_['name']);
           object_request['hs_name']=feature.values_['hs_name'];
           object_request['site_name']=feature.values_['name'];
           object_request['hs_url']=feature.values_['hs_url'];
