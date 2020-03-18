@@ -893,8 +893,9 @@ def get_values_graph_hs(request):
         graph_json["variable"] = times_series['variable']['variableName']
         graph_json["unit"] = times_series[
             'variable']['unit']['unitAbbreviation']
-        graph_json["title"] = site_name + ' ' + \
-            "( " + times_series['variable']['variableName'] + " )"
+        # graph_json["title"] = site_name + ' ' + \
+        #     "( " + times_series['variable']['variableName'] + " )"
+        graph_json["title"] = times_series['variable']['variableName'] + " (" + graph_json["unit"] + ") vs Time"
         for j in times_series['values']:  # Parsing the timeseries
             print("first for loop")
             print(j)
