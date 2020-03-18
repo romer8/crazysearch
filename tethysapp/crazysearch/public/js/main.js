@@ -144,7 +144,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
         object_request_graphs ={},
         select_variable_change,
         codes_variables_array={},
-        reset_graphs;
+        reset_graphs,
+        change_type_graphs,
+        active_map_feature = {};
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -163,12 +165,56 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: RESET_GRAPHS **********************
     ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
     */
+    change_type_graphs = function(){
+      console.log($("#type_graph_select")['0'].value);
+      let chart_type= $("#type_graph_select")['0'].value;
+      // console.log(active_map_feature);
+
+
+      if(chart_type === "Data Bar Chart"){
+        $.ajax({
+          type:"GET",
+          url: `${apiServer}/get-values-hs/`,
+          dataType: "JSON",
+          data: active_map_feature,
+          success: function(result){
+            console.log(result);
+            initialize_graphs(result['variables'],result['counts'],undefined,undefined,undefined,undefined,"bar");
+          },
+          error: function(error) {
+            console.log(error);
+            // get_notification("danger",`Something were wrong when applying the filter with the keywords`);
+            $.notify(
+                {
+                    message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+                },
+                {
+                    type: "danger",
+                    allow_dismiss: true,
+                    z_index: 20000,
+                    delay: 5000
+                }
+            )
+
+          }
+        })
+      }
+
+      if(chart_type === "Scatter"){
+        console.log("HOLA");
+
+      }
+
+    }
+    $("#type_graph_select").change(change_type_graphs)
+
+    /*
+    ************ FUNCTION NAME: RESET_GRAPHS **********************
+    ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
+    */
     reset_graphs = function(){
-      initialize_graphs([],[],"No Data Available","","","");
-      console.log("no mames");
-      $("#variables_graph").empty();
-      let option_begin = `<option selected= "selected">No variables Available </option>`;
-      $("#variables_graph").append(option_begin)
+      initialize_graphs([],[],"No Data Available","","","","scatter");
+
     }
 
     $('#reset_graphs').on('click',reset_graphs)
@@ -230,14 +276,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
             let units_x = `${result1['graphs']['unit']}` ;
             let units_y = "Time";
             let variable_name_legend = `${result1['graphs']['variable']}`;
-            initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend );
+            let type= "scatter";
+            initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
             $("#graphAddLoading").addClass("hidden")
 
          }
          else{
            let title_graph=  `${object_request_graphs['site_name']} - ${selectedItemText}
            No Data Available`
-           initialize_graphs([],[],title_graph,"","","");
+           initialize_graphs([],[],title_graph,"","","","scatter");
            $("#graphAddLoading").addClass("hidden")
 
          }
@@ -254,7 +301,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: INITIALIZE_GRAPHS **********************
     ************ PURPOSE: INITIALIZES ANY GRAH IN THE TIME SERIE OR BEGINNING ***********
     */
-    initialize_graphs = function(xArray,yArray,title_graph,xTitle,yTitle,legend1){
+    initialize_graphs = function(xArray,yArray,title_graph,xTitle,yTitle,legend1,type){
       let element_graphs=document.getElementById("graph");
       $("#graphs").empty();
       // let element_graphs2=document.getElementById("graph2");
@@ -265,12 +312,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         element_graphs.style.cssText=  "display: flex; flex-direction: row;";
         map.updateSize();
+      if(type === "scatter"){
         var trace1 = {
           x: xArray,
           y: yArray,
           // mode: 'markers',
           mode: 'lines',
-          type: 'scatter',
+          type: type,
           name: legend1,
           text: [],
           marker: { size: 5 },
@@ -305,8 +353,40 @@ var CRAZYSEARCH_PACKAGE = (function() {
           autosize: true,
           showlegend:true
         };
-
         Plotly.newPlot('plots', data, layout);
+
+      }
+      if(type ==="bar"){
+        console.log("I am bar type");
+        // var xValue = ['Product A', 'Product B', 'Product C'];
+        // var yValue = [20, 14, 23];
+        var trace1 = {
+          x: xArray,
+          y: yArray,
+          type: 'bar',
+          text: yArray.map(String),
+          textposition: 'auto',
+          hoverinfo: 'none',
+          marker: {
+            color: 'rgb(158,202,225)',
+            opacity: 0.6,
+            line: {
+              color: 'rgb(8,48,107)',
+              width: 1.5
+            }
+          }
+        };
+
+        var data = [trace1];
+
+        var layout = {
+          title: 'Variables',
+          barmode: 'stack'
+        };
+        Plotly.newPlot('plots', data, layout);
+
+      }
+
     // }
   }
 
@@ -330,6 +410,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
         if (feature) {
           console.log(feature.values_['hs_name']);
           // console.log(feature);
+          // ADD TO THE GLOBAL OBJECT THAT CONTAINS INFORMATION//
+          active_map_feature['hs_name']=feature.values_['hs_name'];
+          active_map_feature['site_name']=feature.values_['name'];
+          active_map_feature['hs_url']=feature.values_['hs_url'];
+          active_map_feature['code']=feature.values_['code'];
+          active_map_feature['network']=feature.values_['network'];
+
 
           // code here
           $("#siteName_title").html(feature.values_['name']);
@@ -351,33 +438,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log(result);
               // create Dict //
               evt.stopPropagation();
-              // let graphs_data_array = result['graph_data'];
-              // let myIndex = 0;
-              // graphs_data_array.forEach(function(graph_data_array){
-              //   let variable_name_count = `${graph_data_array['variable']}(Data Points: ${graph_data_array['count']})`;
-              //   let option;
-              //   let option_begin;
-              //   if(myIndex === 0){
-              //     console.log("initial");
-              //     // option = `<option selected = "selected>Variables Ready ..</option>`;
-              //     option_begin = `<option value=${myIndex} selected= "selected">${variable_name_count}</option>`;
-              //     variable_select.append(option_begin)
-              //
-              //   }
-              //   else{
-              //     option = `<option value=${myIndex} >${variable_name_count}</option>`;
-              //
-              //   }
-              //   variable_select.append(option)
-              //   // variable_select.append(option_variables)
-              //
-              //   variable_select.selectpicker("refresh");
-              //   myIndex = myIndex+1;
-              //
-              // })
-
-
-
               let object_code_and_variable = {};
               let variables = result['variables'];
               let code_variable =result['codes'];
@@ -468,9 +528,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     let units_x = `${result1['graphs']['unit']}` ;
                     let units_y = "Time" ;
                     let variable_name_legend = `${result1['graphs']['variable']}`;
+                    let type = "scatter";
 
-
-                    initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend);
+                    initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
                     $("#graphAddLoading").addClass("hidden")
                     // $("#plots").show();
                     // Plotly.Plots.resize();
@@ -479,7 +539,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  }
                  else{
                    let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
-                   initialize_graphs([],[],title_graph,"","","");
+                   let type = "scatter";
+
+                   initialize_graphs([],[],title_graph,"","","",type);
                    $("#graphAddLoading").addClass("hidden")
                    // $("#plots").show();
                    // Plotly.Plots.resize();
@@ -2578,7 +2640,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       // })
      activate_layer_values();
      let empty_array=[];
-     initialize_graphs([],[],"No data Available","","");
+     initialize_graphs([],[],"No data Available","","","","scatter");
 
   })
 })() // End of package wrapper
