@@ -258,14 +258,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     select_variable_change = function(){
       console.log("new change on this");
       console.log(this);
-      // let object_request2 = {};
-      // object_request2['hs_name']=feature.values_['hs_name'];
-      // object_request2['site_name']=feature.values_['name'];
-      // object_request2['hs_url']=feature.values_['hs_url'];
-      // object_request2['code']=feature.values_['code'];
-      // object_request2['network']=feature.values_['network'];
-      //CONTINUE HERE // AND TRY TO SEE HOW IT GOES //
-      // console.log(object_request);
+
       let selectedItem = $('#variables_graph')['0'].value;
       let selectedItemText = $('#variables_graph')['0'].text;
       // console.log(selectedItem);
@@ -309,6 +302,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
             let units_y = "Time";
             let variable_name_legend = `${result1['graphs']['variable']}`;
             let type= "scatter";
+            active_map_feature_graphs['scatter']['x_array'] = x_array;
+            active_map_feature_graphs['scatter']['y_array'] = y_array;
+            active_map_feature_graphs['scatter']['title_graph'] = title_graph;
+            active_map_feature_graphs['scatter']['units_x'] = units_x;
+            active_map_feature_graphs['scatter']['units_y'] = units_y;
+            active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
+            active_map_feature_graphs['scatter']['type'] = type;
+
             initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
             $("#graphAddLoading").addClass("hidden")
 
@@ -445,16 +446,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             'bar':{}
           }
           console.log(feature.values_['hs_name']);
-          // console.log(feature);
-          // ADD TO THE GLOBAL OBJECT THAT CONTAINS INFORMATION//
-          // active_map_feature_graphs['hs_name']=feature.values_['hs_name'];
-          // active_map_feature_graphs['site_name']=feature.values_['name'];
-          // active_map_feature_graphs['hs_url']=feature.values_['hs_url'];
-          // active_map_feature_graphs['code']=feature.values_['code'];
-          // active_map_feature_graphs['network']=feature.values_['network'];
 
-
-          // code here
           $("#siteName_title").html(feature.values_['name']);
           object_request['hs_name']=feature.values_['hs_name'];
           object_request['site_name']=feature.values_['name'];
