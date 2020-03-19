@@ -174,7 +174,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       // console.log(active_map_feature_graphs);
 
 
-      if(chart_type === "Data Bar Chart"){
+      if(chart_type === "Bar"){
         if(active_map_feature_graphs['bar']['y_array'].length > 0){
           initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
         }

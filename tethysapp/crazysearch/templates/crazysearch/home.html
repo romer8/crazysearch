@@ -70,7 +70,17 @@
 
     <div id="options">
       <h3 id= "siteName_title"> Select a Station</h3>
-      <p> Variables</p>
+      <p> Plot type
+        <select id="type_graph_select" class="selectpicker" data-width="fit">
+          <option>Scatter</option>
+          <option>Bar</option>
+          <option>Pie</option>
+
+          <option>Option 4</option>
+        </select>
+        <button type="button" id= "reset_graphs" class="btn btn-danger" data-width="fit">Reset</button>
+      </p>
+      <p >Variables</p>
       <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info" width: '100%'>
         <option > No Variables Available . . .</option>
         <!-- <option >Hot Dog, Fries and a Soda</option>
@@ -78,17 +88,6 @@
         <option>Sugar, Spice and all things nice</option> -->
       </select>
       <br>
-      <button type="button" id= "reset_graphs" class="btn btn-danger">Reset Plot</button>
-      <br>
-      <br>
-      <p>Type of plots</p>
-      <select id="type_graph_select" class="selectpicker">
-        <option>Select your plot . .</option>
-        <option>Scatter</option>
-        <option>Data Bar Chart</option>
-        <option>Option 3</option>
-        <option>Option 4</option>
-      </select>
 
     </div>
     <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />

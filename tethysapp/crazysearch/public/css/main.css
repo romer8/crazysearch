@@ -204,3 +204,15 @@
 }
 .toggle.ios, .toggle-on.ios, .toggle-off.ios { border-radius: 20px; }
 .toggle.ios .toggle-handle { border-radius: 20px; }
+
+#options{
+  margin: 0 0 0 0;
+  /* padding: 0 0 0 0; */
+}
+#options p {
+  /* font-weight: bold; */
+}
+#plots{
+  padding:  0 0 0 0;
+
+}
