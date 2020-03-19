@@ -223,7 +223,17 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
       if(chart_type === "Scatter"){
         console.log("HOLA");
+        console.log(active_map_feature_graphs['scatter']);
         // initialize_graphs(active_map_feature_graphs['scatter']['x_a'])
+
+          let x_array=active_map_feature_graphs['scatter']['x_array'];
+          let y_array= active_map_feature_graphs['scatter']['y_array'];
+          let title_graph= active_map_feature_graphs['scatter']['title_graph'];
+          let units_x = active_map_feature_graphs['scatter']['units_x'];
+          let units_y = active_map_feature_graphs['scatter']['units_y'];
+          let variable_name_legend = active_map_feature_graphs['scatter']['variable_name_legend'];
+          let type = active_map_feature_graphs['scatter']['type'];
+          initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
 
       }
 
@@ -404,7 +414,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
         var layout = {
           title: 'Variables',
           barmode: 'stack',
-
         };
         Plotly.newPlot('plots', data, layout);
 
@@ -431,6 +440,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             return feature;
             });
         if (feature) {
+          active_map_feature_graphs={}
           console.log(feature.values_['hs_name']);
           // console.log(feature);
           // ADD TO THE GLOBAL OBJECT THAT CONTAINS INFORMATION//
@@ -459,8 +469,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
             data: object_request,
             success: function(result){
               console.log(result);
+              active_map_feature_graphs['bar']['x_array']=[];
+
               // create Dict //
-              active_map_feature_graphs['bar']['x_array'] = [];
               for(let i=0; i< result['variables'].length; ++i){
                 let x_axis= `${result['variables'][i]} + (${result['codes'][i]})`;
                 active_map_feature_graphs['bar']['x_array'].push(x_axis);
