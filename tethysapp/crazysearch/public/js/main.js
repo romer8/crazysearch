@@ -403,7 +403,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         var layout = {
           title: 'Variables',
-          barmode: 'stack'
+          barmode: 'stack',
+
         };
         Plotly.newPlot('plots', data, layout);
 
@@ -459,7 +460,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
             success: function(result){
               console.log(result);
               // create Dict //
-              active_map_feature_graphs['bar']['x_array'] =result['variables'];
+              active_map_feature_graphs['bar']['x_array'] = [];
+              for(let i=0; i< result['variables'].length; ++i){
+                let x_axis= `${result['variables'][i]} + (${result['codes'][i]})`;
+                active_map_feature_graphs['bar']['x_array'].push(x_axis);
+              }
+
+              // active_map_feature_graphs['bar']['x_array'] =result['variables'];
               active_map_feature_graphs['bar']['y_array'] = result['counts'];
               active_map_feature_graphs['bar']['type'] = 'bar';
               evt.stopPropagation();
@@ -562,6 +569,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     active_map_feature_graphs['scatter']['units_y'] = units_y;
                     active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
                     active_map_feature_graphs['scatter']['type'] = type;
+
 
 
                     initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
