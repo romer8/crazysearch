@@ -440,7 +440,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
             return feature;
             });
         if (feature) {
-          active_map_feature_graphs={}
+          active_map_feature_graphs={
+            'scatter':{},
+            'bar':{}
+          }
           console.log(feature.values_['hs_name']);
           // console.log(feature);
           // ADD TO THE GLOBAL OBJECT THAT CONTAINS INFORMATION//
