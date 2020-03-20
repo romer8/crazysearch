@@ -148,7 +148,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         change_type_graphs,
         active_map_feature_graphs = {
           'scatter':{},
-          'bar':{}
+          'bar':{},
+          'pie':{}
         };
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
@@ -183,6 +184,35 @@ var CRAZYSEARCH_PACKAGE = (function() {
         if(active_map_feature_graphs['bar'].hasOwnProperty('y_array')){
           if(active_map_feature_graphs['bar']['y_array'].length > 0){
             initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+          }
+        }
+
+        else{
+          $.notify(
+              {
+                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+
+
+        }
+
+      }
+
+      if(chart_type === "Pie"){
+        $("#variables_graph")['0'].disabled = true;
+        $('#variables_graph').selectpicker('setStyle', 'btn-info');
+
+
+        if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
+          if(active_map_feature_graphs['pie']['y_array'].length > 0){
+            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
           }
         }
 
@@ -269,8 +299,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
       let selectedItemText = $('#variables_graph')['0'].text;
       if(chart_type == "Scatter"){
         $("#type_graph_select")['0'].disabled = false;
-
-
 
         // console.log(selectedItem);
 
@@ -444,8 +472,57 @@ var CRAZYSEARCH_PACKAGE = (function() {
         var layout = {
           title: 'Variables',
           barmode: 'stack',
+          xaxis: {
+            title: {
+             text: xTitle,
+             font: {
+               size: 15,
+               color: '#7f7f7f'
+             }
+           },
+           rangemode: 'tozero'
+            // range: [ 0, 5.25 ]
+          },
+          yaxis: {
+            title: {
+             text: yTitle,
+             font: {
+               size: 15,
+               color: '#7f7f7f'
+             }
+           },
+           rangemode: 'tozero'
+
+            // range: [0, 4]
+          },
         };
         Plotly.newPlot('plots', data, layout);
+
+      }
+      if(type === "pie"){
+        var data = [{
+          values:yArray,
+          labels:xArray,
+          type: type,
+          // automargin: true,
+          hoverinfo: 'label + percent',
+        }];
+
+        var layout = {
+          title: title_graph,
+          height: 400,
+          width: 700,
+          showlegend: true,
+          // autosize: true,
+          legend: {
+            x: 1,
+            y: 0.5
+          }
+
+        };
+
+        Plotly.newPlot('plots', data, layout);
+
 
       }
 
@@ -472,10 +549,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
             return feature;
             });
         if (feature) {
+          initialize_graphs([],[],"No data Available","","","","scatter");
+
 
           active_map_feature_graphs={
             'scatter':{},
-            'bar':{}
+            'bar':{},
+            'pie':{}
           }
           console.log(feature.values_['hs_name']);
 
@@ -497,16 +577,40 @@ var CRAZYSEARCH_PACKAGE = (function() {
             success: function(result){
               console.log(result);
               active_map_feature_graphs['bar']['x_array']=[];
+              active_map_feature_graphs['pie']['x_array']=[];
 
               // create Dict //
               for(let i=0; i< result['variables'].length; ++i){
-                let x_axis= `${result['variables'][i]} + (${result['codes'][i]})`;
+                let x_axis= `${result['variables'][i]} (${result['codes'][i]})`;
                 active_map_feature_graphs['bar']['x_array'].push(x_axis);
+                active_map_feature_graphs['pie']['x_array'].push(x_axis);
+
               }
 
               // active_map_feature_graphs['bar']['x_array'] =result['variables'];
               active_map_feature_graphs['bar']['y_array'] = result['counts'];
               active_map_feature_graphs['bar']['type'] = 'bar';
+              active_map_feature_graphs['pie']['y_array'] = result['counts'];
+              active_map_feature_graphs['pie']['type'] = 'bar';
+              let title_info = `${object_request['site_name']} Variables Distribution`
+              let check_empty_pieChart = true;
+              result['counts'].forEach(function(x){
+                if (x > 0){
+                  check_empty_pieChart = true;
+                }
+                else{
+                  check_empty_pieChart = false;
+                }
+
+              })
+              if (check_empty_pieChart){
+                initialize_graphs(active_map_feature_graphs['pie']['x_array'],result['counts'],title_info, undefined, undefined, undefined,'pie');
+              }
+              else{
+                initialize_graphs(['no variable has data'],[1],title_info, undefined, undefined, undefined,'pie');
+
+              }
+
               evt.stopPropagation();
               let object_code_and_variable = {};
               let variables = result['variables'];
@@ -610,21 +714,20 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
 
-                    initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
+                    // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
+                    // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
                     $("#graphAddLoading").addClass("hidden")
-                    // $("#plots").show();
-                    // Plotly.Plots.resize();
+
 
 
                  }
                  else{
-                   let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
-                   let type = "scatter";
+                   // let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
+                   // let type = "scatter";
 
-                   initialize_graphs([],[],title_graph,"","","",type);
+                   // initialize_graphs([],[],title_graph,"","","",type);
                    $("#graphAddLoading").addClass("hidden")
-                   // $("#plots").show();
-                   // Plotly.Plots.resize();
+
 
 
 
@@ -638,7 +741,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         }
       });
-      $('#variables_graph').selectpicker('setStyle', 'btn-primary');
 
     }
 
