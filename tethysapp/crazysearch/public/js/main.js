@@ -171,12 +171,59 @@ var CRAZYSEARCH_PACKAGE = (function() {
     change_type_graphs = function(){
       console.log($("#type_graph_select")['0'].value);
       let chart_type= $("#type_graph_select")['0'].value;
+      console.log($("#variables_graph")['0']);
       // console.log(active_map_feature_graphs);
 
 
       if(chart_type === "Bar"){
-        if(active_map_feature_graphs['bar']['y_array'].length > 0){
-          initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+        $("#variables_graph")['0'].disabled = true;
+        $('#variables_graph').selectpicker('setStyle', 'btn-info');
+
+
+        if(active_map_feature_graphs['bar'].hasOwnProperty('y_array')){
+          if(active_map_feature_graphs['bar']['y_array'].length > 0){
+            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+          }
+        }
+
+        else{
+          $.notify(
+              {
+                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+
+
+        }
+
+      }
+
+      if(chart_type === "Scatter"){
+        console.log("HOLA");
+        $("#variables_graph")['0'].disabled = false;
+
+
+
+        if(active_map_feature_graphs['scatter'].hasOwnProperty('y_array')){
+          $('#variables_graph').selectpicker('setStyle', 'btn-primary');
+
+          console.log(active_map_feature_graphs['scatter']);
+          // initialize_graphs(active_map_feature_graphs['scatter']['x_a'])
+
+          let x_array=active_map_feature_graphs['scatter']['x_array'];
+          let y_array= active_map_feature_graphs['scatter']['y_array'];
+          let title_graph= active_map_feature_graphs['scatter']['title_graph'];
+          let units_x = active_map_feature_graphs['scatter']['units_x'];
+          let units_y = active_map_feature_graphs['scatter']['units_y'];
+          let variable_name_legend = active_map_feature_graphs['scatter']['variable_name_legend'];
+          let type = active_map_feature_graphs['scatter']['type'];
+          initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
         }
         else{
           $.notify(
@@ -193,48 +240,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
         }
-        // $.ajax({
-        //   type:"GET",
-        //   url: `${apiServer}/get-values-hs/`,
-        //   dataType: "JSON",
-        //   data: object_request_graphs,
-        //   success: function(result){
-        //     console.log(result);
-        //     initialize_graphs(result['variables'],result['counts'],undefined,undefined,undefined,undefined,"bar");
-        //   },
-        //   error: function(error) {
-        //     console.log(error);
-        //     // get_notification("danger",`Something were wrong when applying the filter with the keywords`);
-        //     $.notify(
-        //         {
-        //             message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
-        //         },
-        //         {
-        //             type: "danger",
-        //             allow_dismiss: true,
-        //             z_index: 20000,
-        //             delay: 5000
-        //         }
-        //     )
-        //
-        //   }
-        // })
-      }
-
-      if(chart_type === "Scatter"){
-        console.log("HOLA");
-        console.log(active_map_feature_graphs['scatter']);
-        // initialize_graphs(active_map_feature_graphs['scatter']['x_a'])
-
-          let x_array=active_map_feature_graphs['scatter']['x_array'];
-          let y_array= active_map_feature_graphs['scatter']['y_array'];
-          let title_graph= active_map_feature_graphs['scatter']['title_graph'];
-          let units_x = active_map_feature_graphs['scatter']['units_x'];
-          let units_y = active_map_feature_graphs['scatter']['units_y'];
-          let variable_name_legend = active_map_feature_graphs['scatter']['variable_name_legend'];
-          let type = active_map_feature_graphs['scatter']['type'];
-          initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
-
       }
 
     }
@@ -259,73 +264,97 @@ var CRAZYSEARCH_PACKAGE = (function() {
       console.log("new change on this");
       console.log(this);
 
+      let chart_type= $("#type_graph_select")['0'].value;
       let selectedItem = $('#variables_graph')['0'].value;
       let selectedItemText = $('#variables_graph')['0'].text;
-      // console.log(selectedItem);
+      if(chart_type == "Scatter"){
+        $("#type_graph_select")['0'].disabled = false;
 
-      object_request_graphs['variable']=selectedItem;
-      object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`];
-      // console.log(object_request2);
-      $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
-      $("#graphAddLoading").removeClass("hidden");
-      $.ajax({
-        type:"GET",
-        url: `${apiServer}/get-values-graph-hs/`,
-        dataType: "JSON",
-        data: object_request_graphs,
-        success: function(result1){
-          console.log(result1);
-          if(result1.graphs !== undefined){
+
+
+        // console.log(selectedItem);
+
+        object_request_graphs['variable']=selectedItem;
+        object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`];
+        // console.log(object_request2);
+        $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
+        $("#graphAddLoading").removeClass("hidden");
+        $.ajax({
+          type:"GET",
+          url: `${apiServer}/get-values-graph-hs/`,
+          dataType: "JSON",
+          data: object_request_graphs,
+          success: function(result1){
             console.log(result1);
-            let time_series_array = result1['graphs']['values2'];
-            console.log(time_series_array);
+            if(result1.graphs !== undefined){
+              console.log(result1);
+              let time_series_array = result1['graphs']['values2'];
+              console.log(time_series_array);
 
-            let x_array = [];
-            time_series_array.forEach(function(x){
-              x_array.push(x[0]);
-            })
-            let y_array=[]
-            time_series_array.forEach(function(y){
-              // console.log(y[1]);
-              if(y[1]===-9999){
-                y_array.push(null)
-              }
-              else{
-                y_array.push(y[1]);
-              }
+              let x_array = [];
+              time_series_array.forEach(function(x){
+                x_array.push(x[0]);
+              })
+              let y_array=[]
+              time_series_array.forEach(function(y){
+                // console.log(y[1]);
+                if(y[1]===-9999){
+                  y_array.push(null)
+                }
+                else{
+                  y_array.push(y[1]);
+                }
 
-            })
-            console.log(x_array);
-            console.log(y_array);
-            let title_graph = `${result1['graphs']['title']}`;
-            let units_x = `${result1['graphs']['unit']}` ;
-            let units_y = "Time";
-            let variable_name_legend = `${result1['graphs']['variable']}`;
-            let type= "scatter";
-            active_map_feature_graphs['scatter']['x_array'] = x_array;
-            active_map_feature_graphs['scatter']['y_array'] = y_array;
-            active_map_feature_graphs['scatter']['title_graph'] = title_graph;
-            active_map_feature_graphs['scatter']['units_x'] = units_x;
-            active_map_feature_graphs['scatter']['units_y'] = units_y;
-            active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
-            active_map_feature_graphs['scatter']['type'] = type;
+              })
+              console.log(x_array);
+              console.log(y_array);
+              let title_graph = `${result1['graphs']['title']}`;
+              let units_x = `${result1['graphs']['unit']}` ;
+              let units_y = "Time";
+              let variable_name_legend = `${result1['graphs']['variable']}`;
+              let type= "scatter";
+              active_map_feature_graphs['scatter']['x_array'] = x_array;
+              active_map_feature_graphs['scatter']['y_array'] = y_array;
+              active_map_feature_graphs['scatter']['title_graph'] = title_graph;
+              active_map_feature_graphs['scatter']['units_x'] = units_x;
+              active_map_feature_graphs['scatter']['units_y'] = units_y;
+              active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
+              active_map_feature_graphs['scatter']['type'] = type;
 
-            initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
-            $("#graphAddLoading").addClass("hidden")
+              initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
+              $("#graphAddLoading").addClass("hidden")
 
-         }
-         else{
-           let title_graph=  `${object_request_graphs['site_name']} - ${selectedItemText}
-           No Data Available`
-           initialize_graphs([],[],title_graph,"","","","scatter");
-           $("#graphAddLoading").addClass("hidden")
+           }
+           else{
+             let title_graph=  `${object_request_graphs['site_name']} - ${selectedItemText}
+             No Data Available`
+             initialize_graphs([],[],title_graph,"","","","scatter");
+             $("#graphAddLoading").addClass("hidden")
+             $.notify(
+                 {
+                     message: `There is no data for this variable, Sorry`
+                 },
+                 {
+                     type: "danger",
+                     allow_dismiss: true,
+                     z_index: 20000,
+                     delay: 5000
+                 }
+             )
 
-         }
+           }
+          }
+        })
+
+      }
+      if(chart_type == "Bar"){
+        console.log($('#variables_graph')['0']);
+        $("#type_graph_select")['0'].disabled = true;
 
 
 
-        }
-      })
+      }
+
       // console.log(object_request_graphs);
 
     }
@@ -430,6 +459,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
     */
     activate_layer_values = function (){
       map.on('singleclick', function(evt) {
+        $('#variables_graph').selectpicker('setStyle', 'btn-primary');
+
         evt.stopPropagation();
         $("#graphs").empty();
 
@@ -441,6 +472,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             return feature;
             });
         if (feature) {
+
           active_map_feature_graphs={
             'scatter':{},
             'bar':{}
@@ -606,6 +638,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         }
       });
+      $('#variables_graph').selectpicker('setStyle', 'btn-primary');
+
     }
 
     /*
