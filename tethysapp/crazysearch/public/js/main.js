@@ -170,27 +170,28 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
     */
     change_type_graphs = function(){
-      console.log($("#type_graph_select")['0'].value);
       let chart_type= $("#type_graph_select")['0'].value;
-      console.log($("#variables_graph")['0']);
       // console.log(active_map_feature_graphs);
 
 
       if(chart_type === "Bar"){
+        console.log("inside the bar type");
         $("#variables_graph")['0'].disabled = true;
         $('#variables_graph').selectpicker('setStyle', 'btn-info');
 
 
         if(active_map_feature_graphs['bar'].hasOwnProperty('y_array')){
           if(active_map_feature_graphs['bar']['y_array'].length > 0){
-            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+
+            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],active_map_feature_graphs['bar']['title_graph'],undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+            console.log("the graph has been change to bar");
           }
         }
 
         else{
           $.notify(
               {
-                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+                  message: `Click on one of the hydroserver data points to retrieve a Bar plot`
               },
               {
                   type: "danger",
@@ -206,20 +207,44 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
 
       if(chart_type === "Pie"){
+        console.log("inside the pie char");
         $("#variables_graph")['0'].disabled = true;
         $('#variables_graph').selectpicker('setStyle', 'btn-info');
 
 
         if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
           if(active_map_feature_graphs['pie']['y_array'].length > 0){
-            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+            let check_empty_pieChart = true;
+            active_map_feature_graphs['pie']['y_array'].forEach(function(x){
+              if (x > 0){
+                check_empty_pieChart = true;
+              }
+              else{
+                check_empty_pieChart = false;
+              }
+
+            })
+            if (check_empty_pieChart){
+              initialize_graphs(active_map_feature_graphs['pie']['x_array'],active_map_feature_graphs['pie']['y_array'],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
+              console.log("change to pie chart");
+
+            }
+            else{
+              initialize_graphs(['no variable has data'],[1],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
+              console.log("change to pie chart");
+
+            }
+
+
+            // initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['pie']['type']);
+
           }
         }
 
         else{
           $.notify(
               {
-                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+                  message: `Click on one of the hydroserver data points to retrieve a Pie plot`
               },
               {
                   type: "danger",
@@ -235,11 +260,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
 
       if(chart_type === "Scatter"){
+        console.log("inside the scatter char");
+
         console.log("HOLA");
         $("#variables_graph")['0'].disabled = false;
 
 
-
+        console.log(active_map_feature_graphs);
         if(active_map_feature_graphs['scatter'].hasOwnProperty('y_array')){
           $('#variables_graph').selectpicker('setStyle', 'btn-primary');
 
@@ -254,11 +281,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
           let variable_name_legend = active_map_feature_graphs['scatter']['variable_name_legend'];
           let type = active_map_feature_graphs['scatter']['type'];
           initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
+          console.log("scatter chart has been changed");
+
         }
         else{
+          initialize_graphs([],[],"No data Available","","","","scatter");
+
           $.notify(
               {
-                  message: `you need to click on one of the hydroserver data points to retrieve a graph of any kind`
+                  message: `Click on one of the hydroserver data points to retrieve a Scatter plot or either the Scatter plot does not have any values`
               },
               {
                   type: "danger",
@@ -447,7 +478,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
       }
       if(type ==="bar"){
-        console.log("I am bar type");
         // var xValue = ['Product A', 'Product B', 'Product C'];
         // var yValue = [20, 14, 23];
         var trace1 = {
@@ -586,13 +616,19 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 active_map_feature_graphs['pie']['x_array'].push(x_axis);
 
               }
+              let title_info = `${object_request['site_name']} Variables Distribution`;
 
               // active_map_feature_graphs['bar']['x_array'] =result['variables'];
               active_map_feature_graphs['bar']['y_array'] = result['counts'];
               active_map_feature_graphs['bar']['type'] = 'bar';
+              active_map_feature_graphs['bar']['title_graph'] = title_info;
+
               active_map_feature_graphs['pie']['y_array'] = result['counts'];
-              active_map_feature_graphs['pie']['type'] = 'bar';
-              let title_info = `${object_request['site_name']} Variables Distribution`
+              active_map_feature_graphs['pie']['type'] = 'pie';
+              active_map_feature_graphs['pie']['title_graph'] = title_info;
+
+
+
               let check_empty_pieChart = true;
               result['counts'].forEach(function(x){
                 if (x > 0){
