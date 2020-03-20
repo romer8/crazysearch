@@ -212,19 +212,40 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $('#variables_graph').selectpicker('setStyle', 'btn-info');
 
 
+        // result['counts'].forEach(function(x){
+        //   if (x > 0){
+        //     check_empty_pieChart = true;
+        //     check_array.push(check_empty_pieChart);
+        //   }
+        //   else{
+        //     check_empty_pieChart = false;
+        //     check_array.push(check_empty_pieChart);
+        //
+        //   }
+        //
+        // })
+        // if (!check_array.includes(false)) {
+        //   initialize_graphs(active_map_feature_graphs['pie']['x_array'],result['counts'],title_info, undefined, undefined, undefined,'pie');
+        // }
+        // else{
+        //   initialize_graphs(['no variable has data'],[1],title_info, undefined, undefined, undefined,'pie');
+        //
+        // }
+
         if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
           if(active_map_feature_graphs['pie']['y_array'].length > 0){
-            let check_empty_pieChart = true;
-            active_map_feature_graphs['pie']['y_array'].forEach(function(x){
-              if (x > 0){
-                check_empty_pieChart = true;
-              }
-              else{
-                check_empty_pieChart = false;
-              }
-
-            })
-            if (check_empty_pieChart){
+            // let check_empty_pieChart = true;
+            // active_map_feature_graphs['pie']['y_array'].forEach(function(x){
+            //   if (x > 0){
+            //     check_empty_pieChart = true;
+            //   }
+            //   else{
+            //     check_empty_pieChart = false;
+            //   }
+            //
+            // })
+            console.log(active_map_feature_graphs['pie']);
+            if (active_map_feature_graphs['pie']['check_none'].includes(true)){
               initialize_graphs(active_map_feature_graphs['pie']['x_array'],active_map_feature_graphs['pie']['y_array'],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
               console.log("change to pie chart");
 
@@ -536,12 +557,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
           type: type,
           // automargin: true,
           hoverinfo: 'label + percent',
+           textposition: 'inside'
         }];
 
         var layout = {
           title: title_graph,
           height: 400,
-          width: 700,
+          width: 900,
           showlegend: true,
           // autosize: true,
           legend: {
@@ -630,16 +652,24 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
               let check_empty_pieChart = true;
+              let check_array = [];
+
               result['counts'].forEach(function(x){
                 if (x > 0){
                   check_empty_pieChart = true;
+                  check_array.push(check_empty_pieChart);
                 }
                 else{
                   check_empty_pieChart = false;
+                  check_array.push(check_empty_pieChart);
+
                 }
 
               })
-              if (check_empty_pieChart){
+              active_map_feature_graphs['pie']['check_none'] = check_array;
+              console.log(active_map_feature_graphs['pie']['check_none']);
+
+              if (check_array.includes(true)) {
                 initialize_graphs(active_map_feature_graphs['pie']['x_array'],result['counts'],title_info, undefined, undefined, undefined,'pie');
               }
               else{
