@@ -149,7 +149,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         active_map_feature_graphs = {
           'scatter':{},
           'bar':{},
-          'pie':{}
+          'pie':{},
+          'whisker':{}
         };
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
@@ -211,39 +212,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $("#variables_graph")['0'].disabled = true;
         $('#variables_graph').selectpicker('setStyle', 'btn-info');
 
-
-        // result['counts'].forEach(function(x){
-        //   if (x > 0){
-        //     check_empty_pieChart = true;
-        //     check_array.push(check_empty_pieChart);
-        //   }
-        //   else{
-        //     check_empty_pieChart = false;
-        //     check_array.push(check_empty_pieChart);
-        //
-        //   }
-        //
-        // })
-        // if (!check_array.includes(false)) {
-        //   initialize_graphs(active_map_feature_graphs['pie']['x_array'],result['counts'],title_info, undefined, undefined, undefined,'pie');
-        // }
-        // else{
-        //   initialize_graphs(['no variable has data'],[1],title_info, undefined, undefined, undefined,'pie');
-        //
-        // }
-
         if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
           if(active_map_feature_graphs['pie']['y_array'].length > 0){
-            // let check_empty_pieChart = true;
-            // active_map_feature_graphs['pie']['y_array'].forEach(function(x){
-            //   if (x > 0){
-            //     check_empty_pieChart = true;
-            //   }
-            //   else{
-            //     check_empty_pieChart = false;
-            //   }
-            //
-            // })
+
             console.log(active_map_feature_graphs['pie']);
             if (active_map_feature_graphs['pie']['check_none'].includes(true)){
               initialize_graphs(active_map_feature_graphs['pie']['x_array'],active_map_feature_graphs['pie']['y_array'],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
@@ -283,7 +254,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
       if(chart_type === "Scatter"){
         console.log("inside the scatter char");
 
-        console.log("HOLA");
         $("#variables_graph")['0'].disabled = false;
 
 
@@ -323,6 +293,48 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         }
       }
+      if(chart_type === "Whisker and Box"){
+        console.log("inside the whisker and plot char");
+
+        $("#variables_graph")['0'].disabled = false;
+
+
+        console.log(active_map_feature_graphs);
+        if(active_map_feature_graphs['scatter'].hasOwnProperty('y_array')){
+          $('#variables_graph').selectpicker('setStyle', 'btn-primary');
+
+          console.log(active_map_feature_graphs['scatter']);
+          // initialize_graphs(active_map_feature_graphs['scatter']['x_a'])
+
+          let y_array= active_map_feature_graphs['scatter']['y_array'];
+          let title_graph= active_map_feature_graphs['scatter']['title_graph'];
+          let type = active_map_feature_graphs['whisker']['type'];
+          initialize_graphs(undefined,y_array,title_graph, undefined, undefined, undefined,type);
+          console.log("whisker chart has been changed");
+
+        }
+        else{
+          initialize_graphs([],[],"No data Available","","","","scatter");
+
+          $.notify(
+              {
+                  message: `Click on one of the hydroserver data points to retrieve a Whisker and Box plot`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+
+
+        }
+      }
+
+
+
+
 
     }
     $("#type_graph_select").change(change_type_graphs)
@@ -349,7 +361,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       let chart_type= $("#type_graph_select")['0'].value;
       let selectedItem = $('#variables_graph')['0'].value;
       let selectedItemText = $('#variables_graph')['0'].text;
-      if(chart_type == "Scatter"){
+      if(chart_type == "Scatter" || chart_type =="Whisker and Box"){
         $("#type_graph_select")['0'].disabled = false;
 
         // console.log(selectedItem);
@@ -401,7 +413,20 @@ var CRAZYSEARCH_PACKAGE = (function() {
               active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
               active_map_feature_graphs['scatter']['type'] = type;
 
-              initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
+              // defining the Whiskers and plot //
+              active_map_feature_graphs['whisker']['y_array'] = y_array;
+              active_map_feature_graphs['whisker']['title_graph'] = title_graph;
+              active_map_feature_graphs['whisker']['type'] = "whisker";
+
+              if(chart_type ==="Scatter"){
+                console.log("it is an scatter plot for the variable change");
+                initialize_graphs(x_array,y_array,title_graph,units_y, units_x,variable_name_legend,type);
+              }
+              if(chart_type ==="Whisker and Box"){
+                console.log("it is an whisker and box plot for the variable change");
+
+                initialize_graphs(undefined,y_array,title_graph,undefined, undefined,undefined,"whisker");
+              }
               $("#graphAddLoading").addClass("hidden")
 
            }
@@ -575,6 +600,34 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         Plotly.newPlot('plots', data, layout);
 
+      }
+      if(type === "whisker"){
+        let trace1 = {
+          y: yArray,
+          type: 'box',
+          name: 'All Points',
+          // jitter: 0.3,
+          // pointpos: -1.8,
+          marker: {color: '#3D9970'},
+          boxpoints: 'outliers',
+          boxmean: 'sd'
+
+        };
+        // var trace2 = {
+        //   y:yArray,
+        //   type: 'box',
+        //   name: 'Mean and Standard Deviation',
+        //   marker: {
+        //     color: 'rgb(10,140,208)'
+        //   },
+        //   boxmean: 'sd'
+        // };
+        let data = [trace1];
+
+        let layout = {
+          title: title_graph
+        };
+        Plotly.newPlot('plots', data, layout);
 
       }
 
@@ -607,7 +660,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
           active_map_feature_graphs={
             'scatter':{},
             'bar':{},
-            'pie':{}
+            'pie':{},
+            'whisker':{}
           }
           console.log(feature.values_['hs_name']);
 
@@ -778,7 +832,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
                     active_map_feature_graphs['scatter']['type'] = type;
 
-
+                    active_map_feature_graphs['whisker']['y_array'] = y_array;
+                    active_map_feature_graphs['whisker']['title_graph'] = title_graph;
+                    active_map_feature_graphs['whisker']['type'] = "whisker";
 
                     // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
                     // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
