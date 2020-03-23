@@ -49,14 +49,14 @@
 
 #options{
   padding-left: 2%;
-  flex: 1 1 30%;
+  flex: 1 1 10%;
   order: 1;
   width: 100%;
   height: 100%;
 }
 
 #plots{
-  flex: 1 1 70%;
+  flex: 1 1 90%;
   order: 2;
   width: 100%;
   height: 100%;
