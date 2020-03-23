@@ -72,10 +72,15 @@
       <h3 id= "siteName_title"> Select a Station</h3>
       <p> Plot type
         <select id="type_graph_select" class="selectpicker" data-width="fit">
-          <option> Pie </option>
-          <option> Bar </option>
-          <option> Scatter </option>
-          <option> Whisker and Box </option>
+          <optgroup label="Gropup Plots">
+            <option> Pie </option>
+            <option> Bar </option>
+          </optgroup>
+          <optgroup label="Individual Variable Plots">
+            <option> Scatter </option>
+            <option> Whisker and Box </option>
+        </optgroup>
+
         </select>
         <button type="button" id= "reset_graphs" class="btn btn-danger" data-width="fit">Reset</button>
       </p>

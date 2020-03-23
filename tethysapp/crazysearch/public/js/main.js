@@ -257,6 +257,18 @@ var CRAZYSEARCH_PACKAGE = (function() {
         $("#variables_graph")['0'].disabled = false;
 
 
+        // $("#variables_graph").val($("#variables_graph option:first").val());
+        // $("#variables_graph")['0'].value = 0
+        console.log($("#variables_graph"));
+        // $("#variables_graph")[0].selectedIndex = 0
+        // $("#variables_graph option:selected").prop("selected", false);
+        // $("#variables_graph option:first").prop("selected", "selected");
+
+        console.log($("#variables_graph"));
+
+
+
+
         console.log(active_map_feature_graphs);
         if(active_map_feature_graphs['scatter'].hasOwnProperty('y_array')){
           $('#variables_graph').selectpicker('setStyle', 'btn-primary');
@@ -297,7 +309,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
         console.log("inside the whisker and plot char");
 
         $("#variables_graph")['0'].disabled = false;
-
+        console.log($("#variables_graph"));
+        // $("#variables_graph")[0].selectedIndex = 0
+        // $("#variables_graph option:selected").prop("selected", false);
+        // $("#variables_graph option:first").prop("selected", "selected");
+        console.log($("#variables_graph"));
 
         console.log(active_map_feature_graphs);
         if(active_map_feature_graphs['scatter'].hasOwnProperty('y_array')){
