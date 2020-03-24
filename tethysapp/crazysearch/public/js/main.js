@@ -708,8 +708,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let table_begin =
             `<br>
             <p>Table of Variables</p>
-            <table id="siteVariableTable" class="table table-striped">
-                <tr>
+            <table id="siteVariableTable" class="table table-striped table-hover table-condensed">
+                <tr class="danger"> 
                   <th>Variable</th>
                   <th>Code</th>
                   <th>Data Points</th>
