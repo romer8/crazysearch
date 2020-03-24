@@ -698,8 +698,39 @@ var CRAZYSEARCH_PACKAGE = (function() {
             data: object_request,
             success: function(result){
               console.log(result);
+              let description_site = document.getElementById('siteDes')
+              console.log(description_site);
+              description_site.innerHTML =
+                ` <p> <em>Organization:</em> ${result['description'][Object.keys(result['description'])[0]]['organization']} <p>
+                  <p> <em>Citation:</em> ${result['description'][Object.keys(result['description'])[0]]['citation']} <p>
+                  <p> <em>Description:</em> ${result['description'][Object.keys(result['description'])[0]]['sourceDescription']}</p>`
+
+              let table_begin =
+            `<br>
+            <p>Table of Variables</p>
+            <table id="siteVariableTable" class="table table-striped">
+                <tr>
+                  <th>Variable</th>
+                  <th>Code</th>
+                  <th>Data Points</th>
+                </tr>`;
+              for(let i=0; i<result['variables'].length ; ++i){
+                let newRow =
+                `
+                <tr>
+                  <th>${result['variables'][i]}</th>
+                  <th>${result['codes'][i]}</th>
+                  <th>${result['counts'][i]}</th>
+                </tr>
+                `
+                table_begin = table_begin + newRow;
+              }
+              table_begin = table_begin + `</table>`;
+              $("#table_div").html(table_begin);
+
               active_map_feature_graphs['bar']['x_array']=[];
               active_map_feature_graphs['pie']['x_array']=[];
+
 
               // create Dict //
               for(let i=0; i< result['variables'].length; ++i){

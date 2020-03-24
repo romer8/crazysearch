@@ -70,6 +70,12 @@
 
     <div id="options">
       <h3 id= "siteName_title"> Select a Station</h3>
+      <p id= "siteDes"> No Site Selected</p>
+
+      <br>
+    </div>
+    <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />
+    <div id="variables_id">
       <p> Plot type
         <select id="type_graph_select" class="selectpicker" data-width="fit">
           <optgroup label="Gropup Plots">
@@ -89,11 +95,8 @@
         <option > No Variables Available . . .</option>
 
       </select>
-      <br>
-
+      <div id="table_div"></div>
     </div>
-    <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />
-
     <div id="plots">
     </div>
 

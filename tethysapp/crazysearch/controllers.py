@@ -697,6 +697,7 @@ def get_values_hs(request):
     site_name = request.GET.get('site_name')
     site_code =  request.GET.get('code')
     network = request.GET.get('network')
+    site_desc = network + ':' + site_code
 
 
     # variable_text = request.GET.get('variable')
@@ -721,30 +722,52 @@ def get_values_hs(request):
     keywords_dict_object = json.dumps(keywords_dict)
 
     keywords_json = json.loads(keywords_dict_object)
-    # print(keywords_json)
+
+    site_info_Mc = client.service.GetSiteInfo(site_desc)
+    site_info_Mc_dict = xmltodict.parse(site_info_Mc)
+    site_info_Mc_json_object = json.dumps(site_info_Mc_dict)
+    site_info_Mc_json = json.loads(site_info_Mc_json_object)
+
+
+    object_methods= site_info_Mc_json['sitesResponse']['site']['seriesCatalog']['series']
+    object_with_methods_and_variables = {}
+    object_with_descriptions_and_variables = {}
+    object_with_time_and_variables = {}
+    if(isinstance(object_methods,(dict))):
+        print("adding to the methodID as a dict")
+        variable_name_ = object_methods['variable']['variableName']
+        object_with_methods_and_variables[variable_name_]= object_methods['method']['@methodID']
+        object_with_descriptions_and_variables[variable_name_]= object_methods['source'];
+        object_with_time_and_variables[variable_name_]= object_methods['variableTimeInterval'];
+        print(object_with_methods_and_variables)
+    else:
+        for object_method in object_methods:
+            print("adding to the methodID as an arraylist")
+            variable_name_ = object_method['variable']['variableName']
+            object_with_methods_and_variables[variable_name_]= object_method['method']['@methodID']
+            print(object_method['source'])
+            object_with_descriptions_and_variables[variable_name_]= object_method['source'];
+            object_with_time_and_variables[variable_name_]= object_method['variableTimeInterval'];
+            print(object_with_methods_and_variables)
+
+
+
     array_variables=keywords_json['variablesResponse']['variables']['variable']
     array_keywords_hydroserver=[]
     array_variables_codes = []
     array_variables_lengths = []
     length_values = 0
 
-    # print(type(array_variables))
-    # print(array_variables)
+
     if isinstance(array_variables,type([])):
-        # print("inside the list iption")
         for words in array_variables:
-            # print("priting words")
-            # print(type(words))
-            # print(words)
-            # print(words.get('variableName'))
-            # print(words['variableName'])
+
             variable_text = words['variableName']
             code_variable = words['variableCode']['#text']
             start_date = ""
             end_date = ""
             variable_desc = network + ':' + code_variable
             print(variable_desc)
-            site_desc = network + ':' + site_code
             print(site_desc)
             values = client.service.GetValues(
                 site_desc, variable_desc, start_date, end_date, "")
@@ -775,9 +798,7 @@ def get_values_hs(request):
         start_date = ""
         end_date = ""
         variable_desc = network + ':' + code_variable
-        print(variable_desc)
-        site_desc = network + ':' + site_code
-        print(site_desc)
+
         values = client.service.GetValues(
             site_desc, variable_desc, start_date, end_date, "")
         # print(values)
@@ -800,12 +821,6 @@ def get_values_hs(request):
 
         array_variables_lengths.append(length_values)
 
-        # site_info_Mc = client.service.GetSiteInfo(site_desc)
-        # site_info_Mc_dict = xmltodict.parse(site_info_Mc)
-        # site_info_Mc_json_object = json.dumps(site_info_Mc_dict)
-        # site_info_Mc_json = json.loads(site_info_Mc_json_object)
-
-
         array_keywords_hydroserver.append(array_variables['variableName'])
         array_variables_codes.append(array_variables['variableCode']['#text'])
 
@@ -813,6 +828,9 @@ def get_values_hs(request):
     return_obj['variables']=array_keywords_hydroserver
     return_obj['codes']=array_variables_codes
     return_obj['counts'] = array_variables_lengths
+    return_obj['methodsIDs']= object_with_methods_and_variables
+    return_obj['description'] = object_with_descriptions_and_variables
+    return_obj['times_series'] = object_with_time_and_variables
 
 
     return JsonResponse(return_obj)
