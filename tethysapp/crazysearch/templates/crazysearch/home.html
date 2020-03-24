@@ -70,15 +70,20 @@
 
     <div id="options">
       <h3 id= "siteName_title"> Select a Station</h3>
-      <p id= "siteDes"> No Site Selected</p>
+      <p id= "siteDes"> No Site Selected, when a site is "clicked" metadata of the site will display
+        in this part such as a name and a description.
+      </p>
 
       <br>
     </div>
     <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />
     <div id="variables_id">
-      <p> Plot type
+      <p><em>Site Variable Distribution</em></p>
+      <p>Select a plot to describe the variable distribution in the selected site</p>
+      <p>
         <select id="type_graph_select" class="selectpicker" data-width="fit">
           <optgroup label="Gropup Plots">
+            <option> Select option </option>
             <option> Pie </option>
             <option> Bar </option>
           </optgroup>
@@ -90,11 +95,23 @@
         </select>
         <button type="button" id= "reset_graphs" class="btn btn-danger" data-width="fit">Reset</button>
       </p>
-      <p >Variables</p>
-      <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info"width: '100%'>
-        <option > No Variables Available . . .</option>
+      <p ><em> Variables Plot </em></p>
+      <p> Select a variable and its kind of Plot </p>
+      <p>
+        <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info"width: '100%'>
+          <option > No Variables Available . . .</option>
+        </select>
+        <select id="type_graph_select" class="selectpicker" data-width="fit">
 
-      </select>
+          <optgroup label="Individual Variable Plots">
+            <option> Select option </option>
+            <option> Scatter </option>
+            <option> Whisker and Box </option>
+        </optgroup>
+
+        </select>
+      </p>
+
       <div id="table_div"></div>
     </div>
     <div id="plots">
