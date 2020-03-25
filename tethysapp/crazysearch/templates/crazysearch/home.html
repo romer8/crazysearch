@@ -81,9 +81,8 @@
       <p><em>Site Variable Distribution</em></p>
       <p>Select a plot to describe the variable distribution in the selected site</p>
       <p>
-        <select id="type_graph_select" class="selectpicker" data-width="fit">
+        <select id="type_graph_select" class="selectpicker" data-width="auto">
           <optgroup label="Gropup Plots">
-            <option> Select option </option>
             <option> Pie </option>
             <option> Bar </option>
           </optgroup>
@@ -93,26 +92,55 @@
         </optgroup>
 
         </select>
-        <button type="button" id= "reset_graphs" class="btn btn-danger" data-width="fit">Reset</button>
+        <button type="button" id= "reset_graphs" class="btn btn-danger">Reset</button>
       </p>
+
+
       <p ><em> Variables Plot </em></p>
       <p> Select a variable and its kind of Plot </p>
       <p>
         <select id= "variables_graph" class="selectpicker" data-live-search="true" data-style="btn-info"width: '100%'>
           <option > No Variables Available . . .</option>
         </select>
-        <select id="type_graph_select" class="selectpicker" data-width="fit">
+        <select id="type_graph_select2" class="selectpicker" data-width="fit">
 
           <optgroup label="Individual Variable Plots">
-            <option> Select option </option>
             <option> Scatter </option>
             <option> Whisker and Box </option>
         </optgroup>
-
         </select>
       </p>
+      <p><em>Variables Time Range</em></p>
+      <p>Select a Range of time for the given variables</p>
+      <div class="containerTime">
+          <div class='col-md-5'>
+              <div class="form-group">
+                  <div class='input-group date' id='datetimepicker6' data-provide="datepicker">
+                      <input type='text' class="form-control" />
+                      <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                  </div>
+              </div>
+          </div>
+          <div class='col-md-5'>
+              <div class="form-group">
+                  <div class='input-group date' id='datetimepicker7' data-provide="datepicker">
+                      <input type='text' class="form-control" />
+                      <span class="input-group-addon">
+                          <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <br>
+      <br>
+      <br>
+      <br>
 
-      <div id="table_div"></div>
+
+    <div id="table_div"></div>
     </div>
     <div id="plots">
     </div>
@@ -157,4 +185,23 @@
 {% block app_actions %}
 <div id="zoomlevel"></div>
 
+{% endblock %}
+{% block scripts %}
+  {{ block.super }}
+  <script type="text/javascript">
+      $(function () {
+          $('#datetimepicker6').datepicker();
+          $('#datetimepicker7').datepicker();
+          $("#datetimepicker6").datepicker().on("changeDate", function (e) {
+              console.log("changing time");
+              $('#datetimepicker7').datepicker('setStartDate', $(this).datepicker('getDate'));
+          });
+
+          $("#datetimepicker7").datepicker().on("changeDate", function (e) {
+              console.log("changing time");
+              $('#datetimepicker6').datepicker('setEndDate', $(this).datepicker('getDate'));
+          });
+
+      });
+  </script>
 {% endblock %}
