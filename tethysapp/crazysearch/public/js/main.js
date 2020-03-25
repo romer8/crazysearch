@@ -955,8 +955,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
               $('#datetimepicker6').datepicker('update', dateUTC_start);
               $('#datetimepicker7').datepicker('update', dateUTC_end);
-              $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
-              $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
+              // $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
+              // $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
                $("#graphAddLoading").addClass("hidden")
               // $.ajax({
               //   type:"GET",
