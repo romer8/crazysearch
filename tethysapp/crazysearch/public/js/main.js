@@ -146,7 +146,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         select_variable_change2,
         codes_variables_array={},
         reset_graphs,
-        change_type_graphs,
+        change_type_graphs_group,
+        change_type_graphs_individual,
         active_map_feature_graphs = {
           'scatter':{},
           'bar':{},
@@ -169,93 +170,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#00ffff"
     ]
     /*
-    ************ FUNCTION NAME: RESET_GRAPHS **********************
-    ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
+    ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_INDIVIDUAL **********************
+    ************ PURPOSE: CHANGE THE GRAPHS THAT ARE PART OF THE ***********
     */
-    change_type_graphs = function(){
-      let chart_type= $("#type_graph_select")['0'].value;
-      // console.log(active_map_feature_graphs);
-
-      if(chart_type === "Bar"){
-        console.log("inside the bar type");
-        $("#variables_graph")['0'].disabled = true;
-        $('#variables_graph').selectpicker('setStyle', 'btn-info');
-
-
-        if(active_map_feature_graphs['bar'].hasOwnProperty('y_array')){
-          if(active_map_feature_graphs['bar']['y_array'].length > 0){
-
-            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],active_map_feature_graphs['bar']['title_graph'],undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
-            console.log("the graph has been change to bar");
-          }
-        }
-
-        else{
-          $.notify(
-              {
-                  message: `Click on one of the hydroserver data points to retrieve a Bar plot`
-              },
-              {
-                  type: "danger",
-                  allow_dismiss: true,
-                  z_index: 20000,
-                  delay: 5000
-              }
-          )
-
-
-        }
-
-      }
-
-      if(chart_type === "Pie"){
-        console.log("inside the pie char");
-        $("#variables_graph")['0'].disabled = true;
-        $('#variables_graph').selectpicker('setStyle', 'btn-info');
-
-        if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
-          if(active_map_feature_graphs['pie']['y_array'].length > 0){
-
-            console.log(active_map_feature_graphs['pie']);
-            if (active_map_feature_graphs['pie']['check_none'].includes(true)){
-              initialize_graphs(active_map_feature_graphs['pie']['x_array'],active_map_feature_graphs['pie']['y_array'],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
-              console.log("change to pie chart");
-
-            }
-            else{
-              initialize_graphs(['no variable has data'],[1],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
-              console.log("change to pie chart");
-
-            }
-
-
-            // initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['pie']['type']);
-
-          }
-        }
-
-        else{
-          $.notify(
-              {
-                  message: `Click on one of the hydroserver data points to retrieve a Pie plot`
-              },
-              {
-                  type: "danger",
-                  allow_dismiss: true,
-                  z_index: 20000,
-                  delay: 5000
-              }
-          )
-
-
-        }
-
-      }
+    change_type_graphs_individual = function(){
+      let chart_type= $("#type_graph_select2")['0'].value;
 
       if(chart_type === "Scatter"){
         console.log("inside the scatter char");
 
-        $("#variables_graph")['0'].disabled = false;
+        // $("#variables_graph")['0'].disabled = false;
 
 
         // $("#variables_graph").val($("#variables_graph option:first").val());
@@ -309,7 +233,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       if(chart_type === "Whisker and Box"){
         console.log("inside the whisker and plot char");
 
-        $("#variables_graph")['0'].disabled = false;
+        // $("#variables_graph")['0'].disabled = false;
         console.log($("#variables_graph"));
         // $("#variables_graph")[0].selectedIndex = 0
         // $("#variables_graph option:selected").prop("selected", false);
@@ -350,9 +274,98 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
 
 
+
+
     }
-    $("#type_graph_select").change(change_type_graphs)
-    $("#type_graph_select2").change(change_type_graphs)
+    /*
+    ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_GROUP **********************
+    ************ PURPOSE: CHANGE THE GRAPHS THAT ARE PART OF THE ***********
+    */
+    change_type_graphs_group = function(){
+      let chart_type= $("#type_graph_select")['0'].value;
+
+      if(chart_type === "Bar"){
+        console.log("inside the bar type");
+        // $("#variables_graph")['0'].disabled = true;
+        $('#variables_graph').selectpicker('setStyle', 'btn-info');
+
+
+        if(active_map_feature_graphs['bar'].hasOwnProperty('y_array')){
+          if(active_map_feature_graphs['bar']['y_array'].length > 0){
+
+            initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['bar']['y_array'],active_map_feature_graphs['bar']['title_graph'],undefined,undefined,undefined,active_map_feature_graphs['bar']['type']);
+            console.log("the graph has been change to bar");
+          }
+        }
+
+        else{
+          $.notify(
+              {
+                  message: `Click on one of the hydroserver data points to retrieve a Bar plot`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+
+
+        }
+
+      }
+
+      if(chart_type === "Pie"){
+        console.log("inside the pie char");
+        // $("#variables_graph")['0'].disabled = true;
+        $('#variables_graph').selectpicker('setStyle', 'btn-info');
+
+        if(active_map_feature_graphs['pie'].hasOwnProperty('y_array')){
+          if(active_map_feature_graphs['pie']['y_array'].length > 0){
+
+            console.log(active_map_feature_graphs['pie']);
+            if (active_map_feature_graphs['pie']['check_none'].includes(true)){
+              initialize_graphs(active_map_feature_graphs['pie']['x_array'],active_map_feature_graphs['pie']['y_array'],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
+              console.log("change to pie chart");
+
+            }
+            else{
+              initialize_graphs(['no variable has data'],[1],active_map_feature_graphs['pie']['title_graph'], undefined, undefined, undefined,active_map_feature_graphs['pie']['type']);
+              console.log("change to pie chart");
+
+            }
+
+
+            // initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['pie']['type']);
+
+          }
+        }
+
+        else{
+          $.notify(
+              {
+                  message: `Click on one of the hydroserver data points to retrieve a Pie plot`
+              },
+              {
+                  type: "danger",
+                  allow_dismiss: true,
+                  z_index: 20000,
+                  delay: 5000
+              }
+          )
+
+
+        }
+
+      }
+
+
+
+
+    }
+    $("#type_graph_select").change(change_type_graphs_group)
+    $("#type_graph_select2").change(change_type_graphs_individual)
 
     /*
     ************ FUNCTION NAME: RESET_GRAPHS **********************
