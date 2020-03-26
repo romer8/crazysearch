@@ -946,6 +946,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let dateUTC_start = new Date(start_dateUTC)
               console.log(dateUTC_start);
               let starts = start_dateUTC.split("T");
+              console.log(starts[0]);
               // let start_date_ = starts[0]+ ' '+ starts[1]
               let starts_no_seconds = starts[1].split(":");
               object_request_graphs["startTime_hhmmss"] = starts_no_seconds[0] +":" +starts_no_seconds[1];
@@ -953,18 +954,53 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let dateUTC_end = new Date(end_dateUTC)
 
               let ends = end_dateUTC.split("T");
+              console.log(ends[0]);
+
               let ends_no_seconds = ends[1].split(":");
+              console.log(dateUTC_end);
+
               object_request_graphs["endTime_hhmmss"] = ends_no_seconds[0] +":" +ends_no_seconds[1];
 
               // let end_date_ = ends[0] + ' ' + ends[1]
+              console.log(new Date(starts[0]));
+              console.log(new Date(ends[0]));
 
+              // THIS IS NECESARRY TO RESET THE DATES OTHERWISE IT IS GOING TO HAVE EMPTY SPACES..
+              $('#datetimepicker6').datepicker('setStartDate', null);
+              $('#datetimepicker6').datepicker('setEndDate', null);
+              $('#datetimepicker7').datepicker('setEndDate',null);
+
+//               @KrunchMuffin I found a workaround this issue:
+//
+//               Before setting the value remove the limitation (endDate)
+//               Set the value
+//               Restore the limitation (endDate)
+//
+//               Maybe it will work for you also
+//https://github.com/uxsolutions/bootstrap-datepicker/issues/2292#issuecomment-341496634
 
               $('#datetimepicker6').datepicker('update', dateUTC_start);
               $('#datetimepicker7').datepicker('update', dateUTC_end);
+
+              console.log($('#datetimepicker6').datepicker('getDate'));
+              console.log($('#datetimepicker7').datepicker('getDate'));
+
+
+
+
+              // $('#datetimepicker6').datepicker('setDate', dateUTC_start);
+              // $('#datetimepicker7').datepicker('setDate', dateUTC_end);
+
+
+
               $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
               $('#datetimepicker6').datepicker('setEndDate', dateUTC_end);
               // $('#datetimepicker7').datepicker('setStartDate',dateUTC_end);
               $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
+
+
+
+
                $("#graphAddLoading").addClass("hidden")
               // $.ajax({
               //   type:"GET",

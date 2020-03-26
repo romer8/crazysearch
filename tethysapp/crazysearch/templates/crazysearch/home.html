@@ -193,6 +193,8 @@
       $(function () {
           $('#datetimepicker6').datepicker();
           $('#datetimepicker7').datepicker();
+
+
           $("#datetimepicker6").datepicker().on("changeDate", function (e) {
               console.log("changing time");
               $('#datetimepicker7').datepicker('setStartDate', $(this).datepicker('getDate'));
