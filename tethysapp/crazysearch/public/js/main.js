@@ -942,7 +942,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
               object_request_graphs = JSON.parse(JSON.stringify(object_request2));
               console.log(object_request2);
               let start_dateUTC = result['times_series'][Object.keys(result['times_series'])[0]]['beginDateTimeUTC']
+              console.log(start_dateUTC);
               let dateUTC_start = new Date(start_dateUTC)
+              console.log(dateUTC_start);
               let starts = start_dateUTC.split("T");
               // let start_date_ = starts[0]+ ' '+ starts[1]
               let starts_no_seconds = starts[1].split(":");
@@ -959,8 +961,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
               $('#datetimepicker6').datepicker('update', dateUTC_start);
               $('#datetimepicker7').datepicker('update', dateUTC_end);
-              // $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
-              // $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
+              $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
+              $('#datetimepicker6').datepicker('setEndDate', dateUTC_end);
+              // $('#datetimepicker7').datepicker('setStartDate',dateUTC_end);
+              $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
                $("#graphAddLoading").addClass("hidden")
               // $.ajax({
               //   type:"GET",

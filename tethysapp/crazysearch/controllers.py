@@ -833,7 +833,7 @@ def get_values_hs(request):
     return_obj['times_series'] = object_with_time_and_variables
     return_obj['siteInfo']= site_info_Mc_json
 
-
+    print("finished with the get_values_hs")
     return JsonResponse(return_obj)
 
 def get_values_graph_hs(request):
@@ -1083,7 +1083,7 @@ def get_values_graph_hs(request):
     #     graph_json["count"] = 0
     #     return_obj["graphs"]=graph_json
 
-    print("done with get_values_graph")
+    print("done with get_values_graph_hs")
     return JsonResponse(return_obj)
 # def get_values_graph_hs(request):
 # # def get_values_graph_hs(hs_name, hs_url, site_name, site_code, network, code_variable):
