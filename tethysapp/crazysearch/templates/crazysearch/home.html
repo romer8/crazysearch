@@ -78,6 +78,7 @@
     </div>
     <img id="graphAddLoading" class="view-file hidden" src="{% static 'crazysearch/images/loader.gif' %}"  />
     <div id="variables_id">
+      <h3 id= "siteName_title"> Site Variables Info</h3>
       <p><em>Site Variable Distribution</em></p>
       <p>Select a plot to describe the variable distribution in the selected site</p>
       <p>
@@ -105,6 +106,7 @@
             <option> Whisker and Box </option>
         </optgroup>
         </select>
+
       </p>
       <p><em>Variables Time Range</em></p>
       <p>Select a Range of time for the given variables</p>
@@ -130,10 +132,13 @@
               </div>
           </div>
       </div>
+
       <br>
       <br>
       <br>
       <br>
+      <br>
+      <button type="button" id= "update_graphs" class="btn btn-danger">Update</button>
 
 
     <div id="table_div"></div>

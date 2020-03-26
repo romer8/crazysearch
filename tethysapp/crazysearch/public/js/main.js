@@ -169,6 +169,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+
     /*
     ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_INDIVIDUAL **********************
     ************ PURPOSE: CHANGE THE GRAPHS THAT ARE PART OF THE ***********
@@ -335,10 +336,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log("change to pie chart");
 
             }
-
-
-            // initialize_graphs(active_map_feature_graphs['bar']['x_array'],active_map_feature_graphs['pie']['y_array'],undefined,undefined,undefined,undefined,active_map_feature_graphs['pie']['type']);
-
           }
         }
 
@@ -387,9 +384,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         e = '0'+e;
         return e
       }
-
     }
-
 
     select_variable_change = function(){
       console.log("new change on this");
@@ -419,12 +414,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
       object_request_graphs['actual_method'] = object_request_graphs['methodsIDs'][object_request_graphs['variables_array'][selectedItem-1]];
       console.log(object_request_graphs['actual_method']);
       console.log(object_request_graphs);
-
-
-      // PASAR LAS DOS FECHAS
-      // PASAR LAS VARIABLES DE METODS//
-      // PASAR
-
 
       if(chart_type == "Scatter" || chart_type =="Whisker and Box"){
         $("#type_graph_select")['0'].disabled = false;
@@ -519,7 +508,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
       }
 
     }
-    $("#variables_graph").change(select_variable_change)
+    $("#variables_graph").change(select_variable_change);
+    $("#update_graphs").on("click",select_variable_change);
+
     /*
     ************ FUNCTION NAME: INITIALIZE_GRAPHS **********************
     ************ PURPOSE: INITIALIZES ANY GRAH IN THE TIME SERIE OR BEGINNING ***********
