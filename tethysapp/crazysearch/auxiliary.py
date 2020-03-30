@@ -228,6 +228,8 @@ def parseWML(bbox):
 
 def parseJSON(json):
     hs_sites = []
+    print("I am inside the parseJSON")
+    print(json)
     sites_object = json['sitesResponse']['site']
 
     # If statement is executed for multiple sites within the HydroServer, if there is a single site then it goes to the else statement

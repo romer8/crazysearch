@@ -837,6 +837,7 @@ def get_values_hs(request):
     return JsonResponse(return_obj)
 
 def get_values_graph_hs(request):
+    print("inside the get_values_graph_hs")
 # def get_values_graph_hs(hs_name, hs_url, site_name, site_code, network, code_variable):
     # let's do the change baby ok
 

@@ -949,7 +949,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log(starts[0]);
               // let start_date_ = starts[0]+ ' '+ starts[1]
               let starts_no_seconds = starts[1].split(":");
-              object_request_graphs["startTime_hhmmss"] = starts_no_seconds[0] +":" +starts_no_seconds[1];
+              // object_request_graphs["startTime_hhmmss"] = starts_no_seconds[0] +":" +starts_no_seconds[1];
               let end_dateUTC = result['times_series'][Object.keys(result['times_series'])[0]]['endDateTimeUTC']
               let dateUTC_end = new Date(end_dateUTC)
 
@@ -959,7 +959,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let ends_no_seconds = ends[1].split(":");
               console.log(dateUTC_end);
 
-              object_request_graphs["endTime_hhmmss"] = ends_no_seconds[0] +":" +ends_no_seconds[1];
+              // object_request_graphs["endTime_hhmmss"] = ends_no_seconds[0] +":" +ends_no_seconds[1];
 
               // let end_date_ = ends[0] + ' ' + ends[1]
               console.log(new Date(starts[0]));
