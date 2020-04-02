@@ -142,6 +142,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         activate_layer_values,
         initialize_graphs,
         object_request_graphs ={},
+        // object_request_variable={},
         select_variable_change,
         select_variable_change2,
         codes_variables_array={},
@@ -153,9 +154,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
           'bar':{},
           'pie':{},
           'whisker':{}
-        },
-        changeDigits;
-    /************************************************************************
+        };
+      /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
     colors = [
@@ -379,30 +379,20 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: SELECT_VARIABLE_CHANGE **********************
     ************ PURPOSE: SELECT A VARIABLE FROM A DROPDOWN AND CHANGE THE GRAPH ***********
     */
-    changeDigits = function(e){
-      if(e < 10){
-        e = '0'+e;
-        return e
-      }
-    }
+
 
     select_variable_change = function(){
       console.log("new change on this");
       console.log(this);
       let arrayTime = [];
-
+      let object_request_variable={};
       let start_date_object =  $('#datetimepicker6').datepicker('getDates')[0];
-      // let start_date_string = start_date_object.getFullYear() + '-' + changeDigits(start_date_object.getMonth()) + '-' + changeDigits(start_date_object.getDay()) + 'T' +  object_request_graphs['startTime_hhmmss']
-      // let start_date_string = start_date_object.getFullYear() + '-' + (start_date_object.getUTCMonth()) + '-' + (start_date_object.getUTCDay());
+
       let start_date_string = start_date_object.toISOString().split("T")[0]
       let end_date_object = $('#datetimepicker7').datepicker('getDates')[0];
-      // let end_date_string = end_date_object.getFullYear() + '-' + changeDigits(end_date_object.getMonth()) + '-' + changeDigits(end_date_object.getDay()) + 'T' +  object_request_graphs['endTime_hhmmss']
-      // let end_date_string = end_date_object.getFullYear() + '-' + (end_date_object.getMonth()) + '-' + (end_date_object.getDay());
+
       let end_date_string = end_date_object.toISOString().split("T")[0]
-      console.log(start_date_object.toISOString());
-      console.log(end_date_object);
-      console.log(start_date_string);
-      console.log(end_date_string);
+
 
       let chart_type= $("#type_graph_select2")['0'].value;
       let selectedItem = $('#variables_graph')['0'].value;
@@ -410,10 +400,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
       arrayTime.push(start_date_string);
       arrayTime.push(end_date_string);
-      object_request_graphs['timeFrame'] = arrayTime;
-      object_request_graphs['actual_method'] = object_request_graphs['methodsIDs'][object_request_graphs['variables_array'][selectedItem-1]];
-      console.log(object_request_graphs['actual_method']);
-      console.log(object_request_graphs);
+      // object_request_graphs['timeFrame'] = arrayTime;
+      object_request_variable['timeFrame'] = arrayTime;
+
+      // object_request_graphs['actual_method'] = object_request_graphs['methodsIDs'][object_request_graphs['variables_array'][selectedItem-1]];
+      object_request_variable['actual_method'] = object_request_graphs['methodsIDs'][object_request_graphs['variables_array'][selectedItem-1]];
+      // console.log(object_request_graphs['actual_method']);
+      // console.log(object_request_graphs);
 
       if(chart_type == "Scatter" || chart_type =="Whisker and Box"){
         $("#type_graph_select")['0'].disabled = false;
@@ -421,15 +414,21 @@ var CRAZYSEARCH_PACKAGE = (function() {
         // console.log(selectedItem);
 
         object_request_graphs['variable']=selectedItem;
-        object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`-1];
-        // console.log(object_request2);
+        // object_request_variable['variable']=selectedItem;
+        // object_request_graphs['code_variable']= codes_variables_array[`${selectedItem}`-1];
+        object_request_variable['code_variable']= codes_variables_array[`${selectedItem}`-1];
+        object_request_variable['hs_url'] =  object_request_graphs['hs_url'];
+        object_request_variable['code'] =  object_request_graphs['code'];
+        object_request_variable['network'] =  object_request_graphs['network'];
+        // console.log(object_request_graphs);
+        console.log(object_request_variable);
         $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
         $("#graphAddLoading").removeClass("hidden");
         $.ajax({
           type:"GET",
           url: `${apiServer}/get-values-graph-hs/`,
           dataType: "JSON",
-          data: object_request_graphs,
+          data: object_request_variable,
           success: function(result1){
             console.log(result1);
             if(result1.graphs !== undefined){
@@ -681,78 +680,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     // }
   }
 
-    select_variable_change2 = function(){
-      let start_date_object =  $('#datetimepicker6').datepicker('getDates');
-      let end_date_object = $('#datetimepicker7').datepicker('getDates');
-      $.ajax({
-        type:"GET",
-        url: `${apiServer}/get-values-graph-hs/`,
-        dataType: "JSON",
-        data: object_request_graphs,
-        success: function(result1){
-          if(result1.graphs !== undefined){
-            console.log(result1);
-            // let time_series_array = result1['graphs']['values'];
-            let time_series_array = result1['graphs']['values2'];
-            console.log(time_series_array);
 
-            let x_array = [];
-            time_series_array.forEach(function(x){
-
-              x_array.push(x[0]);
-            })
-            let y_array=[]
-            time_series_array.forEach(function(y){
-              // console.log(y[1]);
-              if(y[1]===-9999){
-                y_array.push(null)
-              }
-              else{
-                y_array.push(y[1]);
-              }
-
-            })
-            console.log(x_array);
-            console.log(y_array);
-            let title_graph = `${result1['graphs']['title']}`;
-            let units_x = `${result1['graphs']['unit']}` ;
-            let units_y = "Time" ;
-            let variable_name_legend = `${result1['graphs']['variable']}`;
-            let type = "scatter";
-
-            active_map_feature_graphs['scatter']['x_array'] = x_array;
-            active_map_feature_graphs['scatter']['y_array'] = y_array;
-            active_map_feature_graphs['scatter']['title_graph'] = title_graph;
-            active_map_feature_graphs['scatter']['units_x'] = units_x;
-            active_map_feature_graphs['scatter']['units_y'] = units_y;
-            active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
-            active_map_feature_graphs['scatter']['type'] = type;
-
-            active_map_feature_graphs['whisker']['y_array'] = y_array;
-            active_map_feature_graphs['whisker']['title_graph'] = title_graph;
-            active_map_feature_graphs['whisker']['type'] = "whisker";
-
-            // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
-            // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
-            $("#graphAddLoading").addClass("hidden")
-
-
-
-         }
-         else{
-           // let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
-           // let type = "scatter";
-
-           // initialize_graphs([],[],title_graph,"","","",type);
-           $("#graphAddLoading").addClass("hidden")
-
-         }
-
-        }
-      })
-
-
-    }
 
     /*
     ************ FUNCTION NAME: ACTIVATE_LAYER_VALUES **********************
@@ -785,8 +713,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
           console.log(feature.values_['hs_name']);
 
           $("#siteName_title").html(feature.values_['name']);
-          object_request['hs_name']=feature.values_['hs_name'];
-          object_request['site_name']=feature.values_['name'];
+          // object_request['hs_name']=feature.values_['hs_name'];
+          // object_request['site_name']=feature.values_['name'];
           object_request['hs_url']=feature.values_['hs_url'];
           object_request['code']=feature.values_['code'];
           object_request['network']=feature.values_['network'];
@@ -842,7 +770,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 active_map_feature_graphs['pie']['x_array'].push(x_axis);
 
               }
-              let title_info = `${object_request['site_name']} Variables Distribution`;
+              // let title_info = `${object_request['site_name']} Variables Distribution`;
+              let title_info = `${feature.values_['name']} Variables Distribution`;
 
               // active_map_feature_graphs['bar']['x_array'] =result['variables'];
               active_map_feature_graphs['bar']['y_array'] = result['counts'];
@@ -959,9 +888,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let ends_no_seconds = ends[1].split(":");
               console.log(dateUTC_end);
 
-              // object_request_graphs["endTime_hhmmss"] = ends_no_seconds[0] +":" +ends_no_seconds[1];
 
-              // let end_date_ = ends[0] + ' ' + ends[1]
               console.log(new Date(starts[0]));
               console.log(new Date(ends[0]));
 
@@ -971,7 +898,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
               $('#datetimepicker7').datepicker('setEndDate',null);
 
 //               @KrunchMuffin I found a workaround this issue:
-//
 //               Before setting the value remove the limitation (endDate)
 //               Set the value
 //               Restore the limitation (endDate)
@@ -985,89 +911,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log($('#datetimepicker6').datepicker('getDate'));
               console.log($('#datetimepicker7').datepicker('getDate'));
 
-
-
-
-              // $('#datetimepicker6').datepicker('setDate', dateUTC_start);
-              // $('#datetimepicker7').datepicker('setDate', dateUTC_end);
-
-
-
               $('#datetimepicker6').datepicker('setStartDate', dateUTC_start);
               $('#datetimepicker6').datepicker('setEndDate', dateUTC_end);
               // $('#datetimepicker7').datepicker('setStartDate',dateUTC_end);
               $('#datetimepicker7').datepicker('setEndDate',dateUTC_end);
-
-
-
-
                $("#graphAddLoading").addClass("hidden")
-              // $.ajax({
-              //   type:"GET",
-              //   url: `${apiServer}/get-values-graph-hs/`,
-              //   dataType: "JSON",
-              //   data: object_request2,
-              //   success: function(result1){
-              //     if(result1.graphs !== undefined){
-              //       console.log(result1);
-              //       // let time_series_array = result1['graphs']['values'];
-              //       let time_series_array = result1['graphs']['values2'];
-              //       console.log(time_series_array);
-              //
-              //       let x_array = [];
-              //       time_series_array.forEach(function(x){
-              //
-              //         x_array.push(x[0]);
-              //       })
-              //       let y_array=[]
-              //       time_series_array.forEach(function(y){
-              //         // console.log(y[1]);
-              //         if(y[1]===-9999){
-              //           y_array.push(null)
-              //         }
-              //         else{
-              //           y_array.push(y[1]);
-              //         }
-              //
-              //       })
-              //       console.log(x_array);
-              //       console.log(y_array);
-              //       let title_graph = `${result1['graphs']['title']}`;
-              //       let units_x = `${result1['graphs']['unit']}` ;
-              //       let units_y = "Time" ;
-              //       let variable_name_legend = `${result1['graphs']['variable']}`;
-              //       let type = "scatter";
-              //
-              //       active_map_feature_graphs['scatter']['x_array'] = x_array;
-              //       active_map_feature_graphs['scatter']['y_array'] = y_array;
-              //       active_map_feature_graphs['scatter']['title_graph'] = title_graph;
-              //       active_map_feature_graphs['scatter']['units_x'] = units_x;
-              //       active_map_feature_graphs['scatter']['units_y'] = units_y;
-              //       active_map_feature_graphs['scatter']['variable_name_legend'] = variable_name_legend;
-              //       active_map_feature_graphs['scatter']['type'] = type;
-              //
-              //       active_map_feature_graphs['whisker']['y_array'] = y_array;
-              //       active_map_feature_graphs['whisker']['title_graph'] = title_graph;
-              //       active_map_feature_graphs['whisker']['type'] = "whisker";
-              //
-              //       // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
-              //       // initialize_graphs(x_array,y_array,title_graph, units_y, units_x, variable_name_legend,type);
-              //       $("#graphAddLoading").addClass("hidden")
-              //
-              //
-              //
-              //    }
-              //    else{
-              //      // let title_graph=  ` No data available ${object_request2['site_name']} - ${selectedItemText}`
-              //      // let type = "scatter";
-              //
-              //      // initialize_graphs([],[],title_graph,"","","",type);
-              //      $("#graphAddLoading").addClass("hidden")
-              //
-              //    }
-              //
-              //   }
-              // })
+
 
             }
 
