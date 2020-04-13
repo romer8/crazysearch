@@ -2589,6 +2589,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                       if(keywords_in_servers.includes(title) || key_words_to_search.length == 0 ){
                         // get_notification("sucess",`Successfully Added the HydroServer to the Map`);
+                        let allNoneGroups = Array.from(document.getElementsByClassName("noGroups"));
+                        console.log(allNoneGroups);
+                        allNoneGroups.forEach(function(e){
+                          e.parentNode.removeChild(e);
+
+                        })
                         $.notify(
                             {
                                 message: `Successfully Added the HydroServer to the Map`
