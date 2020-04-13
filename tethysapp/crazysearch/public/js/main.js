@@ -903,7 +903,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 //               Restore the limitation (endDate)
 //
 //               Maybe it will work for you also
-//https://github.com/uxsolutions/bootstrap-datepicker/issues/2292#issuecomment-341496634
+//               https://github.com/uxsolutions/bootstrap-datepicker/issues/2292#issuecomment-341496634
 
               $('#datetimepicker6').datepicker('update', dateUTC_start);
               $('#datetimepicker7').datepicker('update', dateUTC_end);
@@ -1249,11 +1249,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
       // ONLY THE KEY WORDS //
       let key_words_to_search= get_all_the_checked_keywords();
 
+
       if(key_words_to_search.length > 0){
 
         // LOOK FOR THE GROUPS TO SEARCH//
         let input_check_array= get_active_hydroservers_groups();
-        console.log(input_check_array);
 
         // GET THE LI ELEMENTS OF THE MENU OF THE HYDROSERVERS //
         let lis = document.getElementById("current-servers").getElementsByTagName("li");
@@ -1263,6 +1263,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         // LOOP FOR ALL THE GROUPS THAT ARE CHECKED
         input_check_array.forEach(function(hydroserver_group){
+          let allNoneGroups = Array.from(document.getElementsByClassName("noGroups"));
+          console.log(allNoneGroups);
+          allNoneGroups.forEach(function(e){
+            e.parentNode.removeChild(e);
+
+          })
+
           let servers_with_no_keyword=[]; // SERVERS WITH NO KEYWORD
           let all_servers_titles=[]; // ALL THE TITLES OF THE SERVERS
 
@@ -1357,8 +1364,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(separator_element);
                 let children_element = Array.from(separator_element.children);
                 console.log(children_element);
-                if(children_element.length <= 2){
-                    let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                if(children_element.length < 2){
+                    let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
+                    // let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
                       $(no_servers).appendTo(`#${id_group_separator}`) ;
                 }
                 else{
@@ -1446,10 +1454,16 @@ var CRAZYSEARCH_PACKAGE = (function() {
   */
   reset_keywords = function(){
     // UNCHECK ALL THE BOXES AND CHECK IF THERE WAS SOME THAT WERE CHECKED BEFORE //
-    $("#KeywordLoading").css({"margin-left":'40%', position:'relative',"z-index": 9999});
-    $("#KeywordLoading").removeClass("hidden");
-    $("#btn-key-search").hide();
+    // $("#KeywordLoading").css({"margin-left":'40%', position:'relative',"z-index": 9999});
+    // $("#KeywordLoading").removeClass("hidden");
+    // $("#btn-key-search").hide();
     console.log("IN THE FUNCTION FOR RESETING ");
+    let allNoneGroups = Array.from(document.getElementsByClassName("noGroups"));
+    console.log(allNoneGroups);
+    allNoneGroups.forEach(function(e){
+      e.parentNode.removeChild(e);
+
+    })
     let datastring = Array.from(document.getElementsByClassName("odd gradeX"));
     datastring.forEach(function(data){
       Array.from(data.children).forEach(function(column){
@@ -1470,16 +1484,12 @@ var CRAZYSEARCH_PACKAGE = (function() {
         lis.style.visibility = "visible";
         console.log("hola");
         let title = lis.attributes['layer-name'].value;
-        console.log("hola");
 
         lis_separators[index].appendChild(lis);
-        console.log("hola");
 
         layersDict[title] = layers_deleted[index];
-        console.log("hola");
 
         map.addLayer(layersDict[title]);
-        console.log("hola");
 
         index = index + 1;
       })
@@ -1491,7 +1501,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
       separator_elements.forEach(function(element){
         element.parentNode.removeChild(element);
       })
-      $("#KeywordLoading").addClass("hidden");
+      // $("#KeywordLoading").addClass("hidden");
 
   }
   $("#btn-r-reset").on("click", reset_keywords);
@@ -1954,7 +1964,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                  $(title_group).appendTo("#current-servers") ;
                  if(servers.length <= 0){
-                   let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                   let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
                    $(no_servers).appendTo(`#${id_group_separator}`) ;
                  }
 
