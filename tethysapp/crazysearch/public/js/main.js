@@ -2728,8 +2728,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(separator_element);
                 let children_element = Array.from(separator_element.children);
                 console.log(children_element);
-                if(children_element.length <= 2){
-                    let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
+                if(children_element.length < 2){
+                  let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
                       $(no_servers).appendTo(`#${id_group_separator}`) ;
                 }
 
