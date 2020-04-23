@@ -10,6 +10,7 @@
 /*****************************************************************************
  *                      LIBRARY WRAPPER
  *****************************************************************************/
+
  var staticPath = baseStatic;
  var apiServer = `${staticPath.replace("/static", "/apps")}`;
  window.onbeforeunload = null
@@ -149,6 +150,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         reset_graphs,
         change_type_graphs_group,
         change_type_graphs_individual,
+        add_boundary_map,
         active_map_feature_graphs = {
           'scatter':{},
           'bar':{},
@@ -169,6 +171,102 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+
+    /*
+    ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_INDIVIDUAL **********************
+    ************ PURPOSE: CHANGE THE GRAPHS THAT ARE PART OF THE ***********
+    */
+    add_boundary_map = function(color, width){
+      console.log(color);
+      console.log(width);
+      if(color === "None"){
+        console.log("i do not color");
+        color = "#000000";
+      }
+      if(width === "None"){
+        console.log("i do not width");
+        width = 3;
+      }
+      var owsrootUrl = endpointGeoServer;
+      var workspaceURL = geoServerWorkspace;
+      var layerURL = geoServerLayer;
+      var typeRoot = "ows";
+      var serviceURL = "WFS";
+      var versionURL = "1.1.0";
+      var request = "GetFeature";
+      var typename = `${workspaceURL}:${layerURL}`;
+      var outputFormat = "application/json";
+      var finalURL = `${owsrootUrl}/${typeRoot}?service=${serviceURL}&version=${versionURL}&request=${request}&typename=${typename}&outputFormat=${outputFormat} `;
+      var vectorSource = new ol.source.Vector({
+          url:finalURL,
+          format: new ol.format.GeoJSON()
+      })
+      var vector_layer = new ol.layer.Vector({
+          source: vectorSource,
+          style: new ol.style.Style({
+              //color Fill
+              // fill: new ol.style.Fill({
+              //     color: "rgba(255, 255, 255, 0)"
+              // }),
+              //ourside part of contour //
+              stroke: new ol.style.Stroke({
+                  // color: "#ffcc33",
+                  color: color,
+                  // width: 2
+                  width: width
+              }),
+          })
+      })
+
+      return vector_layer;
+      // var featureRequest = new WFS().writeGetFeature({
+      //   srsName: 'EPSG:3857',
+      //   featureNS: 'http://openstreemap.org',
+      //   featurePrefix: 'osm',
+      //   featureTypes: ['water_areas'],
+      //   outputFormat: 'application/json',
+      //   filter: andFilter(
+      //     likeFilter('name', 'Mississippi*'),
+      //     equalToFilter('waterway', 'riverbank')
+      //   )
+      // });
+
+
+
+
+
+
+      // var defaultParameters = {
+      //     service : 'WFS',
+      //     version : '1.0.0',
+      //     request : 'GetFeature',
+      //     typeName : workspaceLayer,
+      //     outputFormat : 'application/json',
+      // };
+      // var parameters = L.Util.extend(defaultParameters);
+      // var URL = owsrootUrl + L.Util.getParamString(parameters);
+      // var WFSLayer = null;
+      // var ajax = $.ajax({
+      //     url : URL,
+      //     success : function (response) {
+      //         WFSLayer = L.geoJson(response, {
+      //             style: function (feature) {
+      //                 return {
+      //                     stroke: false,
+      //                     fillColor: 'FFFFFF',
+      //                     fillOpacity: 0
+      //                 };
+      //             },
+      //             onEachFeature: function (feature, layer) {
+      //                 popupOptions = {maxWidth: 200};
+      //                 layer.bindPopup("Popup text, access attributes with feature.properties.ATTRIBUTE_NAME"
+      //                     ,popupOptions);
+      //             }
+      //         }).addTo(map);
+      //     }
+      // });
+
+    }
 
     /*
     ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_INDIVIDUAL **********************
@@ -356,9 +454,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
         }
 
       }
-
-
-
 
     }
     $("#type_graph_select").change(change_type_graphs_group)
@@ -1055,8 +1150,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         })
 
         layersDict = {}
-
-        layers = [baseLayer, vector_layer, shpLayer]
+        var boundaryLayerGeoserver = add_boundary_map(geoServerColor, geoServerWidth);
+        layers = [baseLayer, vector_layer, shpLayer, boundaryLayerGeoserver]
         map = new ol.Map({
             target: "map",
             layers: layers,
@@ -1074,6 +1169,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 ]),
             crossOrigin: "anonymous"
         })
+        add_boundary_map(map);
 
         var lastFeature, draw, featureType
         //Remove the last feature before drawing a new one

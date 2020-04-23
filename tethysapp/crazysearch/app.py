@@ -1,5 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-from tethys_sdk.app_settings import PersistentStoreDatabaseSetting, SpatialDatasetServiceSetting
+from tethys_sdk.app_settings import PersistentStoreDatabaseSetting, SpatialDatasetServiceSetting, CustomSetting
 
 
 
@@ -94,6 +94,41 @@ class Crazysearch(TethysAppBase):
 
         return url_maps
 
+    def custom_settings(self):
+        custom_settings = (
+            CustomSetting(
+                name='Boundary Geoserver Endpoint',
+                type = CustomSetting.TYPE_STRING,
+                description='Geoserver endpoint for the hydroshare resource containning the layer (e.g:"https://geoserver.hydroshare.org/geoserver/layerID")',
+                required=False
+            ),
+            CustomSetting(
+                name='Boundary Workspace Name',
+                type = CustomSetting.TYPE_STRING,
+                description='workspace and layer name (e.g workspace:layername)',
+                required=False
+            ),
+            CustomSetting(
+                name='Boundary Layer Name',
+                type = CustomSetting.TYPE_STRING,
+                description='layer name (e.g workspace:layername)',
+                required=False
+            ),
+            CustomSetting(
+                name='Boundary Color',
+                type = CustomSetting.TYPE_STRING,
+                description='The color style for the boundary (e.g #ffcc33)',
+                required=False
+            ),
+            CustomSetting(
+                name='Boundary Width',
+                type = CustomSetting.TYPE_STRING,
+                description='Width of the boundary. A number from 1 to 10',
+                required=False
+            ),
+        )
+        # return
+        return custom_settings
     def persistent_store_settings(self):
         ps_settings = (
             PersistentStoreDatabaseSetting(

@@ -28,11 +28,8 @@ from pyproj import Proj, transform  # Reprojecting/Transforming coordinates
 from datetime import datetime
 
 
-
-
-
 from django.http import JsonResponse, HttpResponse
-
+from .app import Crazysearch as app
 
 Persistent_Store_Name = 'catalog_db'
 
@@ -43,7 +40,20 @@ def home(request):
     """
     Controller for the app home page.
     """
-    context = {}
+    boundaryEndpoint = app.get_custom_setting('Boundary Geoserver Endpoint')
+    boundaryWorkspace = app.get_custom_setting('Boundary Workspace Name')
+    boundaryLayer = app.get_custom_setting('Boundary Layer Name')
+    boundaryColor = app.get_custom_setting('Boundary Color')
+    boundaryWidth = app.get_custom_setting('Boundary Width')
+    print(boundaryEndpoint)
+    print(type(boundaryEndpoint))
+    context = {
+     "geoEndpoint": boundaryEndpoint,
+     "geoWorkspace": boundaryWorkspace,
+     "geoLayer": boundaryLayer,
+     "geoColor": boundaryColor,
+     "geoWidth":boundaryWidth
+    }
     # readSoap(request)
     return render(request, 'crazysearch/home.html', context)
 
