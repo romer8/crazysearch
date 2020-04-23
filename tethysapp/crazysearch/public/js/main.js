@@ -1006,7 +1006,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
       let element_map =document.getElementById("map");
       if(actual_state){
-        element_graphs.style.cssText=  "display: flex; flex-direction: row;";
+        element_graphs.style.cssText=  "display: flex !important; flex-direction: row;";
+        map.updateSize();
+
       }
       else{
         console.log("off");
