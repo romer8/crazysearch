@@ -176,7 +176,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: ADD_BOUNDARY_MAP **********************
     ************ PURPOSE: ADD THE BOUNDARY LAYER TO THE MAP TAKING INTO ACCCOUNT THE CUSTOM SETTINGS***********
     */
-    add_boundary_map = function(color, width){
+    add_boundary_map = function(color, width, map){
 
       if(color === "None"){
         color = "#000000";
@@ -214,8 +214,19 @@ var CRAZYSEARCH_PACKAGE = (function() {
               }),
           })
       })
+      map.addLayer(vector_layer);
+      vectorSource.once('change',function(e){
+          if(vectorSource.getState() === 'ready') {
+              var extent = vectorSource.getExtent();
+              console.log(extent);
+              map.getView().fit(extent, map.getSize());
+          }
+      });
 
-      return vector_layer;
+      // map.getView().fit();
+      // map.updateSize();
+      // return vector_layer;
+
       // var featureRequest = new WFS().writeGetFeature({
       //   srsName: 'EPSG:3857',
       //   featureNS: 'http://openstreemap.org',
@@ -1147,8 +1158,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
         })
 
         layersDict = {}
-        var boundaryLayerGeoserver = add_boundary_map(geoServerColor, geoServerWidth);
-        layers = [baseLayer, vector_layer, shpLayer, boundaryLayerGeoserver]
+        // var boundaryLayerGeoserver = add_boundary_map(geoServerColor, geoServerWidth);
+        // layers = [baseLayer, vector_layer, shpLayer, boundaryLayerGeoserver]
+        layers = [baseLayer, vector_layer, shpLayer]
         map = new ol.Map({
             target: "map",
             layers: layers,
@@ -1166,8 +1178,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 ]),
             crossOrigin: "anonymous"
         })
-        add_boundary_map(map);
-
         var lastFeature, draw, featureType
         //Remove the last feature before drawing a new one
         var removeLastFeature = function() {
@@ -3117,6 +3127,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
      activate_layer_values();
      let empty_array=[];
      initialize_graphs([],[],"No data Available","","","","scatter");
+     add_boundary_map(geoServerColor, geoServerWidth, map);
 
 
   })
