@@ -3080,19 +3080,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
       init_jquery_var();
       addDefaultBehaviorToAjax();
       init_menu();
+
       init_map();
-      // activate_deactivate_graphs();
       load_group_hydroservers();
 
-      // let switch_graphs = document.getElementById("switchGraphs");
-      // console.log(switch_graphs);
-      // switch_graphs.addEventListener("click", function(){
-      //   console.log("hola");
-      // })
      activate_layer_values();
      let empty_array=[];
      initialize_graphs([],[],"No data Available","","","","scatter");
      add_boundary_map(geoServerColor, geoServerWidth, map);
+
 
 
   })
