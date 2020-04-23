@@ -239,41 +239,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
       //   )
       // });
 
-
-
-
-
-
-      // var defaultParameters = {
-      //     service : 'WFS',
-      //     version : '1.0.0',
-      //     request : 'GetFeature',
-      //     typeName : workspaceLayer,
-      //     outputFormat : 'application/json',
-      // };
-      // var parameters = L.Util.extend(defaultParameters);
-      // var URL = owsrootUrl + L.Util.getParamString(parameters);
-      // var WFSLayer = null;
-      // var ajax = $.ajax({
-      //     url : URL,
-      //     success : function (response) {
-      //         WFSLayer = L.geoJson(response, {
-      //             style: function (feature) {
-      //                 return {
-      //                     stroke: false,
-      //                     fillColor: 'FFFFFF',
-      //                     fillOpacity: 0
-      //                 };
-      //             },
-      //             onEachFeature: function (feature, layer) {
-      //                 popupOptions = {maxWidth: 200};
-      //                 layer.bindPopup("Popup text, access attributes with feature.properties.ATTRIBUTE_NAME"
-      //                     ,popupOptions);
-      //             }
-      //         }).addTo(map);
-      //     }
-      // });
-
     }
 
     /*
