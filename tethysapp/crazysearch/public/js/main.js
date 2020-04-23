@@ -173,18 +173,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ]
 
     /*
-    ************ FUNCTION NAME: CHANGE_TYPE_GRAPHS_INDIVIDUAL **********************
-    ************ PURPOSE: CHANGE THE GRAPHS THAT ARE PART OF THE ***********
+    ************ FUNCTION NAME: ADD_BOUNDARY_MAP **********************
+    ************ PURPOSE: ADD THE BOUNDARY LAYER TO THE MAP TAKING INTO ACCCOUNT THE CUSTOM SETTINGS***********
     */
     add_boundary_map = function(color, width){
-      console.log(color);
-      console.log(width);
+
       if(color === "None"){
-        console.log("i do not color");
         color = "#000000";
       }
       if(width === "None"){
-        console.log("i do not width");
         width = 3;
       }
       var owsrootUrl = endpointGeoServer;
