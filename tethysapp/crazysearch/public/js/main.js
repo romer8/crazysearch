@@ -221,20 +221,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
               console.log(extent);
               map.getView().fit(extent, map.getSize());
 
+              //disable zoom out // 
               var properties = map.getView().getProperties();
               properties["minZoom"] = map.getView().getZoom();
               map.setView(new ol.View(properties));
-              console.log("aqui 1");
-
           }
-          console.log("aqui 2");
-          var properties = map.getView().getProperties();
-          properties["minZoom"] = map.getView().getZoom();
-          map.setView(new ol.View(properties));
-
 
       });
-      console.log("aqui 3");
 
 
 
