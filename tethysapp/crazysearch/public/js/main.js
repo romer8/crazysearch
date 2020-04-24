@@ -220,24 +220,68 @@ var CRAZYSEARCH_PACKAGE = (function() {
               var extent = vectorSource.getExtent();
               console.log(extent);
               map.getView().fit(extent, map.getSize());
+
+              var properties = map.getView().getProperties();
+              properties["minZoom"] = map.getView().getZoom();
+              map.setView(new ol.View(properties));
+              console.log("aqui 1");
+
           }
+          console.log("aqui 2");
+          var properties = map.getView().getProperties();
+          properties["minZoom"] = map.getView().getZoom();
+          map.setView(new ol.View(properties));
+
+
       });
+      console.log("aqui 3");
 
-      // map.getView().fit();
-      // map.updateSize();
-      // return vector_layer;
 
-      // var featureRequest = new WFS().writeGetFeature({
-      //   srsName: 'EPSG:3857',
-      //   featureNS: 'http://openstreemap.org',
-      //   featurePrefix: 'osm',
-      //   featureTypes: ['water_areas'],
-      //   outputFormat: 'application/json',
-      //   filter: andFilter(
-      //     likeFilter('name', 'Mississippi*'),
-      //     equalToFilter('waterway', 'riverbank')
-      //   )
-      // });
+
+      // if(vectorSource.getState() === 'ready') {
+      //   const nc_array = map.getView().calculateExtent(map.getSize());
+      //   console.log("nc_array");
+      //   console.log(nc_array);
+      //   const nc_s = nc_array[1];
+      //   const nc_w = nc_array[0];
+      //   const nc_n = nc_array[3];
+      //   const nc_e = nc_array[2];
+      //   map.on('moveend', function() {
+      //
+      //       /* uses nc_array data (nc_w, nc_s, nc_e, nc_n) from initial map setup*/
+      //       var ext_array = map.getView().calculateExtent(vectorSource.getExtent());
+      //       var view = map.getView();
+      //       var ext_s = ext_array[1];
+      //       var ext_w = ext_array[0];
+      //       var ext_n = ext_array[3];
+      //       var ext_e = ext_array[2];
+      //       if(ext_s < nc_s) {
+      //           var now_s = view.getZoom();
+      //           view.fit([ext_w, nc_s, ext_e, ext_n+(nc_s-ext_s)]);
+      //           map.getView().setZoom(now_s);
+      //       }
+      //       if(ext_w < nc_w) {
+      //           var now_w = view.getZoom();
+      //           view.fit([nc_w, ext_s, ext_e+(nc_w-ext_w), ext_n]);
+      //           map.getView().setZoom(now_w);
+      //       }
+      //       if(ext_n > nc_n) {
+      //           var now_n = view.getZoom();
+      //           view.fit([ext_w, ext_s-(ext_n-nc_n), ext_e, nc_n]);
+      //           map.getView().setZoom(now_n);
+      //       }
+      //       if(ext_e > nc_e) {
+      //           var now_e = view.getZoom();
+      //           view.fit([ext_w-(ext_e-nc_e), ext_s, nc_e, ext_n]);
+      //           map.getView().setZoom(now_e);
+      //       }
+      //
+      //
+      //   });
+      // }
+
+
+
 
     }
 
@@ -1143,7 +1187,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     new ol.control.ZoomSlider(),
                     new ol.control.FullScreen()
                 ]),
-            crossOrigin: "anonymous"
+            crossOrigin: "anonymous",
+            interactions: ol.interaction.defaults({ dragPan: false}),
         })
         var lastFeature, draw, featureType
         //Remove the last feature before drawing a new one
