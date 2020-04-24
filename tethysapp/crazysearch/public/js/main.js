@@ -151,6 +151,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         change_type_graphs_group,
         change_type_graphs_individual,
         add_boundary_map,
+        disable_map,
         active_map_feature_graphs = {
           'scatter':{},
           'bar':{},
@@ -171,6 +172,35 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+    /*
+    ************ FUNCTION NAME: DISABLE MAP **********************
+    ************ PURPOSE: DISABLES OR ENABLES THE ZOOM OUT AND DRAGGING OF THE MAP ***********
+    */
+    disable_map =  function (){
+
+      let map_block=document.getElementById("blockPosition");
+      let layerBoundary = layersDict['boundaryLayer'];
+      let vectorSource = layerBoundary.getSource();
+      if(map_block.checked){
+        var extent = vectorSource.getExtent();
+        console.log(extent);
+        map.getView().fit(extent, map.getSize());
+        var properties = map.getView().getProperties();
+        properties["minZoom"] = map.getView().getZoom();
+        map.setView(new ol.View(properties));
+        map.interactions = ol.interaction.defaults({ dragPan: false});
+        map.addLayer(layersDict['boundaryLayer']);
+      }
+      else{
+        var properties = map.getView().getProperties();
+        properties["minZoom"] = 1;
+        map.setView(new ol.View(properties));
+        map.interactions = ol.interaction.defaults({ dragPan: true});
+        map.removeLayer(layersDict['boundaryLayer']);
+      }
+    }
+
+    $('#blockPosition').change(disable_map)
 
     /*
     ************ FUNCTION NAME: ADD_BOUNDARY_MAP **********************
@@ -213,68 +243,21 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   width: width
               }),
           })
-      })
+      });
+      layersDict['boundaryLayer'] = vector_layer;
       map.addLayer(vector_layer);
       vectorSource.once('change',function(e){
-          if(vectorSource.getState() === 'ready') {
-              var extent = vectorSource.getExtent();
-              console.log(extent);
-              map.getView().fit(extent, map.getSize());
+        if(vectorSource.getState() === 'ready') {
+          var extent = vectorSource.getExtent();
+          console.log(extent);
+          map.getView().fit(extent, map.getSize());
 
-              //disable zoom out // 
-              var properties = map.getView().getProperties();
-              properties["minZoom"] = map.getView().getZoom();
-              map.setView(new ol.View(properties));
-          }
-
+          //disable zoom out //
+          var properties = map.getView().getProperties();
+          properties["minZoom"] = map.getView().getZoom();
+          map.setView(new ol.View(properties));
+        }
       });
-
-
-
-      // if(vectorSource.getState() === 'ready') {
-      //   const nc_array = map.getView().calculateExtent(map.getSize());
-      //   console.log("nc_array");
-      //   console.log(nc_array);
-      //   const nc_s = nc_array[1];
-      //   const nc_w = nc_array[0];
-      //   const nc_n = nc_array[3];
-      //   const nc_e = nc_array[2];
-      //   map.on('moveend', function() {
-      //
-      //       /* uses nc_array data (nc_w, nc_s, nc_e, nc_n) from initial map setup*/
-      //       var ext_array = map.getView().calculateExtent(vectorSource.getExtent());
-      //       var view = map.getView();
-      //       var ext_s = ext_array[1];
-      //       var ext_w = ext_array[0];
-      //       var ext_n = ext_array[3];
-      //       var ext_e = ext_array[2];
-      //       if(ext_s < nc_s) {
-      //           var now_s = view.getZoom();
-      //           view.fit([ext_w, nc_s, ext_e, ext_n+(nc_s-ext_s)]);
-      //           map.getView().setZoom(now_s);
-      //       }
-      //       if(ext_w < nc_w) {
-      //           var now_w = view.getZoom();
-      //           view.fit([nc_w, ext_s, ext_e+(nc_w-ext_w), ext_n]);
-      //           map.getView().setZoom(now_w);
-      //       }
-      //       if(ext_n > nc_n) {
-      //           var now_n = view.getZoom();
-      //           view.fit([ext_w, ext_s-(ext_n-nc_n), ext_e, nc_n]);
-      //           map.getView().setZoom(now_n);
-      //       }
-      //       if(ext_e > nc_e) {
-      //           var now_e = view.getZoom();
-      //           view.fit([ext_w-(ext_e-nc_e), ext_s, nc_e, ext_n]);
-      //           map.getView().setZoom(now_e);
-      //       }
-      //
-      //
-      //   });
-      // }
-
-
-
 
     }
 
