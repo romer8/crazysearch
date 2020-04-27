@@ -1,9 +1,10 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
 from tethys_sdk.app_settings import PersistentStoreDatabaseSetting, SpatialDatasetServiceSetting, CustomSetting
-
+from tethys_sdk.permissions import Permission, PermissionGroup
 
 
 class Crazysearch(TethysAppBase):
+
     """
     Tethys app class for Crazysearch.
     """
@@ -18,11 +19,14 @@ class Crazysearch(TethysAppBase):
     tags = '&quot;Hydroserver&quot;, &quot;Query&quot;,&quot;BYU&quot;,&quot;Geoglows&quot;, &quot;Data Share&quot;'
     enable_feedback = False
     feedback_emails = []
+    ## App Permission for different Users ##
+
 
     def url_maps(self):
         """
         Add controllers
         """
+
         UrlMap = url_map_maker(self.root_url)
 
         url_maps = (
@@ -31,6 +35,11 @@ class Crazysearch(TethysAppBase):
                 url='crazysearch',
                 controller='crazysearch.controllers.home'
             ),
+            # UrlMap(
+            #     name='lock_with_boundary',
+            #     url='crazysearch',
+            #     controller='crazysearch.controllers.lock_with_boundary'
+            # ),
             UrlMap(name='his-server',
                    url='crazysearch/his-server',
                    controller='crazysearch.controllers.get_his_server'),
@@ -93,6 +102,46 @@ class Crazysearch(TethysAppBase):
         )
 
         return url_maps
+    # def permissions (self):
+    #     delete_hydrogroups = Permission(
+    #         name = 'delete_hydrogroups',
+    #         description = 'Delete a Hydrogroup from the App',
+    #     )
+    #     block_map = Permission(
+    #         name='block_map',
+    #         description='locks the map to a certain limit',
+    #     )
+    #     admin = PermissionGroup(
+    #         name='admin',
+    #         permission = (delete_hydrogroups,block_map),
+    #     )
+    #     permi = (admin)
+    #
+    #     return permi
+    def permissions(self):
+        """
+        Example permissions method.
+        """
+        # Viewer Permissions
+        delete_hydrogroups = Permission(
+            name = 'delete_hydrogroups',
+            description = 'Delete a Hydrogroup from the App',
+        )
+
+        block_map = Permission(
+            name='block_map',
+            description='locks the map to a certain limit',
+        )
+
+        admin = PermissionGroup(
+            name='admin',
+            permissions=(delete_hydrogroups, block_map)
+        )
+
+
+        permissions = (admin, )
+
+        return permissions
 
     def custom_settings(self):
         custom_settings = (
@@ -100,19 +149,19 @@ class Crazysearch(TethysAppBase):
                 name='Boundary Geoserver Endpoint',
                 type = CustomSetting.TYPE_STRING,
                 description='Geoserver endpoint for the hydroshare resource containning the layer (e.g:"https://geoserver.hydroshare.org/geoserver/layerID")',
-                required=False
+                required=True
             ),
             CustomSetting(
                 name='Boundary Workspace Name',
                 type = CustomSetting.TYPE_STRING,
                 description='workspace and layer name (e.g workspace:layername)',
-                required=False
+                required=True
             ),
             CustomSetting(
                 name='Boundary Layer Name',
                 type = CustomSetting.TYPE_STRING,
                 description='layer name (e.g workspace:layername)',
-                required=False
+                required=True
             ),
             CustomSetting(
                 name='Boundary Color',
@@ -129,6 +178,8 @@ class Crazysearch(TethysAppBase):
         )
         # return
         return custom_settings
+
+    #### Persistant storage ###
     def persistent_store_settings(self):
         ps_settings = (
             PersistentStoreDatabaseSetting(

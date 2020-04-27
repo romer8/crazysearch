@@ -16,6 +16,8 @@ from .model import Base, Catalog, HISCatalog, Groups, HydroServer_Individual
 
 
 from tethys_sdk.gizmos import TimeSeries, SelectInput, DatePicker, TextInput, GoogleMapView
+from tethys_sdk.permissions import permission_required, has_permission
+
 from .model import Catalog, HISCatalog
 from .auxiliary import *
 
@@ -40,6 +42,8 @@ def home(request):
     """
     Controller for the app home page.
     """
+    can_define_boundary = has_permission(request, 'block_map')
+    # if can_define_boundary:
     boundaryEndpoint = app.get_custom_setting('Boundary Geoserver Endpoint')
     boundaryWorkspace = app.get_custom_setting('Boundary Workspace Name')
     boundaryLayer = app.get_custom_setting('Boundary Layer Name')
@@ -52,10 +56,39 @@ def home(request):
      "geoWorkspace": boundaryWorkspace,
      "geoLayer": boundaryLayer,
      "geoColor": boundaryColor,
-     "geoWidth":boundaryWidth
+     "geoWidth":boundaryWidth,
+     'can_delete_hydrogroups': has_permission(request, 'delete_hydrogroups'),
+     'can_block_map': has_permission(request, 'block_map')
     }
-    # readSoap(request)
+    # else:
+    #     context = {
+    #      'can_delete_hydrogroups': has_permission(request, 'delete_hydrogroups'),
+    #      'can_block_map': has_permission(request, 'block_map')
+    #     }
+    # context = {}
     return render(request, 'crazysearch/home.html', context)
+
+# @permission_required('block_map')
+# def lock_with_boundary(request):
+#     """
+#     Controller for the app home page.
+#     """
+#     boundaryEndpoint = app.get_custom_setting('Boundary Geoserver Endpoint')
+#     boundaryWorkspace = app.get_custom_setting('Boundary Workspace Name')
+#     boundaryLayer = app.get_custom_setting('Boundary Layer Name')
+#     boundaryColor = app.get_custom_setting('Boundary Color')
+#     boundaryWidth = app.get_custom_setting('Boundary Width')
+#     print(boundaryEndpoint)
+#     print(type(boundaryEndpoint))
+#     context = {
+#      "geoEndpoint": boundaryEndpoint,
+#      "geoWorkspace": boundaryWorkspace,
+#      "geoLayer": boundaryLayer,
+#      "geoColor": boundaryColor,
+#      "geoWidth":boundaryWidth
+#     }
+#     # readSoap(request)
+#     return render(request, 'crazysearch/home.html', context)
 
 
 def readSoap(request):
@@ -585,6 +618,7 @@ def delete_group_hydroserver(request):
 ######*****************************************************************************************################
 ############################## DELETE A GROUP OF HYDROSERVERS #############################
 ######*****************************************************************************************################
+@permission_required('delete_hydrogroups')
 def delete_group(request):
     print("delete_group function controllers.py")
     print("--------------------------------------------")

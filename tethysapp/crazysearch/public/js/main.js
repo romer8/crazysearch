@@ -207,57 +207,60 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ PURPOSE: ADD THE BOUNDARY LAYER TO THE MAP TAKING INTO ACCCOUNT THE CUSTOM SETTINGS***********
     */
     add_boundary_map = function(color, width, map){
-
-      if(color === "None"){
-        color = "#000000";
-      }
-      if(width === "None"){
-        width = 3;
-      }
-      var owsrootUrl = endpointGeoServer;
-      var workspaceURL = geoServerWorkspace;
-      var layerURL = geoServerLayer;
-      var typeRoot = "ows";
-      var serviceURL = "WFS";
-      var versionURL = "1.1.0";
-      var request = "GetFeature";
-      var typename = `${workspaceURL}:${layerURL}`;
-      var outputFormat = "application/json";
-      var finalURL = `${owsrootUrl}/${typeRoot}?service=${serviceURL}&version=${versionURL}&request=${request}&typename=${typename}&outputFormat=${outputFormat} `;
-      var vectorSource = new ol.source.Vector({
-          url:finalURL,
-          format: new ol.format.GeoJSON()
-      })
-      var vector_layer = new ol.layer.Vector({
-          source: vectorSource,
-          style: new ol.style.Style({
-              //color Fill
-              // fill: new ol.style.Fill({
-              //     color: "rgba(255, 255, 255, 0)"
-              // }),
-              //ourside part of contour //
-              stroke: new ol.style.Stroke({
-                  // color: "#ffcc33",
-                  color: color,
-                  // width: 2
-                  width: width
-              }),
-          })
-      });
-      layersDict['boundaryLayer'] = vector_layer;
-      map.addLayer(vector_layer);
-      vectorSource.once('change',function(e){
-        if(vectorSource.getState() === 'ready') {
-          var extent = vectorSource.getExtent();
-          console.log(extent);
-          map.getView().fit(extent, map.getSize());
-
-          //disable zoom out //
-          var properties = map.getView().getProperties();
-          properties["minZoom"] = map.getView().getZoom();
-          map.setView(new ol.View(properties));
+      // if(endpointGeoServer && geoServerLayer){
+        if(color === "None"){
+          color = "#000000";
         }
-      });
+        if(width === "None"){
+          width = 3;
+        }
+        var owsrootUrl = endpointGeoServer;
+        var workspaceURL = geoServerWorkspace;
+        var layerURL = geoServerLayer;
+        var typeRoot = "ows";
+        var serviceURL = "WFS";
+        var versionURL = "1.1.0";
+        var request = "GetFeature";
+        var typename = `${workspaceURL}:${layerURL}`;
+        var outputFormat = "application/json";
+        var finalURL = `${owsrootUrl}/${typeRoot}?service=${serviceURL}&version=${versionURL}&request=${request}&typename=${typename}&outputFormat=${outputFormat} `;
+        var vectorSource = new ol.source.Vector({
+            url:finalURL,
+            format: new ol.format.GeoJSON()
+        })
+        var vector_layer = new ol.layer.Vector({
+            source: vectorSource,
+            style: new ol.style.Style({
+                //color Fill
+                // fill: new ol.style.Fill({
+                //     color: "rgba(255, 255, 255, 0)"
+                // }),
+                //ourside part of contour //
+                stroke: new ol.style.Stroke({
+                    // color: "#ffcc33",
+                    color: color,
+                    // width: 2
+                    width: width
+                }),
+            })
+        });
+        layersDict['boundaryLayer'] = vector_layer;
+        map.addLayer(vector_layer);
+        vectorSource.once('change',function(e){
+          if(vectorSource.getState() === 'ready') {
+            var extent = vectorSource.getExtent();
+            console.log(extent);
+            map.getView().fit(extent, map.getSize());
+
+            //disable zoom out //
+            var properties = map.getView().getProperties();
+            properties["minZoom"] = map.getView().getZoom();
+            map.setView(new ol.View(properties));
+          }
+        });
+
+      // }
+
 
     }
 
@@ -1148,24 +1151,48 @@ var CRAZYSEARCH_PACKAGE = (function() {
         // var boundaryLayerGeoserver = add_boundary_map(geoServerColor, geoServerWidth);
         // layers = [baseLayer, vector_layer, shpLayer, boundaryLayerGeoserver]
         layers = [baseLayer, vector_layer, shpLayer]
-        map = new ol.Map({
-            target: "map",
-            layers: layers,
-            view: new ol.View({
-              // -25.30066, -57.63591
-                center: [-11500000, 4735000],
-                projection: projection,
-                zoom: 4
-            }),
-            controls: ol.control
-                .defaults()
-                .extend([
-                    new ol.control.ZoomSlider(),
-                    new ol.control.FullScreen()
-                ]),
-            crossOrigin: "anonymous",
-            interactions: ol.interaction.defaults({ dragPan: false}),
-        })
+        // if(can_block_map){
+          console.log(" I am here testing the map bro");
+          map = new ol.Map({
+              target: "map",
+              layers: layers,
+              view: new ol.View({
+                // -25.30066, -57.63591
+                  center: [-11500000, 4735000],
+                  projection: projection,
+                  zoom: 4
+              }),
+              controls: ol.control
+                  .defaults()
+                  .extend([
+                      new ol.control.ZoomSlider(),
+                      new ol.control.FullScreen()
+                  ]),
+              crossOrigin: "anonymous",
+              interactions: ol.interaction.defaults({ dragPan: false}),
+          })
+        // }
+        // else{
+        //   console.log("testing the map also bro looks good");
+        //   map = new ol.Map({
+        //       target: "map",
+        //       layers: layers,
+        //       view: new ol.View({
+        //         // -25.30066, -57.63591
+        //           center: [-11500000, 4735000],
+        //           projection: projection,
+        //           zoom: 4
+        //       }),
+        //       controls: ol.control
+        //           .defaults()
+        //           .extend([
+        //               new ol.control.ZoomSlider(),
+        //               new ol.control.FullScreen()
+        //           ]),
+        //       crossOrigin: "anonymous",
+        //   })
+        // }
+
         var lastFeature, draw, featureType
         //Remove the last feature before drawing a new one
         var removeLastFeature = function() {
