@@ -256,6 +256,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
           var properties = map.getView().getProperties();
           properties["minZoom"] = map.getView().getZoom();
           map.setView(new ol.View(properties));
+          console.log("NNNN");
+          map.getLayers().forEach(function(element, index,array){
+            console.log(element);
+            console.log(index);
+            console.log(array);
+
+          })
+
         }
       });
 
@@ -789,6 +797,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             return feature;
             });
         if (feature) {
+          console.log(feature);
           initialize_graphs([],[],"No data Available","","","","scatter");
 
 
@@ -1164,7 +1173,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                     new ol.control.FullScreen()
                 ]),
             crossOrigin: "anonymous",
-            interactions: ol.interaction.defaults({ dragPan: false}),
+            // interactions: ol.interaction.defaults({ dragPan: false}),
         })
 
 
@@ -2124,7 +2133,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                                        code: site.sitecode,
                                        network: site.network,
                                        hs_url: url,
-                                       hs_name: title
+                                       hs_name: title,
+                                       lon: parseFloat(site.longitude),
+                                       lat: parseFloat(site.latitude)
                                    }
                                }
                            })
@@ -2196,7 +2207,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                                    code: site.sitecode,
                                    network: site.network,
                                    hs_url: url,
-                                   hs_name: title
+                                   hs_name: title,
+                                   lon: parseFloat(site.longitude),
+                                   lat: parseFloat(site.latitude)
                                }
                            }
                        })
@@ -2564,7 +2577,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                                       code: site.sitecode,
                                       network: site.network,
                                       hs_url: url,
-                                      hs_name: title
+                                      hs_name: title,
+                                      lon: parseFloat(site.longitude),
+                                      lat: parseFloat(site.latitude)
                                   }
                               }
                           })
@@ -2644,7 +2659,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                                   code: site.sitecode,
                                   network: site.network,
                                   hs_url: url,
-                                  hs_name: title
+                                  hs_name: title,
+                                  lon: parseFloat(site.longitude),
+                                  lat: parseFloat(site.latitude)
                               }
                           }
                       })
