@@ -813,11 +813,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 style: [
                   new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                      color: 'blue',
-                      width: 3
+                      color: 'red',
+                      width: 6
                     }),
                     fill: new ol.style.Fill({
-                      color: 'rgba(0, 0, 255, 0.1)'
+                      color: 'rgba(255, 0, 0, 0.1)'
                     })
                   })
                 ]
