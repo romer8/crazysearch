@@ -795,6 +795,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
         var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
             //you can add a condition on layer to restrict the listener
             if(feature){
+              if(layersDict['selectedPoint']){
+                map.removeLayer(layersDict['selectedPoint'])
+                delete layersDict[title]
+                map.updateSize()
+              }
               var actual_source = layer.getSource();
               var centerLongitudeLatitude = ol.proj.fromLonLat([feature.values_['lon'], feature.values_['lat']]);
               var dist = 40000;
@@ -817,8 +822,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   })
                 ]
               });
-              // layersDict['selectedPoint'];
-              console.log("before adding a layer IMPORTANT");
+              layersDict['selectedPoint'] = layer;
               map.addLayer(layer);
 
             }
@@ -1955,7 +1959,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
   ****** FU1NCTION NAME : addExpandableMenu *********
   ****** FUNCTION PURPOSE: call and expandable menu*********
   */
-    addExpandableMenu = function(clName){
+  addExpandableMenu = function(clName){
       let element= document.getElementsByClassName(className);
 
     }
@@ -1963,7 +1967,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ****** FU1NCTION NAME : REMOVE_INDIVIDUAL_HYDROSERVERS_GROUPS *********
     ****** FUNCTION PURPOSE: MAKES THE LAYERS OF HYDROSERVERS AND THE GROUP TAG TO DISSAPEAR WHEN THE GROUP NAME IS UNCHECK*********
     */
-    remove_individual_hydroservers_group = function(group_name){
+  remove_individual_hydroservers_group = function(group_name){
 
       let group_name_obj={
         group: group_name
