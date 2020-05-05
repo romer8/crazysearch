@@ -1751,20 +1751,35 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 // </div>
                 // </li>`
                 let id_group_separator = `${title}_list_separator`;
+                let newHtml;
+                if(can_delete_hydrogroups){
+                  newHtml =
+                  `
+                  <ul>
+                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                  <input class="chkbx-layer" type="checkbox" checked>
+                      <span class="group-name">${title}</span>
+                      <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                      <span class="glyphicon glyphicon-option-vertical"></span>
+                      </button>
+                  </li>
+                  <div id= ${id_group_separator} class="divForServers"></div>
+                  </ul>
+                  `
+                }
+                else{
+                  newHtml =
+                  `
+                  <ul>
+                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                  <input class="chkbx-layer" type="checkbox" checked>
+                      <span class="group-name">${title}</span>
+                  </li>
+                  <div id= ${id_group_separator} class="divForServers"></div>
+                  </ul>
+                  `
+                }
 
-                let newHtml =
-                `
-                <ul>
-                <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                <input class="chkbx-layer" type="checkbox" checked>
-                    <span class="group-name">${title}</span>
-                    <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
-                    <span class="glyphicon glyphicon-option-vertical"></span>
-                    </button>
-                </li>
-                <div id= ${id_group_separator} class="divForServers"></div>
-                </ul>
-                `
                 $(newHtml).appendTo("#current-Groupservers");
 
                 let li_object = document.getElementById(`${title}`);
@@ -2354,19 +2369,35 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   } = group
                   let id_group_separator = `${title}_list_separator`;
 
-                  let newHtml =
-                  `
-                  <ul>
-                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                  <input class="chkbx-layer" type="checkbox" checked>
-                      <span class="group-name">${title}</span>
-                      <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
-                      <span class="glyphicon glyphicon-option-vertical"></span>
-                      </button>
-                  </li>
-                  <div id= ${id_group_separator} class="divForServers"></div>
-                  </ul>
-                  `
+                  let newHtml;
+                  if(can_delete_hydrogroups){
+                    console.log("JJJJJJJS");
+                    newHtml =
+                    `
+                    <ul>
+                    <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                    <input class="chkbx-layer" type="checkbox" checked>
+                        <span class="group-name">${title}</span>
+                        <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                        <span class="glyphicon glyphicon-option-vertical"></span>
+                        </button>
+                    </li>
+                    <div id= ${id_group_separator} class="divForServers"></div>
+                    </ul>
+                    `
+                  }
+                  else{
+                    newHtml =
+                    `
+                    <ul>
+                    <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                    <input class="chkbx-layer" type="checkbox" checked>
+                        <span class="group-name">${title}</span>
+                    </li>
+                    <div id= ${id_group_separator} class="divForServers"></div>
+                    </ul>
+                    `
+                  }
                   $(newHtml).appendTo("#current-Groupservers");
 
 
