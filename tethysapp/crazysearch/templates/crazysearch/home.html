@@ -19,7 +19,7 @@
         </button>
         <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span>
         {% if can_delete_hydrogroups %}
-        <button class="btn btn-danger" id="btn-delete-hydroserver-group"> <span class="glyphicon glyphicon-trash"></span>
+        <button class="btn btn-danger"  data-toggle="modal" data-target="#DeleteWarning"> <span class="glyphicon glyphicon-trash"></span>
         {% endif %}
         <button class="btn btn-success" data-toggle="modal" data-target="#modalKeyWordSearch"> <span class="glyphicon glyphicon-search"></span></button>
         {% if can_block_map %}
@@ -175,6 +175,7 @@
 {% include "crazysearch/modals/delServer.html" %}
 {% include "crazysearch/modals/addGroupHydroserver.html" %}
 {% include "crazysearch/modals/keywordSearch.html" %}
+{% include "crazysearch/modals/DeleteHydroWarning.html" %}
 
 
 

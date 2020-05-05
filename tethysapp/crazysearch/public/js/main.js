@@ -1963,6 +1963,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
   }
 
   $("#btn-delete-hydroserver-group").on("click", delete_group_of_hydroservers);
+
   /*
   ****** FU1NCTION NAME : addExpandableMenu *********
   ****** FUNCTION PURPOSE: call and expandable menu*********
