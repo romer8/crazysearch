@@ -2117,7 +2117,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                        let newHtml = `
                        <li class="ui-state-default" layer-name="${title}" id="${title}" >
                        <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                       <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
+
                        </li>
                        `;
 
@@ -2556,7 +2556,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
                       let newHtml = `
                       <li class="ui-state-default" layer-name="${title}" id="${title}" >
                       <input class="chkbx-layer" type="checkbox" checked><span class="server-name">${title}</span>
-                      <div class="hmbrgr-div"><img src="${staticPath}/images/hamburger.svg"></div>
                       </li>
                       `;
 
