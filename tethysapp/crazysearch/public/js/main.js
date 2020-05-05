@@ -1364,7 +1364,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
         let input_check_array= get_active_hydroservers_groups();
 
         // GET THE LI ELEMENTS OF THE MENU OF THE HYDROSERVERS //
-        let lis = document.getElementById("current-servers").getElementsByTagName("li");
+        // let lis = document.getElementById("current-servers").getElementsByTagName("li");
+        let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
         let li_arrays = Array.from(lis);
         console.log(li_arrays);
 
@@ -1682,7 +1683,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
   ************ FUNCTION NAME : CREATE_GROUP_HYDROSERVERS
   ************ PURPOSE : CREATES A GROUP OF HYDRSOERVERS AND ADDS IT TO THE MENU
   */
-    create_group_hydroservers = function(){
+  create_group_hydroservers = function(){
       //CHECKS IF THE INPUT IS EMPTY ///
       if($("#addGroup-title").val() == ""){
         $modalAddGroupHydro.find(".warning").html(  "<b>Please enter a title. This field cannot be blank.</b>")
@@ -1737,13 +1738,27 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 let title=group.title;
                 let description=group.description;
 
-                let newHtml = `<li class="ui-state-default" id="${title}">
-                <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
-                <div>
-                  <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
-                </div>
-                </li>`
+                // let newHtml = `<li class="ui-state-default" id="${title}">
+                // <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
+                // <div>
+                //   <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
+                // </div>
+                // </li>`
+                let id_group_separator = `${title}_list_separator`;
 
+                let newHtml =
+                `
+                <ul>
+                <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                <input class="chkbx-layer" type="checkbox" checked>
+                    <span class="group-name">${title}</span>
+                    <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                    <span class="glyphicon glyphicon-option-vertical"></span>
+                    </button>
+                </li>
+                <div id= ${id_group_separator} class="divForServers"></div>
+                </ul>
+                `
                 $(newHtml).appendTo("#current-Groupservers");
 
                 let li_object = document.getElementById(`${title}`);
@@ -1967,7 +1982,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
               tag_to_delete.parentNode.removeChild(tag_to_delete);
               // $("#current-servers").remove(id_group_separator);
 
-              let lis = document.getElementById("current-servers").getElementsByTagName("li");
+              // let lis = document.getElementById("current-servers").getElementsByTagName("li");
+              let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
               let li_arrays = Array.from(lis);
               console.log(li_arrays);
               servers.forEach(server => {
@@ -1987,7 +2003,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                   // so the deletion will be //
 
-                  let ul_servers = document.getElementById("current-servers");
+                  // let ul_servers = document.getElementById("current-servers");
+                  let ul_servers = document.getElementById("current-Groupservers");
                   lis_to_delete.forEach(function(li_tag){
                     ul_servers.removeChild(li_tag);
                   });
@@ -2020,7 +2037,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 ****** FUNCTION PURPOSE: LOADS THE SERVERS OF A HYDROSERVER WHEN THE HYDROSERVER GROUPS IS CLICKED*********
 
 */
-   load_individual_hydroservers_group = function(group_name){
+  load_individual_hydroservers_group = function(group_name){
      let servers_with_keywords = [];
      let key_words_to_search = get_all_the_checked_keywords();
      let group_name_obj={
@@ -2062,13 +2079,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  let extent = ol.extent.createEmpty()
                  console.log(servers);
                  let id_group_separator = `${group_name}_list_separator`;
-                 let title_group=`<ul id= ${id_group_separator}>
-                 <button class="btn btn-info btn-block" id >${group_name} </button>
-                  </ul> `
-
-                 // let title_group=`<h5 class = "title-separators" id= ${id_group_separator}>${group_name}<h5>`
-
-                 $(title_group).appendTo("#current-servers") ;
+                 // let title_group=`<ul id= ${id_group_separator}>
+                 // <button class="btn btn-info btn-block">${group_name} </button>
+                 //  </ul> `
+                 //
+                 //
+                 //
+                 //
+                 // $(title_group).appendTo("#current-servers") ;
                  if(servers.length <= 0){
                    let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
                    $(no_servers).appendTo(`#${id_group_separator}`) ;
@@ -2097,11 +2115,13 @@ var CRAZYSEARCH_PACKAGE = (function() {
                        $(newHtml).appendTo(`#${id_group_separator}`);
                        console.log($(newHtml));
 
-                       console.log(document.getElementById("current-servers"));
-                       let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                       // console.log(document.getElementById("current-servers"));
+                       // let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                       let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
                        console.log(lis);
                        let li_arrays = Array.from(lis);
-                       console.log(li_arrays);
+                       let li_arrays2 = Array.from(lis);
+                       console.log(li_arrays2);
 
                        let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
 
@@ -2306,7 +2326,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
  ****** FU1NCTION NAME : load_group_hydroservers*********
  ****** FUNCTION PURPOSE: LOADS THE GROUPS OF HYDROSERVERS THAT ARE THERE *********
  */
-    load_group_hydroservers = function(){
+  load_group_hydroservers = function(){
       console.log("hola");
       $.ajax({
           type: "GET",
@@ -2317,7 +2337,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let groups =result["hydroservers"];
               // console.log("this are the servers");
               // console.log(groups);
-              $("#current-servers").empty() //Resetting the catalog
+              // $("#current-servers").empty() //Resetting the catalog
+              $(".divForServers").empty() //Resetting the catalog
               let extent = ol.extent.createEmpty()
               // console.log(groups);
               groups.forEach(group => {
@@ -2325,14 +2346,24 @@ var CRAZYSEARCH_PACKAGE = (function() {
                       title,
                       description
                   } = group
-                  let newHtml = `
+                  let id_group_separator = `${title}_list_separator`;
 
-                  <li class="ui-state-default" id="${title}">
-                  <input class="chkbx-layer" type="checkbox" checked><span class="group-name">${title}</span>
-                  <div>
-                    <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface"> <span class="glyphicon glyphicon-option-vertical"></span> </button>
-                  </div>`
+                  let newHtml =
+                  `
+                  <ul>
+                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                  <input class="chkbx-layer" type="checkbox" checked>
+                      <span class="group-name">${title}</span>
+                      <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                      <span class="glyphicon glyphicon-option-vertical"></span>
+                      </button>
+                  </li>
+                  <div id= ${id_group_separator} class="divForServers"></div>
+                  </ul>
+                  `
                   $(newHtml).appendTo("#current-Groupservers");
+
+
 
                   let li_object = document.getElementById(`${title}`);
                   console.log("hola");
@@ -2536,8 +2567,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                       // MAKES THE LAYER INVISIBLE
 
-                      console.log(document.getElementById("current-servers"));
-                      let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                      // console.log(document.getElementById("current-servers"));
+                      // let lis = document.getElementById("current-servers").getElementsByTagName("li");
+                      let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
                       console.log(lis);
                       let li_arrays = Array.from(lis);
                       console.log(li_arrays);
