@@ -1352,7 +1352,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 ************ PURPOSE : THE FUNCTION LETS YOU FILTER THE HYDROSERVERS LIST FROM THE SELECTED GROUPS OF HYDROSERVERS
 
 */
-    get_keywords_from_group = function(){
+  get_keywords_from_group = function(){
 
       // ONLY THE KEY WORDS //
       let key_words_to_search= get_all_the_checked_keywords();
@@ -1366,7 +1366,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
         // GET THE LI ELEMENTS OF THE MENU OF THE HYDROSERVERS //
         // let lis = document.getElementById("current-servers").getElementsByTagName("li");
         let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
+
         let li_arrays = Array.from(lis);
+        li_arrays = li_arrays.filter(x => x.attributes['layer-name'].value !== "none");
+
         console.log(li_arrays);
 
 
@@ -1646,6 +1649,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
     let active_groups_hydroservers = document.getElementById("current-Groupservers").getElementsByTagName("LI");
     let array_active_groups_hydroservers = Array.from(active_groups_hydroservers);
     let input_check_array = [];
+    console.log(array_active_groups_hydroservers);
+    array_active_groups_hydroservers = array_active_groups_hydroservers.filter(x => x.attributes['layer-name'].value == "none");
+
     array_active_groups_hydroservers.forEach(function(group){
       let input_type = Array.from(group.getElementsByTagName("INPUT"))[0];
       if(input_type.checked){
