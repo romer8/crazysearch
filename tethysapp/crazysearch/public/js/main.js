@@ -1350,28 +1350,28 @@ var CRAZYSEARCH_PACKAGE = (function() {
     ************ FUNCTION NAME: addContextMenuToListItem **********************
     ************ PURPOSE: ADD THE MENU HAMBUGER OF THE INDIVIDUAL HYDROSERVERS ***********
     */
-    addContextMenuToListItem = function($listItem) {
-        var contextMenuId
-        $listItem.find(".hmbrgr-div img").contextMenu("menu", ContextMenuBase, {
-            triggerOn: "click",
-            displayAround: "trigger",
-            mouseClick: "left",
-            position: "right",
-            onOpen: function(e) {
-                $(".hmbrgr-div").removeClass("hmbrgr-open")
-                $(e.trigger.context)
-                    .parent()
-                    .addClass("hmbrgr-open")
-            },
-            onClose: function(e) {
-                $(e.trigger.context)
-                    .parent()
-                    .removeClass("hmbrgr-open")
-            }
-        })
-        contextMenuId = $(".iw-contextMenu:last-child").attr("id")
-        $listItem.attr("data-context-menu", contextMenuId)
-    }
+    // addContextMenuToListItem = function($listItem) {
+    //     var contextMenuId
+    //     $listItem.find(".hmbrgr-div img").contextMenu("menu", ContextMenuBase, {
+    //         triggerOn: "click",
+    //         displayAround: "trigger",
+    //         mouseClick: "left",
+    //         position: "right",
+    //         onOpen: function(e) {
+    //             $(".hmbrgr-div").removeClass("hmbrgr-open")
+    //             $(e.trigger.context)
+    //                 .parent()
+    //                 .addClass("hmbrgr-open")
+    //         },
+    //         onClose: function(e) {
+    //             $(e.trigger.context)
+    //                 .parent()
+    //                 .removeClass("hmbrgr-open")
+    //         }
+    //     })
+    //     contextMenuId = $(".iw-contextMenu:last-child").attr("id")
+    //     $listItem.attr("data-context-menu", contextMenuId)
+    // }
 
 /*
 ************ FUNCTION NAME : GET_KEYWORDS_FROM_GROUPS
@@ -1813,9 +1813,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                 });
 
-                addContextMenuToListItem(
-                    $("#current-Groupservers").find("li:last-child")
-                )
+                // addContextMenuToListItem(
+                //     $("#current-Groupservers").find("li:last-child")
+                // )
 
 
                 $(".ui-state-default").click(function(){
@@ -2124,9 +2124,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                        // $(newHtml).appendTo("#current-servers")
                        $(newHtml).appendTo(`#${id_group_separator}`);
                        console.log($(newHtml));
-                       addContextMenuToListItem(
-                           $("#current-servers").find("li:last-child")
-                       )
+                       // addContextMenuToListItem(
+                       //     $("#current-servers").find("li:last-child")
+                       // )
                        console.log(document.getElementById("current-servers"));
                        let lis = document.getElementById("current-servers").getElementsByTagName("li");
                        console.log(lis);
@@ -2405,9 +2405,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                   });
 
-                  addContextMenuToListItem(
-                      $("#current-Groupservers").find("li:last-child")
-                  )
+                  // addContextMenuToListItem(
+                  //     $("#current-Groupservers").find("li:last-child")
+                  // )
               })
       },
       error: function(error) {
@@ -2567,9 +2567,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
                       // MAKES THE LAYER INVISIBLE
-                      addContextMenuToListItem(
-                          $("#current-servers").find("li:last-child")
-                      )
+                      // addContextMenuToListItem(
+                      //     $("#current-servers").find("li:last-child")
+                      // )
                       console.log(document.getElementById("current-servers"));
                       let lis = document.getElementById("current-servers").getElementsByTagName("li");
                       console.log(lis);
