@@ -623,23 +623,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
         var config = {
           modeBarButtonsToAdd: [{ name: 'downloadCsv', title: 'Download data as csv', icon: Plotly.Icons.disk, click: function(){
             var csvData = [];
-            // var header = ['X'] //main header.
             var header = [xTitle,yTitle] //main header.
-            // for (var j = 0; j < numSeries; j++){
-            // header.push(y_names[j]);
-            // }
             csvData.push(header);
-            // var header = [x_title] //subheader
-            // for (var j = 0; j < numSeries; j++){
-            // header.push(y_titles[j]);
-            // }
-            // csvData.push(header);
-            // for (var i = 0; i < data.length; i++){ //data
             for (var i = 0; i < xArray.length; i++){ //data
               var line = [xArray[i],yArray[i]];
-              // for (var j = 0; j < numSeries; j++){
-                // line.push(data[i][y_names[j]]);
-              // }
               csvData.push(line);
             }
             var csvFile = csvData.map(e=>e.map(a=>'"'+((a||"").toString().replace(/"/gi,'""'))+'"').join(",")).join("\r\n"); //quote all fields, escape quotes by doubling them.
@@ -789,15 +776,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           boxmean: 'sd'
 
         };
-        // var trace2 = {
-        //   y:yArray,
-        //   type: 'box',
-        //   name: 'Mean and Standard Deviation',
-        //   marker: {
-        //     color: 'rgb(10,140,208)'
-        //   },
-        //   boxmean: 'sd'
-        // };
+
         let data = [trace1];
 
         let layout = {
