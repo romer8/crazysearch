@@ -2014,13 +2014,15 @@ var CRAZYSEARCH_PACKAGE = (function() {
               let extent = ol.extent.createEmpty();
               console.log(servers);
               let id_group_separator = `${group_name}_list_separator`;
-              let tag_to_delete = document.getElementById(id_group_separator);
-              console.log(tag_to_delete);
-              tag_to_delete.parentNode.removeChild(tag_to_delete);
+              // let tag_to_delete = document.getElementById(id_group_separator);
+              // console.log(tag_to_delete);
+              // tag_to_delete.parentNode.removeChild(tag_to_delete);
               // $("#current-servers").remove(id_group_separator);
 
               // let lis = document.getElementById("current-servers").getElementsByTagName("li");
-              let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
+              // let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
+              let lis = document.getElementById(`${id_group_separator}`).getElementsByTagName("li");
+              // Object.values($("#current-Groupservers").find(".buttonAppearance > .chkbx-layer"))
               let li_arrays = Array.from(lis);
               console.log(li_arrays);
               servers.forEach(server => {
@@ -2041,7 +2043,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   // so the deletion will be //
 
                   // let ul_servers = document.getElementById("current-servers");
-                  let ul_servers = document.getElementById("current-Groupservers");
+                  // let ul_servers = document.getElementById("current-Groupservers");
+                  let ul_servers = document.getElementById(`${id_group_separator}`);
+
                   lis_to_delete.forEach(function(li_tag){
                     ul_servers.removeChild(li_tag);
                   });
@@ -2154,14 +2158,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                        // console.log(document.getElementById("current-servers"));
                        // let lis = document.getElementById("current-servers").getElementsByTagName("li");
-                       let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
+                       // let lis = document.getElementById("current-Groupservers").getElementsByTagName("li");
+                       let lis = document.getElementById(`${id_group_separator}`).getElementsByTagName("li");
                        console.log(lis);
                        let li_arrays = Array.from(lis);
                        let li_arrays2 = Array.from(lis);
                        console.log(li_arrays2);
 
                        let input_check = li_arrays.filter(x => title === x.attributes['layer-name'].value)[0];
-
                        // let input_check = document.querySelector(newHtml);
                        console.log(input_check);
 
@@ -3208,10 +3212,10 @@ var CRAZYSEARCH_PACKAGE = (function() {
       init_map();
       load_group_hydroservers();
 
-     activate_layer_values();
-     let empty_array=[];
-     initialize_graphs([],[],"No data Available","","","","scatter");
-     add_boundary_map(geoServerColor, geoServerWidth, map);
+       activate_layer_values();
+       let empty_array=[];
+       initialize_graphs([],[],"No data Available","","","","scatter");
+       add_boundary_map(geoServerColor, geoServerWidth, map);
 
 
 
