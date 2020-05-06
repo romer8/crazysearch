@@ -1912,7 +1912,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 ****** FUNCTION PURPOSE: DELETES THE HYDROSERVER GROUP AND THE HYDROSERVERS INSIDE THE GROUP*********
 */
   delete_group_of_hydroservers = function(){
-    let datastring = Object.values($("#current-Groupservers").find(".divForServers > .chkbx-layer"));
+    let datastring = Object.values($("#current-Groupservers").find(".buttonAppearance > .chkbx-layer"));
     console.log(datastring);
     let groups_to_delete=[];
     datastring.forEach(function(data){
