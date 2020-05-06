@@ -620,6 +620,40 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         element_graphs.style.cssText=  "display: flex; flex-direction: row;";
         map.updateSize();
+        var config = {
+          modeBarButtonsToAdd: [{ name: 'downloadCsv', title: 'Download data as csv', icon: Plotly.Icons.disk, click: function(){
+            var csvData = [];
+            // var header = ['X'] //main header.
+            var header = [xTitle,yTitle] //main header.
+            // for (var j = 0; j < numSeries; j++){
+            // header.push(y_names[j]);
+            // }
+            csvData.push(header);
+            // var header = [x_title] //subheader
+            // for (var j = 0; j < numSeries; j++){
+            // header.push(y_titles[j]);
+            // }
+            // csvData.push(header);
+            // for (var i = 0; i < data.length; i++){ //data
+            for (var i = 0; i < xArray.length; i++){ //data
+              var line = [xArray[i],yArray[i]];
+              // for (var j = 0; j < numSeries; j++){
+                // line.push(data[i][y_names[j]]);
+              // }
+              csvData.push(line);
+            }
+            var csvFile = csvData.map(e=>e.map(a=>'"'+((a||"").toString().replace(/"/gi,'""'))+'"').join(",")).join("\r\n"); //quote all fields, escape quotes by doubling them.
+            var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement("a");
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", title_graph.replace(/[^a-z0-9_.-]/gi,'_') + ".csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            } }],
+        }
       if(type === "scatter"){
         var trace1 = {
           x: xArray,
@@ -661,7 +695,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
           autosize: true,
           showlegend:true
         };
-        Plotly.newPlot('plots', data, layout);
+
+        Plotly.newPlot('plots', data, layout,config);
 
       }
       if(type ==="bar"){
@@ -739,7 +774,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
         };
 
-        Plotly.newPlot('plots', data, layout);
+        Plotly.newPlot('plots', data, layout,config);
 
       }
       if(type === "whisker"){
@@ -768,7 +803,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         let layout = {
           title: title_graph
         };
-        Plotly.newPlot('plots', data, layout);
+        Plotly.newPlot('plots', data, layout,config);
 
       }
 
@@ -1898,7 +1933,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
 ****** FUNCTION PURPOSE: DELETES THE HYDROSERVER GROUP AND THE HYDROSERVERS INSIDE THE GROUP*********
 */
   delete_group_of_hydroservers = function(){
-    let datastring = Object.values($("#current-Groupservers").find(".chkbx-layer"));
+    let datastring = Object.values($("#current-Groupservers").find(".divForServers > .chkbx-layer"));
+    console.log(datastring);
     let groups_to_delete=[];
     datastring.forEach(function(data){
       if(data.checked== true){
