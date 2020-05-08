@@ -1769,28 +1769,48 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 if(can_delete_hydrogroups){
                   newHtml =
                   `
-                  <ul>
-                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                  <input class="chkbx-layer" type="checkbox" checked>
-                      <span class="group-name">${title}</span>
-                      <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
-                      <span class="glyphicon glyphicon-option-vertical"></span>
-                      </button>
-                  </li>
-                  <div id= ${id_group_separator} class="divForServers"></div>
-                  </ul>
+                  <div class="panel panel-default">
+                    <div class="panel-heading buttonAppearance" role="tab" id="heading_${title}">
+                      <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#current-Groupservers" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
+                        <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                          <input class="chkbx-layer" type="checkbox" checked>
+                            <span class="group-name">${title}</span>
+                            <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                              <span class="glyphicon glyphicon-option-vertical"></span>
+                            </button>
+                        </li>
+                        </a>
+                      </h4>
+                    </div>
+                    <div id="collapse_${title}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${title}">
+                      <div class="panel-body">
+                          <div id= ${id_group_separator} class="divForServers"></div>
+                      </div>
+                    </div>
+                  </div>
                   `
                 }
                 else{
                   newHtml =
                   `
-                  <ul>
-                  <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                  <input class="chkbx-layer" type="checkbox" checked>
-                      <span class="group-name">${title}</span>
-                  </li>
-                  <div id= ${id_group_separator} class="divForServers"></div>
-                  </ul>
+                  <div class="panel panel-default">
+                    <div class="panel-heading buttonAppearance" role="tab" id="heading_${title}">
+                      <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#current-Groupservers" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
+                        <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                          <input class="chkbx-layer" type="checkbox" checked>
+                            <span class="group-name">${title}</span>
+                        </li>
+                        </a>
+                      </h4>
+                    </div>
+                    <div id="collapse_${title}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${title}">
+                      <div class="panel-body">
+                          <div id= ${id_group_separator} class="divForServers"></div>
+                      </div>
+                    </div>
+                  </div>
                   `
                 }
 
@@ -2391,31 +2411,60 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
                   let newHtml;
                   if(can_delete_hydrogroups){
-                    console.log("JJJJJJJS");
                     newHtml =
                     `
-                    <ul>
-                    <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                    <input class="chkbx-layer" type="checkbox" checked>
-                        <span class="group-name">${title}</span>
-                        <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
-                        <span class="glyphicon glyphicon-option-vertical"></span>
-                        </button>
-                    </li>
-                    <div id= ${id_group_separator} class="divForServers"></div>
-                    </ul>
+                    <div class="panel panel-default">
+                      <div class="panel-heading buttonAppearance" role="tab" id="heading_${title}">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse" data-parent="#current-Groupservers" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
+                          <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                            <input class="chkbx-layer" type="checkbox" checked>
+                              <span class="group-name">${title}</span>
+                              <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                                <span class="glyphicon glyphicon-option-vertical"></span>
+                              </button>
+                          </li>
+                          </a>
+                        </h4>
+                      </div>
+                      <div id="collapse_${title}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${title}">
+                        <div class="panel-body">
+                            <div id= ${id_group_separator} class="divForServers"></div>
+                        </div>
+                      </div>
+                    </div>
+
                     `
+                    // <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                    //   <input class="chkbx-layer" type="checkbox" checked>
+                    //     <span class="group-name">${title}</span>
+                    //     <button class="btn btn-warning" data-toggle="modal" data-target="#modalInterface">
+                    //       <span class="glyphicon glyphicon-option-vertical"></span>
+                    //     </button>
+                    // </li>
+                    // <div id= ${id_group_separator} class="divForServers"></div>
                   }
                   else{
                     newHtml =
                     `
-                    <ul>
-                    <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
-                    <input class="chkbx-layer" type="checkbox" checked>
-                        <span class="group-name">${title}</span>
-                    </li>
-                    <div id= ${id_group_separator} class="divForServers"></div>
-                    </ul>
+                    <div class="panel panel-default">
+                      <div class="panel-heading buttonAppearance" role="tab" id="heading_${title}">
+                        <h4 class="panel-title">
+                          <a role="button" data-toggle="collapse" data-parent="#current-Groupservers" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
+                          <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
+                            <input class="chkbx-layer" type="checkbox" checked>
+                              <span class="group-name">${title}</span>
+
+                          </li>
+                          </a>
+                        </h4>
+                      </div>
+                      <div id="collapse_${title}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_${title}">
+                        <div class="panel-body">
+                            <div id= ${id_group_separator} class="divForServers"></div>
+                        </div>
+                      </div>
+                    </div>
                     `
                   }
                   $(newHtml).appendTo("#current-Groupservers");
