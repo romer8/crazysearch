@@ -197,7 +197,9 @@
     word-break: break-all;
     margin-left: 5%;
 }
-
+#buttonsBar{
+  margin-left: 10%;
+}
 
 #pop-up_description2 {
   display: flex;

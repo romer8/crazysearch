@@ -12,17 +12,18 @@
 <div class="accordion" id="groups_hydroservers">
   <button class="btn btn-primary btn-lg btn-block">HydroServers</button>
   <br>
-
-  <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span>
-  {% if can_delete_hydrogroups %}
-  <button class="btn btn-danger"  data-toggle="modal" data-target="#DeleteWarning"> <span class="glyphicon glyphicon-trash"></span>
-  {% endif %}
-  <button class="btn btn-success" data-toggle="modal" data-target="#modalKeyWordSearch"> <span class="glyphicon glyphicon-search"></span></button>
-  {% if can_block_map %}
-  <input id="blockPosition" type="checkbox" checked data-toggle="toggle" data-on="<span class='glyphicon glyphicon-picture'></span>" data-off="<span class='glyphicon glyphicon-picture'></span>" data-size="small" data-onstyle = "danger">
-  {% endif %}
-  <input id="sG" type="checkbox" data-toggle="toggle" data-on="<span class='glyphicon glyphicon-signal'></span>" data-off="<span class='glyphicon glyphicon-signal'></span>" data-size="small" data-onstyle = "danger">
-  <br></br>
+  <div id="buttonsBar">
+    <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span></button>
+    {% if can_delete_hydrogroups %}
+    <button class="btn btn-danger"  data-toggle="modal" data-target="#DeleteWarning"> <span class="glyphicon glyphicon-trash"></span></button>
+    {% endif %}
+    <button class="btn btn-success" data-toggle="modal" data-target="#modalKeyWordSearch"> <span class="glyphicon glyphicon-search"></span></button>
+    {% if can_block_map %}
+    <input id="blockPosition" type="checkbox" checked data-toggle="toggle" data-on="<span class='glyphicon glyphicon-picture'></span>" data-off="<span class='glyphicon glyphicon-picture'></span>" data-size="small" data-onstyle = "danger"></input>
+    {% endif %}
+    <input id="sG" type="checkbox" data-toggle="toggle" data-on="<span class='glyphicon glyphicon-signal'></span>" data-off="<span class='glyphicon glyphicon-signal'></span>" data-size="small" data-onstyle = "danger"></input>
+  </div>
+  <br>
   <button class="btn btn-primary btn-block" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo"> </button>
   <br>
   <div class="panel-group" id="current-Groupservers" role="tablist" aria-multiselectable="true"></div>
