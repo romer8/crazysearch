@@ -810,6 +810,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
         evt.stopPropagation();
         $("#graphs").empty();
 
+
         let object_request={};
         console.log(object_request);
 
