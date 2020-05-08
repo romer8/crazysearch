@@ -157,7 +157,6 @@
 #current-Groupservers li {
     position: relative;
     list-style: none;
-    padding: 5px;
     cursor: default;
     display: -webkit-box;
     display: -webkit-flex;
@@ -196,7 +195,9 @@
     flex: 1 1 auto;
     max-width: 218px;
     word-break: break-all;
+    margin-left: 5%;
 }
+
 
 #pop-up_description2 {
   display: flex;
@@ -252,8 +253,8 @@
 .panel-heading.buttonAppearance{
     /* margin: 40px; */
     display: block;
-    height: auto;
-    width: auto;
+    height: 20%;
+    width: 100%;
     /* font-size: 65px; */
     background: #286090 !important;
     /* border: 2px solid white; */
@@ -274,6 +275,7 @@
     color: white;
     transition: all 0.2s linear 0s;
 }
+
 /* .buttonAppearance:hover{
   background-color: #5bc0de !important;
   border-color:#46b8da !important;
