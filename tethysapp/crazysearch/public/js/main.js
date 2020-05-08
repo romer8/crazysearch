@@ -735,7 +735,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
             // range: [0, 4]
           },
         };
-        Plotly.newPlot('plots', data, layout);
+        Plotly.newPlot('plots', data, layout,config);
 
       }
       if(type === "pie"){
