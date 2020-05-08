@@ -10,7 +10,6 @@
 /*****************************************************************************
  *                      LIBRARY WRAPPER
  *****************************************************************************/
-
  var staticPath = baseStatic;
  var apiServer = `${staticPath.replace("/static", "/apps")}`;
  window.onbeforeunload = null
@@ -186,15 +185,21 @@ var CRAZYSEARCH_PACKAGE = (function() {
         map.getView().fit(extent, map.getSize());
         var properties = map.getView().getProperties();
         properties["minZoom"] = map.getView().getZoom();
+        if(geoServerMovement){
+          properties["extent"]= extent
+
+        }
         map.setView(new ol.View(properties));
-        map.interactions = ol.interaction.defaults({ dragPan: false});
         map.addLayer(layersDict['boundaryLayer']);
       }
       else{
         var properties = map.getView().getProperties();
         properties["minZoom"] = 1;
+        if(geoServerMovement){
+          properties["extent"]= extent
+
+        }
         map.setView(new ol.View(properties));
-        map.interactions = ol.interaction.defaults({ dragPan: true});
         map.removeLayer(layersDict['boundaryLayer']);
       }
     }
@@ -254,14 +259,17 @@ var CRAZYSEARCH_PACKAGE = (function() {
           //disable zoom out //
           var properties = map.getView().getProperties();
           properties["minZoom"] = map.getView().getZoom();
-          map.setView(new ol.View(properties));
-          console.log("NNNN");
-          map.getLayers().forEach(function(element, index,array){
-            console.log(element);
-            console.log(index);
-            console.log(array);
+          if(geoServerMovement){
+            properties["extent"]= extent
 
-          })
+          }
+          map.setView(new ol.View(properties));
+          // map.getLayers().forEach(function(element, index,array){
+          //   console.log(element);
+          //   console.log(index);
+          //   console.log(array);
+          //
+          // })
 
         }
       });
@@ -1201,25 +1209,26 @@ var CRAZYSEARCH_PACKAGE = (function() {
         layersDict = {}
         // var boundaryLayerGeoserver = add_boundary_map(geoServerColor, geoServerWidth);
         // layers = [baseLayer, vector_layer, shpLayer, boundaryLayerGeoserver]
-        layers = [baseLayer, vector_layer, shpLayer]
-        map = new ol.Map({
-            target: "map",
-            layers: layers,
-            view: new ol.View({
-              // -25.30066, -57.63591
-                center: [-11500000, 4735000],
-                projection: projection,
-                zoom: 4
-            }),
-            controls: ol.control
-                .defaults()
-                .extend([
-                    new ol.control.ZoomSlider(),
-                    new ol.control.FullScreen()
-                ]),
-            crossOrigin: "anonymous",
-            // interactions: ol.interaction.defaults({ dragPan: false}),
-        })
+        layers = [baseLayer, vector_layer, shpLayer];
+          map = new ol.Map({
+              target: "map",
+              layers: layers,
+              view: new ol.View({
+                // -25.30066, -57.63591
+                  center: [-11500000, 4735000],
+                  projection: projection,
+                  zoom: 4
+              }),
+              controls: ol.control
+                  .defaults()
+                  .extend([
+                      new ol.control.ZoomSlider(),
+                      new ol.control.FullScreen()
+                  ]),
+              crossOrigin: "anonymous",
+              // interactions: ol.interaction.defaults({ dragPan: false}),
+          })
+
 
 
         var lastFeature, draw, featureType

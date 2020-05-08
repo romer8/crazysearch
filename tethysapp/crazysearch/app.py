@@ -164,6 +164,12 @@ class Crazysearch(TethysAppBase):
                 required=True
             ),
             CustomSetting(
+                name='Boundary Movement',
+                type = CustomSetting.TYPE_BOOLEAN,
+                description='Block or Allow movement outside the map boundary layer (True/False)',
+                required=True
+            ),
+            CustomSetting(
                 name='Boundary Color',
                 type = CustomSetting.TYPE_STRING,
                 description='The color style for the boundary (e.g #ffcc33)',

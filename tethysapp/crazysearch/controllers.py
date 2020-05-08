@@ -47,6 +47,7 @@ def home(request):
     boundaryEndpoint = app.get_custom_setting('Boundary Geoserver Endpoint')
     boundaryWorkspace = app.get_custom_setting('Boundary Workspace Name')
     boundaryLayer = app.get_custom_setting('Boundary Layer Name')
+    boundaryMovement = app.get_custom_setting('Boundary Movement')
     boundaryColor = app.get_custom_setting('Boundary Color')
     boundaryWidth = app.get_custom_setting('Boundary Width')
     print(boundaryEndpoint)
@@ -55,6 +56,7 @@ def home(request):
      "geoEndpoint": boundaryEndpoint,
      "geoWorkspace": boundaryWorkspace,
      "geoLayer": boundaryLayer,
+     "geoMovement":boundaryMovement,
      "geoColor": boundaryColor,
      "geoWidth":boundaryWidth,
      'can_delete_hydrogroups': has_permission(request, 'delete_hydrogroups'),
@@ -475,8 +477,8 @@ def soap_group(request):
         else:
             return_obj['zoom'] = 'false'
             # Get a list of all the sites and their respective lat lon.
-            # sites = client.service.GetSites('[:]')
-            sites = client.service.GetSites('')
+            sites = client.service.GetSites('[:]')
+            # sites = client.service.GetSites('')
             print("this are the sites")
             print(sites)
             sites_dict = xmltodict.parse(sites)
