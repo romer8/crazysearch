@@ -25,6 +25,8 @@ import xml.etree.ElementTree as ET
 import psycopg2
 from owslib.waterml.wml11 import WaterML_1_1 as wml11
 from suds.client import Client  # For parsing WaterML/XML
+from suds.xsd.doctor import Import, ImportDoctor
+# from suds.sudsobject import SudObject
 from json import dumps, loads
 from pyproj import Proj, transform  # Reprojecting/Transforming coordinates
 from datetime import datetime
@@ -434,7 +436,7 @@ def soap_group(request):
         # Getting the current map extent
         true_extent = request.POST.get('extent')
 
-        client = Client(url)
+        client = Client(url, timeout= 300)
         # True Extent is on and necessary if the user is trying to add USGS or
         # some of the bigger HydroServers.
         if true_extent == 'on':
@@ -481,11 +483,17 @@ def soap_group(request):
             # sites = client.service.GetSites('')
             print("this are the sites")
             print(sites)
-            sites_dict = xmltodict.parse(sites)
-            sites_json_object = json.dumps(sites_dict)
+            print(type(sites))
+            sites_json={}
+            if isinstance(sites, str):
+                sites_dict = xmltodict.parse(sites)
+                sites_json_object = json.dumps(sites_dict)
+                sites_json = json.loads(sites_json_object)
+            else:
+                sites_json_object = suds_to_json(sites)
+                sites_json = json.loads(sites_json_object)
 
-            sites_json = json.loads(sites_json_object)
-            # Parsing the sites and creating a sites object. See utilities.py
+            # Parsing the sites and creating a sites object. See auxiliary.py
             print("-------------------------------------")
             # print(sites_json)
             sites_object = parseJSON(sites_json)
@@ -689,8 +697,23 @@ def keyWordsForGroup(request):
         layer_obj = {}
         layer_obj["title"] = hydroservers.title
         layer_obj["url"] = hydroservers.url.strip()
+        print(layer_obj["url"])
         layer_obj["siteInfo"] = hydroservers.siteinfo
-        client = Client(hydroservers.url.strip())
+        # schema_url = "http://www.cuahsi.org/his/1.1/ws"
+        imp = Import('http://schemas.xmlsoap.org/soap/encoding/',location='http://schemas.xmlsoap.org/soap/encoding/')
+        schema_url1 = "http://www.cuahsi.org/waterML/1.1"
+        schema_url2 = "http://www.cuahsi.org/his/1.1"
+        schema_url3 = "http://www.w3.org/2001/XMLSchema"
+        imp.filter.add(schema_url1)
+        imp.filter.add(schema_url2)
+        imp.filter.add(schema_url3)
+        # schema_location = "http://www.cuahsi.org/his/1.1/ws.xsd"
+        # schema_import = Import(schema_url)
+        # schema_doctor =ImportDoctor(schema_import)
+        schema_doctor =ImportDoctor(imp)
+        # client = Client(url = hydroservers.url.strip(), doctor = schema_doctor)
+        client = Client(url = hydroservers.url.strip(), plugins =[schema_doctor], autoblend=True)
+
         keywords = client.service.GetVariables('[:]')
 
         keywords_dict = xmltodict.parse(keywords)
