@@ -35,12 +35,12 @@
   width: 100%;
   height: 100%;
   /* position: fixed; */
-  flex:1 1 50%;
+  flex:1 1 70%;
   order: 1;
   overflow-y: hidden;
 }
 #graph{
-  flex: 1 1 50%;
+  flex: 1 1 30%;
   order: 2;
   width: 100%;
   height: 100%;
