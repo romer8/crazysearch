@@ -1500,7 +1500,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(separator_element);
                 let children_element = Array.from(separator_element.children);
                 console.log(children_element);
-                if(children_element.length < 2){
+                if(children_element.length === 0 ){
                     let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
                     // let no_servers = `<p class="no_groups_tag"> The group does not have hydroservers</p>`
                       $(no_servers).appendTo(`#${id_group_separator}`) ;
@@ -2115,6 +2115,14 @@ var CRAZYSEARCH_PACKAGE = (function() {
        group: group_name
      };
      console.log(group_name_obj);
+     $("#GeneralLoading").css({
+        position:'fixed',
+        "z-index": 9999,
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      });
+     $("#GeneralLoading").removeClass("hidden");
      $.ajax({
        type:"GET",
        url: `${apiServer}/keyword-group/`,
@@ -2356,6 +2364,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                      // map.getView().fit(extent, map.getSize())
                      // map.updateSize()
                  }
+
              },
              error: function(error) {
                  console.log(error);
@@ -2373,6 +2382,8 @@ var CRAZYSEARCH_PACKAGE = (function() {
                  )
              }
          })
+         $("#GeneralLoading").addClass("hidden");
+
        },
        error: function(error) {
            console.log(error);
@@ -2399,6 +2410,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
  */
   load_group_hydroservers = function(){
       console.log("hola");
+
       $.ajax({
           type: "GET",
           url: `${apiServer}/load-groups/`,
@@ -2524,6 +2536,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
 
 
               })
+
       },
       error: function(error) {
           $("#soapAddLoading").addClass("hidden")
@@ -2989,7 +3002,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 console.log(separator_element);
                 let children_element = Array.from(separator_element.children);
                 console.log(children_element);
-                if(children_element.length < 2){
+                if(children_element.length < 1){
                   let no_servers = `<button class="btn btn-danger btn-block noGroups"> The group does not have hydroservers</button>`
                       $(no_servers).appendTo(`#${id_group_separator}`) ;
                 }
