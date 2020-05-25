@@ -1782,7 +1782,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                   <div class="panel panel-default">
                     <div class="panel-heading buttonAppearance" role="tab" id="heading_${title}">
                       <h4 class="panel-title">
-                        <a role="button" data-toggle="collapse" data-parent="#current-Groupservers" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
+                        <a role="button" data-toggle="collapse" data-target="#collapse_${title}" href="#collapse_${title}" aria-expanded="true" aria-controls="collapse_${title}">
                         <li class="ui-state-default buttonAppearance" id="${title}" layer-name="none">
                           <input class="chkbx-layer" type="checkbox" checked>
                             <span class="group-name">${title}</span>
