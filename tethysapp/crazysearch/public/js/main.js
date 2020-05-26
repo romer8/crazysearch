@@ -872,6 +872,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
           // $("#plots").hide();
           $("#graphAddLoading").css({left:'50%',bottom:"15%", position:'absolute',"z-index": 9999});
           $("#graphAddLoading").removeClass("hidden");
+          console.log(object_request);
 
           $.ajax({
             type:"GET",
@@ -1517,6 +1518,11 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 $("#KeywordLoading").addClass("hidden");
 
                 $("#btn-key-search").show();
+                $("#modalKeyWordSearch").modal("hide");
+                $("#modalKeyWordSearch").each(function() {
+                    this.reset()
+                })
+
 
 
             },
