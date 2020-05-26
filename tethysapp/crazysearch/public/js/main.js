@@ -3078,7 +3078,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
               //Dynamically generate the list of existing hydroservers
               var server = result["hydroserver"]
               var HSTableHtml =
-                  '<table id="tbl-hydroservers"><thead><th></th><th>Title</th><th>URL</th></thead><tbody>'
+                  '<table id="tbl-hydroservers"><thead><th>Check</th><th>Title</th><th>URL</th></thead><tbody>'
               if (server.length === 0) {
                   $modalDelete
                       .find(".modal-body")

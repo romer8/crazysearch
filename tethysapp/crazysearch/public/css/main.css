@@ -17,6 +17,23 @@
   order: 1;
 
 } */
+
+table #tbl-hydroservers{
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th #tbl-hydroservers, td #tbl-hydroservers, tr #tbl-hydroservers {
+
+  padding: 2%;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color:#f5f5f5;
+}
+
 #GeneralLoading{
   height: 20%;
   width: auto;
