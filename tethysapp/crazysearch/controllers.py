@@ -486,6 +486,7 @@ def soap_group(request):
             print(type(sites))
             sites_json={}
             if isinstance(sites, str):
+                print("here")
                 sites_dict = xmltodict.parse(sites)
                 sites_json_object = json.dumps(sites_dict)
                 sites_json = json.loads(sites_json_object)
@@ -700,19 +701,24 @@ def keyWordsForGroup(request):
         print(layer_obj["url"])
         layer_obj["siteInfo"] = hydroservers.siteinfo
         # schema_url = "http://www.cuahsi.org/his/1.1/ws"
-        imp = Import('http://schemas.xmlsoap.org/soap/encoding/',location='http://schemas.xmlsoap.org/soap/encoding/')
-        schema_url1 = "http://www.cuahsi.org/waterML/1.1"
-        schema_url2 = "http://www.cuahsi.org/his/1.1"
-        schema_url3 = "http://www.w3.org/2001/XMLSchema"
-        imp.filter.add(schema_url1)
-        imp.filter.add(schema_url2)
-        imp.filter.add(schema_url3)
+
+
+        # imp = Import('http://schemas.xmlsoap.org/soap/encoding/',location='http://schemas.xmlsoap.org/soap/encoding/')
+        # schema_url1 = "http://www.cuahsi.org/waterML/1.1"
+        # schema_url2 = "http://www.cuahsi.org/his/1.1"
+        # schema_url3 = "http://www.w3.org/2001/XMLSchema"
+        # imp.filter.add(schema_url1)
+        # imp.filter.add(schema_url2)
+        # imp.filter.add(schema_url3)
+
         # schema_location = "http://www.cuahsi.org/his/1.1/ws.xsd"
         # schema_import = Import(schema_url)
         # schema_doctor =ImportDoctor(schema_import)
-        schema_doctor =ImportDoctor(imp)
-        # client = Client(url = hydroservers.url.strip(), doctor = schema_doctor)
-        client = Client(url = hydroservers.url.strip(), plugins =[schema_doctor], autoblend=True)
+
+        # schema_doctor =ImportDoctor(imp)
+
+        client = Client(url = hydroservers.url.strip())
+        # client = Client(url = hydroservers.url.strip(), plugins =[schema_doctor], autoblend=True)
 
         keywords = client.service.GetVariables('[:]')
 
@@ -767,6 +773,7 @@ def get_values_hs(request):
     # site_name = request.GET.get('site_name')
     site_code =  request.GET.get('code')
     network = request.GET.get('network')
+    network = "whos-plata"
     site_desc = network + ':' + site_code
 
 
@@ -777,6 +784,7 @@ def get_values_hs(request):
     session = SessionMaker()  # Initiate a session
     # hydroservers_group = session.query(HydroServer_Individual).filter(Groups.title == hs_name)
     client = Client(hs_url)
+
     # print(client)
     keywords = client.service.GetVariables('[:]')
     keywords_dict = xmltodict.parse(keywords)
