@@ -17,6 +17,16 @@
   order: 1;
 
 } */
+#GeneralLoading{
+  height: 20%;
+  width: auto;
+}
+#addSoapIdCentering{
+  display: flex;
+  align-content: center;
+
+}
+
 #app-content-wrapper #app-content{
   height: 100%;
   /* when the graph is on */
