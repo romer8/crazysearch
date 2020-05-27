@@ -38,9 +38,10 @@ tr:hover {
   height: 20%;
   width: auto;
 }
+
 #addSoapIdCentering{
   display: flex;
-  align-content: center;
+  justify-content:center;
 
 }
 
