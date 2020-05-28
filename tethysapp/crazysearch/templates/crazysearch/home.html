@@ -14,7 +14,10 @@
   <button class="btn btn-primary btn-lg btn-block">HydroServers</button>
   <br>
   <div id="buttonsBar">
+    {% if can_delete_hydrogroups %}
     <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddGroupServer"> <span class="glyphicon glyphicon-plus"></span></button>
+    {% endif %}
+
     {% if can_delete_hydrogroups %}
     <button class="btn btn-danger"  data-toggle="modal" data-target="#DeleteWarning"> <span class="glyphicon glyphicon-trash"></span></button>
     {% endif %}
