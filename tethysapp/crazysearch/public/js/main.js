@@ -218,61 +218,66 @@ var CRAZYSEARCH_PACKAGE = (function() {
       if(width === "None"){
         width = 3;
       }
-      var owsrootUrl = endpointGeoServer;
-      var workspaceURL = geoServerWorkspace;
-      var layerURL = geoServerLayer;
-      var typeRoot = "ows";
-      var serviceURL = "WFS";
-      var versionURL = "1.1.0";
-      var request = "GetFeature";
-      var typename = `${workspaceURL}:${layerURL}`;
-      var outputFormat = "application/json";
-      var finalURL = `${owsrootUrl}/${typeRoot}?service=${serviceURL}&version=${versionURL}&request=${request}&typename=${typename}&outputFormat=${outputFormat} `;
-      var vectorSource = new ol.source.Vector({
-          url:finalURL,
-          format: new ol.format.GeoJSON()
-      })
-      var vector_layer = new ol.layer.Vector({
-          source: vectorSource,
-          style: new ol.style.Style({
-              //color Fill
-              // fill: new ol.style.Fill({
-              //     color: "rgba(255, 255, 255, 0)"
-              // }),
-              //ourside part of contour //
-              stroke: new ol.style.Stroke({
-                  // color: "#ffcc33",
-                  color: color,
-                  // width: 2
-                  width: width
-              }),
-          })
-      });
-      layersDict['boundaryLayer'] = vector_layer;
-      map.addLayer(vector_layer);
-      vectorSource.once('change',function(e){
-        if(vectorSource.getState() === 'ready') {
-          var extent = vectorSource.getExtent();
-          console.log(extent);
-          map.getView().fit(extent, map.getSize());
+      if(endpointGeoServer ==="None"){
+        endpointGeoServer = "Whole_world";
+        console.log(endpointGeoServer);
+      }
+      if(geoServerWorkspace ==="None"){
+        geoServerWorkspace= "Whole_world";
+      }
+      if(geoServerLayer ==="None"){
+        geoServerLayer= "Whole_world";
+      }
+      if(endpointGeoServer !== "Whole_world"){
+        var owsrootUrl = endpointGeoServer;
+        var workspaceURL = geoServerWorkspace;
+        var layerURL = geoServerLayer;
+        var typeRoot = "ows";
+        var serviceURL = "WFS";
+        var versionURL = "1.1.0";
+        var request = "GetFeature";
+        var typename = `${workspaceURL}:${layerURL}`;
+        var outputFormat = "application/json";
+        var finalURL = `${owsrootUrl}/${typeRoot}?service=${serviceURL}&version=${versionURL}&request=${request}&typename=${typename}&outputFormat=${outputFormat} `;
+        var vectorSource = new ol.source.Vector({
+            url:finalURL,
+            format: new ol.format.GeoJSON()
+        })
+        var vector_layer = new ol.layer.Vector({
+            source: vectorSource,
+            style: new ol.style.Style({
+                //color Fill
+                // fill: new ol.style.Fill({
+                //     color: "rgba(255, 255, 255, 0)"
+                // }),
+                //ourside part of contour //
+                stroke: new ol.style.Stroke({
+                    color: color,
+                    width: width
+                }),
+            })
+        });
+        layersDict['boundaryLayer'] = vector_layer;
+        map.addLayer(vector_layer);
+        vectorSource.once('change',function(e){
+          if(vectorSource.getState() === 'ready') {
+            var extent = vectorSource.getExtent();
+            console.log(extent);
+            map.getView().fit(extent, map.getSize());
 
-          //disable zoom out //
-          var properties = map.getView().getProperties();
-          properties["minZoom"] = map.getView().getZoom();
-          if(geoServerMovement){
-            properties["extent"]= extent
+            //disable zoom out //
+            var properties = map.getView().getProperties();
+            properties["minZoom"] = map.getView().getZoom();
+            if(geoServerMovement){
+              properties["extent"]= extent
+
+            }
+            map.setView(new ol.View(properties));
 
           }
-          map.setView(new ol.View(properties));
-          // map.getLayers().forEach(function(element, index,array){
-          //   console.log(element);
-          //   console.log(index);
-          //   console.log(array);
-          //
-          // })
+        });
+      }
 
-        }
-      });
 
     }
 
@@ -1217,9 +1222,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
               layers: layers,
               view: new ol.View({
                 // -25.30066, -57.63591
-                  center: [-11500000, 4735000],
+                  center: [17.670578, -49.082926],
                   projection: projection,
-                  zoom: 4
+                  zoom: 3
               }),
               controls: ol.control
                   .defaults()

@@ -149,25 +149,28 @@ class Crazysearch(TethysAppBase):
                 name='Boundary Geoserver Endpoint',
                 type = CustomSetting.TYPE_STRING,
                 description='Geoserver endpoint for the hydroshare resource containning the layer (e.g:"https://geoserver.hydroshare.org/geoserver/layerID")',
-                required=True
+                required=False
             ),
             CustomSetting(
                 name='Boundary Workspace Name',
                 type = CustomSetting.TYPE_STRING,
                 description='workspace and layer name (e.g workspace:layername)',
-                required=True
+                required=False
+
             ),
             CustomSetting(
                 name='Boundary Layer Name',
                 type = CustomSetting.TYPE_STRING,
                 description='layer name (e.g workspace:layername)',
-                required=True
+                required=False
+
             ),
             CustomSetting(
                 name='Boundary Movement',
                 type = CustomSetting.TYPE_BOOLEAN,
                 description='Block or Allow movement outside the map boundary layer (True/False)',
-                required=True
+                required=False
+
             ),
             CustomSetting(
                 name='Boundary Color',
