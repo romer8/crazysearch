@@ -187,7 +187,7 @@ def parseWML(bbox):
         for site in bbox_json['site']:
             hs_json = {}
             site_name = site['siteInfo']['siteName']
-            site_name = site_name.encode("utf-8")
+            # site_name = site_name.encode("utf-8")
             latitude = site['siteInfo']['geoLocation'][
                 'geogLocation']['latitude']
             longitude = site['siteInfo']['geoLocation'][
@@ -205,7 +205,7 @@ def parseWML(bbox):
     else:  # If there is just one site within the bounding box, add that site as dictionary object
         hs_json = {}
         site_name = bbox_json['site']['siteInfo']['siteName']
-        site_name = site_name.encode("utf-8")
+        # site_name = site_name.encode("utf-8")
         latitude = bbox_json['site']['siteInfo'][
             'geoLocation']['geogLocation']['latitude']
         longitude = bbox_json['site']['siteInfo'][

@@ -450,14 +450,20 @@ def soap_group(request):
             minx, miny = ext_list[0], ext_list[1]
             maxx, maxy = ext_list[2], ext_list[3]
             x1, y1 = transform(inProj, outProj, minx, miny)
+            print(x1)
+            print(y1)
+
             x2, y2 = transform(inProj, outProj, maxx, maxy)
+            print(x2)
+            print(y2)
             bbox = client.service.GetSitesByBoxObject(
                 x1, y1, x2, y2, '1', '')
             # Get Sites by bounding box using suds
             # Creating a sites object from the endpoint. This site object will
             # be used to generate the geoserver layer. See utilities.py.
             wml_sites = parseWML(bbox)
-
+            # wml_sites = xmltodict.parse(bbox)
+            print(wml_sites)
             sites_parsed_json = json.dumps(wml_sites)
 
             return_obj['title'] = title
@@ -717,7 +723,7 @@ def keyWordsForGroup(request):
 
         # schema_doctor =ImportDoctor(imp)
 
-        client = Client(url = hydroservers.url.strip())
+        client = Client(url = hydroservers.url.strip(), timeout= 500)
         # client = Client(url = hydroservers.url.strip(), plugins =[schema_doctor], autoblend=True)
 
         keywords = client.service.GetVariables('[:]')
