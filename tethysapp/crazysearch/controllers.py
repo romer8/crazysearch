@@ -470,10 +470,18 @@ def soap_group(request):
             SessionMaker = app.get_persistent_store_database(
                 Persistent_Store_Name, as_sessionmaker=True)
             session = SessionMaker()
-            hs_one = Catalog(title=title,
+            hydroservers_group = session.query(Groups).filter(Groups.title == group)[0]
+            # hydroservers_g = session.query(Groups).filter(Groups.title == group)
+            print(hydroservers_group.title)
+            print(hydroservers_group.description)
+
+            hs_one = HydroServer_Individual(title=title,
                              url=url,
-                             siteinfo=sites_parsed_json)  # Adding the HydroServer geosever layer metadata to the local database
-            session.add(hs_one)
+                             siteinfo=sites_parsed_json)
+
+            hydroservers_group.hydroserver.append(hs_one)
+            print(hydroservers_group.hydroserver)
+            session.add(hydroservers_group)
             session.commit()
             session.close()
 
