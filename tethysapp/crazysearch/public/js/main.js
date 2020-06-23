@@ -154,7 +154,9 @@ var CRAZYSEARCH_PACKAGE = (function() {
           'bar':{},
           'pie':{},
           'whisker':{}
-        };
+        },
+        cleanGraphs;
+
       /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS : How are these private? JS has no concept of that
      *************************************************************************/
@@ -169,6 +171,35 @@ var CRAZYSEARCH_PACKAGE = (function() {
         "#6600cc",
         "#00ffff"
     ]
+    colors = [
+      "#ff0000",
+      "#0033cc",
+      "#000099",
+      "#ff0066",
+      "#ff00ff",
+      "#800000",
+      "#6699ff",
+      "#6600cc",
+      "#00ffff"
+  ]
+  /*
+  ************ FUNCTION NAME: CLEANGRAPH **********************
+  ************ PURPOSE: RESET THE GRAPHS PORTION ***********
+  */
+  cleanGraphs = function(){
+    //RESET THE GRAPHS PORTION //
+    $( "#table_div" ).empty();
+    initialize_graphs([],[],"No data Available","","","","scatter");
+    $("#siteName_title").html("Site Variables Info");
+    $("#siteDes").html("No Site Selected, when a site is 'clicked' metadata of the site will display in this part such as a name and a description.");
+    $('#variables_graph option').remove();
+    $('#variables_graph').selectpicker('refresh');
+    // $('#variables_graph').empty();
+    $("#variables_graph").html(`<option > No Variables Available . . .</option>`);
+    $('#datetimepicker6').datepicker('update', '');
+    $('#datetimepicker7').datepicker('update', '');
+
+  }
     /*
     ************ FUNCTION NAME: DISABLE MAP **********************
     ************ PURPOSE: DISABLES OR ENABLES THE ZOOM OUT AND DRAGGING OF THE MAP ***********
@@ -1516,6 +1547,7 @@ var CRAZYSEARCH_PACKAGE = (function() {
                 $("#modalKeyWordSearch").each(function() {
                     this.reset()
                 })
+                cleanGraphs();
 
 
 
