@@ -145,7 +145,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
         select_variable_change,
         select_variable_change2,
         codes_variables_array={},
-        reset_graphs,
         change_type_graphs_group,
         change_type_graphs_individual,
         add_boundary_map,
@@ -472,16 +471,6 @@ var CRAZYSEARCH_PACKAGE = (function() {
     $("#type_graph_select").change(change_type_graphs_group)
     $("#type_graph_select2").change(change_type_graphs_individual)
 
-    /*
-    ************ FUNCTION NAME: RESET_GRAPHS **********************
-    ************ PURPOSE: CLEAN THE GRAPH FROM ANY INPUT OR OUTPUT ***********
-    */
-    reset_graphs = function(){
-      initialize_graphs([],[],"No Data Available","","","","scatter");
-
-    }
-
-    $('#reset_graphs').on('click',reset_graphs)
 
     /*
     ************ FUNCTION NAME: SELECT_VARIABLE_CHANGE **********************
