@@ -72,38 +72,6 @@ def home(request):
     # context = {}
     return render(request, 'crazysearch/home.html', context)
 
-# @permission_required('block_map')
-# def lock_with_boundary(request):
-#     """
-#     Controller for the app home page.
-#     """
-#     boundaryEndpoint = app.get_custom_setting('Boundary Geoserver Endpoint')
-#     boundaryWorkspace = app.get_custom_setting('Boundary Workspace Name')
-#     boundaryLayer = app.get_custom_setting('Boundary Layer Name')
-#     boundaryColor = app.get_custom_setting('Boundary Color')
-#     boundaryWidth = app.get_custom_setting('Boundary Width')
-#     print(boundaryEndpoint)
-#     print(type(boundaryEndpoint))
-#     context = {
-#      "geoEndpoint": boundaryEndpoint,
-#      "geoWorkspace": boundaryWorkspace,
-#      "geoLayer": boundaryLayer,
-#      "geoColor": boundaryColor,
-#      "geoWidth":boundaryWidth
-#     }
-#     # readSoap(request)
-#     return render(request, 'crazysearch/home.html', context)
-
-
-def readSoap(request):
-    "This function is for testing purposes in the Dominican Republic soap endpoint",
-    soap_url="http://128.187.106.131/app/index.php/dr/services/cuahsi_1_1.asmx?WSDL"
-    client=Client(soap_url)
-    # print(client)
-    client.set_options(port='WaterOneFlow')
-    # site_info=client.service.GetSiteInfo("LOS JENGIBRES")
-    # print(site_info)
-
 
 def get_his_server(request):
     server = {}
@@ -144,98 +112,6 @@ def his(request):
 
     return render(request, 'crazysearch/his.html', context)
 
-def soap(request):
-    print("inside SOAP function")
-    return_obj = {}
-    if request.is_ajax() and request.method == 'POST':
-        print("inside first if statement of SOAP function")
-        url = request.POST.get('soap-url')
-        title = request.POST.get('soap-title')
-        title = title.replace(" ", "")
-        # Getting the current map extent
-        true_extent = request.POST.get('extent')
-
-        client = Client(url)
-        # True Extent is on and necessary if the user is trying to add USGS or
-        # some of the bigger HydroServers.
-        if true_extent == 'on':
-            extent_value = request.POST['extent_val']
-            return_obj['zoom'] = 'true'
-            return_obj['level'] = extent_value
-            ext_list = extent_value.split(',')
-            # Reprojecting the coordinates from 3857 to 4326 using pyproj
-            inProj = Proj(init='epsg:3857')
-            outProj = Proj(init='epsg:4326')
-            minx, miny = ext_list[0], ext_list[1]
-            maxx, maxy = ext_list[2], ext_list[3]
-            x1, y1 = transform(inProj, outProj, minx, miny)
-            x2, y2 = transform(inProj, outProj, maxx, maxy)
-            bbox = client.service.GetSitesByBoxObject(
-                x1, y1, x2, y2, '1', '')
-            # Get Sites by bounding box using suds
-            # Creating a sites object from the endpoint. This site object will
-            # be used to generate the geoserver layer. See utilities.py.
-            wml_sites = parseWML(bbox)
-
-            sites_parsed_json = json.dumps(wml_sites)
-
-            return_obj['title'] = title
-            return_obj['url'] = url
-            return_obj['siteInfo'] = sites_parsed_json
-            return_obj['status'] = "true"
-
-            SessionMaker = app.get_persistent_store_database(
-                Persistent_Store_Name, as_sessionmaker=True)
-            session = SessionMaker()
-            hs_one = Catalog(title=title,
-                             url=url,
-                             siteinfo=sites_parsed_json)  # Adding the HydroServer geosever layer metadata to the local database
-            session.add(hs_one)
-            session.commit()
-            session.close()
-
-        else:
-            return_obj['zoom'] = 'false'
-            # Get a list of all the sites and their respective lat lon.
-            sites = client.service.GetSites('[:]')
-            print("this are the sites")
-            # print(sites)
-            sites_dict = xmltodict.parse(sites)
-            sites_json_object = json.dumps(sites_dict)
-
-            sites_json = json.loads(sites_json_object)
-            # Parsing the sites and creating a sites object. See utilities.py
-            print("-------------------------------------")
-            # print(sites_json)
-            sites_object = parseJSON(sites_json)
-            print(sites_object)
-            # converted_sites_object=[x['sitename'].decode("UTF-8") for x in sites_object]
-
-            # sites_parsed_json = json.dumps(converted_sites_object)
-            sites_parsed_json = json.dumps(sites_object)
-
-
-            return_obj['title'] = title
-            return_obj['url'] = url
-            return_obj['siteInfo'] = sites_parsed_json
-            return_obj['status'] = "true"
-            # print("this is the return on=bject")
-            # print(return_obj)
-            SessionMaker = app.get_persistent_store_database(
-                Persistent_Store_Name, as_sessionmaker=True)
-            session = SessionMaker()
-            hs_one = Catalog(title=title,
-                             url=url,
-                             siteinfo=sites_parsed_json)
-            session.add(hs_one)
-            session.commit()
-            session.close()
-
-    else:
-        return_obj[
-            'message'] = 'This request can only be made through a "POST" AJAX call.'
-
-    return JsonResponse(return_obj)
 
 # Retrieve all the list of Hydroservers that have been added to the dataBase..
 def catalog(request):
@@ -816,7 +692,7 @@ def get_values_hs(request):
         print("adding to the methodID as a dict")
         variable_name_ = object_methods['variable']['variableName']
         ## this part was added for the WHOS plata broker endpoint ##
-        if hasattr(object_methods, 'method'):
+        if 'method' in object_methods:
             object_with_methods_and_variables[variable_name_]= object_methods['method']['@methodID']
         else:
             object_with_methods_and_variables[variable_name_]= None
@@ -828,7 +704,7 @@ def get_values_hs(request):
         for object_method in object_methods:
             print("adding to the methodID as an arraylist")
             variable_name_ = object_method['variable']['variableName']
-            if hasattr(object_method, 'method'):
+            if 'method' in object_method:
                 object_with_methods_and_variables[variable_name_]= object_method['method']['@methodID']
             else:
                 object_with_methods_and_variables[variable_name_]= None

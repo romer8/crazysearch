@@ -45,11 +45,7 @@ class Crazysearch(TethysAppBase):
                    controller='crazysearch.controllers.get_his_server'),
             # Returns the selected HIS server from the select HIS
             # server modal.
-            UrlMap(name='soap',
-                   url='crazysearch/soap',
-                   controller='crazysearch.controllers.soap'),
-            # Create's a geoserver layer based on the HydroServer SOAP endpoint and add's
-            # that HydroServer metadata to a persistant store
+
             UrlMap(name='catalog',
                    url='crazysearch/catalog',
                    controller='crazysearch.controllers.catalog'),
@@ -102,22 +98,7 @@ class Crazysearch(TethysAppBase):
         )
 
         return url_maps
-    # def permissions (self):
-    #     delete_hydrogroups = Permission(
-    #         name = 'delete_hydrogroups',
-    #         description = 'Delete a Hydrogroup from the App',
-    #     )
-    #     block_map = Permission(
-    #         name='block_map',
-    #         description='locks the map to a certain limit',
-    #     )
-    #     admin = PermissionGroup(
-    #         name='admin',
-    #         permission = (delete_hydrogroups,block_map),
-    #     )
-    #     permi = (admin)
-    #
-    #     return permi
+
     def permissions(self):
         """
         Example permissions method.
